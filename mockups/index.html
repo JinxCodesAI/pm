@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Co-Pilot Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="global-nav" data-role="global-nav"></header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-hero card">
+      <div class="hero-text">
+        <h1>Creative Co-Pilot Portfolio</h1>
+        <p id="portfolio-overview" class="muted">
+          Monitoring active creative journeys across clients, highlighting where AI loops keep momentum moving.
+        </p>
+      </div>
+      <div class="metrics-grid" id="portfolio-metrics"></div>
+    </section>
+
+    <section class="dashboard-layout">
+      <div class="project-column">
+        <div class="section-header">
+          <h2>Active Pipelines</h2>
+          <div class="filter-row" id="project-filters">
+            <button class="filter-chip active" data-filter="all" type="button">All</button>
+            <button class="filter-chip" data-filter="Active iterations" type="button">In Iteration</button>
+            <button class="filter-chip" data-filter="Discovery in progress" type="button">Discovery</button>
+          </div>
+        </div>
+        <div id="project-grid" class="project-grid"></div>
+      </div>
+
+      <aside class="signals-column">
+        <section class="card signals-card">
+          <div class="section-header">
+            <h2>Portfolio Signals</h2>
+          </div>
+          <ul id="portfolio-signals" class="signals-list"></ul>
+        </section>
+
+        <section class="card loops-card">
+          <div class="section-header">
+            <h2>Iteration Watchlist</h2>
+          </div>
+          <div id="loop-watchlist" class="loop-list"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
