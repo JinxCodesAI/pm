@@ -1594,7 +1594,8 @@ p {
 }
 
 .question-generator,
-.persona-generator {
+.persona-generator,
+.prompt-generator {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1rem 1.1rem;
@@ -1605,20 +1606,23 @@ p {
 }
 
 .question-generator-copy,
-.persona-generator-copy {
+.persona-generator-copy,
+.prompt-generator-copy {
   font-weight: 600;
   color: var(--text);
 }
 
 .question-guidance,
-.persona-guidance {
+.persona-guidance,
+.prompt-guidance {
   display: grid;
   gap: 0.35rem;
   font-size: 0.85rem;
 }
 
 .question-guidance textarea,
-.persona-guidance textarea {
+.persona-guidance textarea,
+.prompt-guidance textarea {
   resize: vertical;
   min-height: 2.8rem;
   border-radius: 10px;
@@ -1628,7 +1632,8 @@ p {
 }
 
 .question-generator-actions,
-.persona-generator-actions {
+.persona-generator-actions,
+.prompt-generator-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1637,7 +1642,8 @@ p {
   font-size: 0.85rem;
 }
 
-.persona-generator-list {
+.persona-generator-list,
+.prompt-generator-list {
   margin: 0;
   padding-left: 1.1rem;
   display: grid;
@@ -1645,7 +1651,8 @@ p {
   font-size: 0.85rem;
 }
 
-.persona-generator-buttons {
+.persona-generator-buttons,
+.prompt-generator-buttons {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
@@ -1910,23 +1917,105 @@ p {
   justify-content: flex-end;
 }
 
-.prompt-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
+
+.prompt-list {
+  display: grid;
+  gap: 0.85rem;
 }
 
-.prompt-table th,
-.prompt-table td {
-  padding: 0.6rem;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
+.prompt-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0.9rem;
+  background: var(--surface);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.prompt-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.prompt-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.prompt-channel {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+}
+
+.prompt-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.prompt-body {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.prompt-body p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.prompt-response {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.prompt-response p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.prompt-footer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .prompt-actions {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.prompt-select {
+  display: inline-flex;
+  align-items: center;
   gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.prompt-select input {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.prompt-convert-bar {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  background: rgba(15, 23, 42, 0.05);
 }
 
 .watch-list {

@@ -362,42 +362,59 @@
               ]
             },
             "research-prompts": {
+              "lastGuidance": "Lean into sustainability proof points and welcome-first storytelling.",
+              "selectedPromptIds": [],
               "prompts": [
                 {
                   "id": "prompt-competitor",
                   "label": "Competitor Angle Sweep",
                   "channel": "ChatGPT",
-                  "promptText": "You are a strategist. Review the following brief summary and outline how top smart lighting competitors talk about seasonal refresh. Highlight tone, offer structure, and visual cues.\n\n{{briefSummary}}",
-                  "status": "ready",
-                  "lastRun": "Not run",
+                  "promptText": "You are supporting the Aurora Spring Launch brief. Audit how leading smart lighting brands talk about seasonal refresh offers. Summarize tone, hero messaging, and recurring call-to-action formats so we can differentiate our campaign.",
                   "tags": [
                     "Competitive",
                     "Messaging"
-                  ]
+                  ],
+                  "generated": true,
+                  "lastGenerated": "2025-04-08 09:20",
+                  "lastUpdated": "2025-04-08 09:20",
+                  "response": "Grid of Hue, Nanoleaf, and Govee launch angles captured. Competitors lean heavily on feature specs—Aurora can own emotional mood-shifting stories.",
+                  "responseLoggedAt": "2025-04-09 15:10",
+                  "convertedToSource": true,
+                  "convertedSourceId": "source-aurora-competitor"
                 },
                 {
                   "id": "prompt-persona-voice",
                   "label": "Persona Voice Stress-Test",
                   "channel": "Gemini",
-                  "promptText": "Given the Aurora Spring Launch creative brief, propose three narrative hooks that would resonate with pragmatic renters focused on flexible living.",
-                  "status": "ready",
-                  "lastRun": "Not run",
+                  "promptText": "Review the Aurora Spring Launch creative brief and propose three narrative hooks that would resonate with pragmatic renters focused on flexible living. Highlight the proof points we should emphasize for credibility.",
                   "tags": [
                     "Persona",
                     "Narrative"
-                  ]
+                  ],
+                  "generated": true,
+                  "lastGenerated": "2025-04-08 09:20",
+                  "lastUpdated": "2025-04-09 08:45",
+                  "response": "Hooks drafted around 'reset your mood in 60 seconds', 'weeknight lighting rituals', and 'automation without app fatigue.' Includes supporting proof pulled from intake sources.",
+                  "responseLoggedAt": "2025-04-09 08:45",
+                  "convertedToSource": false,
+                  "convertedSourceId": ""
                 },
                 {
                   "id": "prompt-media-angles",
                   "label": "Paid Social Angles",
                   "channel": "ChatGPT",
-                  "promptText": "From the creative brief objectives, produce five paid social narrative angles that connect effortless mood shifts with measurable outcomes.",
-                  "status": "ready",
-                  "lastRun": "Not run",
+                  "promptText": "From the creative brief objectives, produce five paid social narrative angles that connect effortless mood shifts with measurable outcomes. Provide headline options and the metrics each angle should chase.",
                   "tags": [
                     "Media",
                     "Acquisition"
-                  ]
+                  ],
+                  "generated": true,
+                  "lastGenerated": "2025-04-08 09:20",
+                  "lastUpdated": "2025-04-08 09:20",
+                  "response": "",
+                  "responseLoggedAt": "",
+                  "convertedToSource": false,
+                  "convertedSourceId": ""
                 }
               ],
               "watch": [
@@ -709,30 +726,42 @@
               ]
             },
             "research-prompts": {
+              "lastGuidance": "Keep prompts anchored in sustainability proof and retail enablement.",
+              "selectedPromptIds": [],
               "prompts": [
                 {
                   "id": "prompt-onboarding",
                   "label": "Onboarding Story Angles",
                   "channel": "ChatGPT",
-                  "promptText": "Using the Northpeak brief summary, outline three narrative angles that welcome first-time hikers and show how gear lowers the barrier to entry.",
-                  "status": "ready",
-                  "lastRun": "Not run",
+                  "promptText": "Using the Northpeak brief summary, outline three narrative angles that welcome first-time hikers and show how gear lowers the barrier to entry. Include the research tasks we should run to validate each angle.",
                   "tags": [
                     "Narrative",
                     "Onboarding"
-                  ]
+                  ],
+                  "generated": true,
+                  "lastGenerated": "2025-04-07 10:30",
+                  "lastUpdated": "2025-04-07 13:05",
+                  "response": "Angles drafted around 'summit mentors', 'no-excuses gear prep', and 'bring a friend' programs. Recommended follow-up research on TikTok hiking coaches and REI advice hubs.",
+                  "responseLoggedAt": "2025-04-07 13:05",
+                  "convertedToSource": false,
+                  "convertedSourceId": ""
                 },
                 {
                   "id": "prompt-partner",
                   "label": "Retail Partner Messaging",
                   "channel": "Gemini",
-                  "promptText": "Draft talking points retail associates can use to pitch the Northpeak starter bundle, drawing from our sustainability proof points.",
-                  "status": "ready",
-                  "lastRun": "Not run",
+                  "promptText": "Draft talking points retail associates can use to pitch the Northpeak starter bundle, drawing from our sustainability proof points. Suggest which stats or anecdotes to spotlight when training store teams.",
                   "tags": [
                     "Enablement",
                     "Retail"
-                  ]
+                  ],
+                  "generated": true,
+                  "lastGenerated": "2025-04-07 10:30",
+                  "lastUpdated": "2025-04-07 10:30",
+                  "response": "",
+                  "responseLoggedAt": "",
+                  "convertedToSource": false,
+                  "convertedSourceId": ""
                 }
               ],
               "watch": [

@@ -34,7 +34,9 @@ const STEP_DETAIL_FACTORIES = {
   }),
   "research-prompts": () => ({
     prompts: [],
-    watch: []
+    watch: [],
+    lastGuidance: "",
+    selectedPromptIds: []
   })
 };
 
@@ -275,6 +277,29 @@ function ensureStepDetail(module, stepId) {
     merged.lastInputs = merged.lastInputs || {};
     merged.lastInputs.summary = Array.isArray(merged.lastInputs.summary) ? merged.lastInputs.summary : [];
     merged.lastInputs.answered = Array.isArray(merged.lastInputs.answered) ? merged.lastInputs.answered : [];
+  } else if (stepId === "research-prompts") {
+    merged.prompts = Array.isArray(merged.prompts) ? merged.prompts : [];
+    merged.prompts = merged.prompts.map((prompt) => ({
+      id: prompt.id || `prompt-${Date.now()}`,
+      label: prompt.label || "Research Prompt",
+      channel: prompt.channel || "ChatGPT",
+      promptText: prompt.promptText || "",
+      tags: Array.isArray(prompt.tags) ? prompt.tags : [],
+      generated: prompt.generated !== undefined ? Boolean(prompt.generated) : Boolean(prompt.promptText),
+      lastGenerated: prompt.lastGenerated || prompt.lastRun || "",
+      lastUpdated: prompt.lastUpdated || prompt.lastGenerated || prompt.lastRun || "",
+      response: prompt.response || "",
+      responseLoggedAt: prompt.responseLoggedAt || "",
+      convertedToSource: Boolean(prompt.convertedToSource),
+      convertedSourceId: prompt.convertedSourceId || ""
+    }));
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.selectedPromptIds = Array.isArray(merged.selectedPromptIds)
+      ? merged.selectedPromptIds.filter((id) =>
+          merged.prompts.some((prompt) => prompt.id === id && prompt.response && !prompt.convertedToSource)
+        )
+      : [];
+    merged.watch = Array.isArray(merged.watch) ? merged.watch : [];
   }
   module.details[stepId] = merged;
   return merged;
@@ -2003,51 +2028,204 @@ function renderResearchPromptView(detail, module) {
   clearChildren(body);
   body.classList.remove("muted");
 
-  const header = createSectionHeading("Prompt Library", "Launch prompts to gather insights without leaving the workspace.");
-  const addButton = createActionButton("Add Prompt", () => openPromptEditor(detail, module));
-  addButton.classList.add("primary-chip");
-  header.appendChild(addButton);
+  const header = createSectionHeading(
+    "Research Prompt Kit",
+    "Generate copy-ready prompts you can run in Gemini, ChatGPT, or any external research copilot."
+  );
   body.appendChild(header);
 
-  if (!detail.prompts?.length) {
+  const generator = createElement("div", { classes: "prompt-generator" });
+  generator.appendChild(
+    createElement("div", {
+      classes: "prompt-generator-copy",
+      text: "Let the AI review your living brief and spin up research prompts instead of writing them manually."
+    })
+  );
+
+  const checklist = createElement("ul", { classes: "prompt-generator-list" });
+  [
+    "Grounds prompts in the latest Intake Summary, clarified answers, and approved personas.",
+    "Tailors each draft for external tools—no placeholders or templating syntax.",
+    "Regenerate whenever the brief shifts to refresh your research plan in seconds."
+  ].forEach((item) => checklist.appendChild(createElement("li", { text: item })));
+  generator.appendChild(checklist);
+
+  const guidanceLabel = createElement("label", { classes: "prompt-guidance" });
+  guidanceLabel.appendChild(createElement("span", { text: "Guidance for the AI (optional)" }));
+  const guidanceInput = document.createElement("textarea");
+  guidanceInput.rows = 2;
+  guidanceInput.placeholder = "e.g. Prioritize sustainability proof or retail partner enablement.";
+  guidanceInput.value = detail.lastGuidance || "";
+  guidanceInput.addEventListener("change", () => {
+    detail.lastGuidance = guidanceInput.value;
+    persistDetail(module.id, "research-prompts", detail);
+  });
+  guidanceLabel.appendChild(guidanceInput);
+  generator.appendChild(guidanceLabel);
+
+  const actions = createElement("div", { classes: "prompt-generator-actions" });
+  const buttonsWrap = createElement("div", { classes: "prompt-generator-buttons" });
+  const generateBtn = document.createElement("button");
+  generateBtn.className = "primary-button";
+  generateBtn.type = "button";
+  const updateGenerateLabel = () => {
+    generateBtn.textContent = detail.prompts?.length ? "Regenerate with AI" : "Generate Prompts";
+  };
+  updateGenerateLabel();
+  generateBtn.addEventListener("click", () => {
+    if (generateBtn.disabled) {
+      return;
+    }
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Generating…";
+    window.setTimeout(() => {
+      const created = generateResearchPrompts(detail, module, guidanceInput.value.trim());
+      generateBtn.disabled = false;
+      updateGenerateLabel();
+      if (created) {
+        renderResearchPromptView(detail, module);
+      }
+    }, 80);
+  });
+  buttonsWrap.appendChild(generateBtn);
+  actions.appendChild(buttonsWrap);
+  actions.appendChild(
+    createElement("span", {
+      classes: "muted",
+      text: "Outputs arrive as plain text—copy them directly into your external research tools."
+    })
+  );
+  generator.appendChild(actions);
+  body.appendChild(generator);
+
+  const prompts = detail.prompts || [];
+  if (!prompts.length) {
     body.appendChild(
       createElement("div", {
         classes: "empty-card",
-        text: "No prompts saved yet. Add prompts to accelerate research runs."
+        text: "No prompts generated yet. Run the generator to draft research starters."
       })
     );
   } else {
-    const table = createElement("table", { classes: "prompt-table" });
-    table.innerHTML = "<thead><tr><th>Prompt</th><th>Channel</th><th>Tags</th><th>Last Run</th><th></th></tr></thead>";
-    const tbody = createElement("tbody");
+    const list = createElement("div", { classes: "prompt-list" });
+    const selectionSet = new Set(detail.selectedPromptIds || []);
 
-    detail.prompts.forEach((promptItem, index) => {
-      const row = createElement("tr");
-      row.appendChild(createElement("td", { text: promptItem.label || "Prompt" }));
-      row.appendChild(createElement("td", { text: promptItem.channel || "Tool" }));
+    prompts.forEach((promptItem, index) => {
+      const card = createElement("article", { classes: "prompt-card" });
 
-      const tagsCell = createElement("td");
-      if (promptItem.tags?.length) {
-        promptItem.tags.forEach((tag) => tagsCell.appendChild(createElement("span", { classes: "tag-chip", text: tag })));
-      } else {
-        tagsCell.appendChild(createElement("span", { classes: "muted", text: "--" }));
+      const meta = createElement("div", { classes: "prompt-meta" });
+      const titleWrap = createElement("div", { classes: "prompt-title" });
+      titleWrap.appendChild(createElement("strong", { text: promptItem.label || "Research Prompt" }));
+      if (promptItem.channel) {
+        titleWrap.appendChild(createElement("span", { classes: "tag-chip prompt-channel", text: promptItem.channel }));
       }
-      row.appendChild(tagsCell);
+      meta.appendChild(titleWrap);
 
-      row.appendChild(createElement("td", { text: promptItem.lastRun || "Not run" }));
+      const statusPill = createElement("span", { classes: "pill" });
+      if (promptItem.convertedToSource) {
+        statusPill.classList.add("status-queued");
+        statusPill.textContent = "Source logged";
+      } else if (promptItem.response) {
+        statusPill.classList.add("status-complete");
+        statusPill.textContent = "Response logged";
+      } else {
+        statusPill.classList.add("status-attention");
+        statusPill.textContent = "Awaiting response";
+      }
+      meta.appendChild(statusPill);
+      card.appendChild(meta);
 
-      const actionCell = createElement("td", { classes: "prompt-actions" });
-      actionCell.appendChild(createActionButton("Run", () => runPrompt(detail, module, index)));
-      actionCell.appendChild(createActionButton("Preview", () => showPromptPreview(promptItem)));
-      actionCell.appendChild(createActionButton("Edit", () => openPromptEditor(detail, module, { index })));
-      actionCell.appendChild(createActionButton("Remove", () => removePrompt(detail, module, index)));
-      row.appendChild(actionCell);
+      if (promptItem.tags?.length) {
+        const tagsRow = createElement("div", { classes: "prompt-tags" });
+        promptItem.tags.forEach((tag) => tagsRow.appendChild(createElement("span", { classes: "tag-chip", text: tag })));
+        card.appendChild(tagsRow);
+      }
 
-      tbody.appendChild(row);
+      const promptBody = createElement("div", { classes: "prompt-body" });
+      promptBody.appendChild(
+        createElement("p", { text: promptItem.promptText || "Prompt text will appear here once generated." })
+      );
+      card.appendChild(promptBody);
+
+      const responseBlock = createElement("div", { classes: "prompt-response" });
+      if (promptItem.response) {
+        responseBlock.appendChild(createElement("p", { text: promptItem.response }));
+      } else {
+        responseBlock.appendChild(
+          createElement("p", {
+            classes: "muted",
+            text: "Response not logged yet. Paste insights once you run this externally."
+          })
+        );
+      }
+      card.appendChild(responseBlock);
+
+      const footerBits = [];
+      if (promptItem.lastGenerated) {
+        footerBits.push(`Generated ${promptItem.lastGenerated}`);
+      }
+      if (promptItem.lastUpdated && promptItem.lastUpdated !== promptItem.lastGenerated) {
+        footerBits.push(`Edited ${promptItem.lastUpdated}`);
+      }
+      if (promptItem.responseLoggedAt) {
+        footerBits.push(`Response logged ${promptItem.responseLoggedAt}`);
+      }
+      if (footerBits.length) {
+        const footer = createElement("div", { classes: "prompt-footer muted" });
+        footer.textContent = footerBits.join(" | ");
+        card.appendChild(footer);
+      }
+
+      if (promptItem.response && !promptItem.convertedToSource) {
+        const selectionLabel = createElement("label", { classes: "prompt-select" });
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = selectionSet.has(promptItem.id);
+        checkbox.addEventListener("change", () =>
+          togglePromptSelection(detail, module, promptItem.id, checkbox.checked)
+        );
+        selectionLabel.appendChild(checkbox);
+        selectionLabel.appendChild(createElement("span", { classes: "muted", text: "Select" }));
+        card.appendChild(selectionLabel);
+      }
+
+      const actions = createElement("div", { classes: "prompt-actions" });
+      actions.appendChild(createActionButton("Preview", () => showPromptPreview(promptItem)));
+      actions.appendChild(createActionButton("Refine Prompt", () => openPromptEditor(detail, module, { index })));
+      actions.appendChild(
+        createActionButton(
+          promptItem.response ? "Update Response" : "Log Response",
+          () => openPromptResponseDialog(detail, module, index)
+        )
+      );
+      actions.appendChild(createActionButton("Remove", () => removePrompt(detail, module, index)));
+      card.appendChild(actions);
+
+      list.appendChild(card);
     });
 
-    table.appendChild(tbody);
-    body.appendChild(table);
+    body.appendChild(list);
+
+    const convertible = prompts.filter((prompt) => prompt.response && !prompt.convertedToSource);
+    if (convertible.length) {
+      const convertBar = createElement("div", { classes: "prompt-convert-bar" });
+      convertBar.appendChild(
+        createElement("span", {
+          classes: "muted",
+          text: detail.selectedPromptIds?.length
+            ? `${detail.selectedPromptIds.length} selected to archive as sources.`
+            : "Select logged responses to capture them in the source library."
+        })
+      );
+      const convertBtn = document.createElement("button");
+      convertBtn.className = "primary-button";
+      convertBtn.type = "button";
+      convertBtn.textContent = "Convert into Source";
+      convertBtn.disabled = !detail.selectedPromptIds?.length;
+      convertBtn.addEventListener("click", () => convertSelectedPrompts(detail, module));
+      convertBar.appendChild(convertBtn);
+      body.appendChild(convertBar);
+    }
   }
 
   if (detail.watch?.length) {
@@ -2058,6 +2236,158 @@ function renderResearchPromptView(detail, module) {
     });
     body.appendChild(watchList);
   }
+}
+
+function generateResearchPrompts(detail, module, guidance) {
+  const normalizedGuidance = (guidance || "").replace(/\s+/g, " ").trim();
+
+  const existing = new Set(
+    (detail.prompts || [])
+      .map((prompt) => (prompt.promptText || "").replace(/\s+/g, " ").trim().toLowerCase())
+      .filter(Boolean)
+  );
+
+  const structureDetail = ensureStepDetail(module, "structure-input");
+  const activeSummary = getActiveSummaryVersion(structureDetail);
+  const summaryLines = Array.isArray(activeSummary?.summary)
+    ? activeSummary.summary
+    : Array.isArray(structureDetail.summary)
+    ? structureDetail.summary
+    : [];
+  const summaryHighlights = summaryLines.map((line) => line.replace(/\s+/g, " ").trim()).filter(Boolean);
+
+  const questionDetail = ensureStepDetail(module, "guided-brief");
+  const answeredQuestions = (questionDetail.questions || [])
+    .filter((question) => question.status === "answered" && question.answer)
+    .map((question) => ({
+      prompt: question.prompt || "",
+      answer: question.answer || ""
+    }));
+
+  const personaDetail = ensureStepDetail(module, "persona-builder");
+  const personas = (personaDetail.personas || []).filter((persona) => persona.name || persona.bio);
+
+  const projectName = state.project?.name || "this project";
+
+  const suggestions = [];
+
+  function addSuggestion(config) {
+    const promptText = (config.promptText || "").replace(/\s+/g, " ").trim();
+    if (!promptText) {
+      return;
+    }
+    const normalized = promptText.toLowerCase();
+    if (existing.has(normalized) || suggestions.some((item) => item.normalized === normalized)) {
+      return;
+    }
+    suggestions.push({ ...config, promptText, normalized });
+  }
+
+  function condense(text, limit = 160) {
+    if (!text) {
+      return "";
+    }
+    const cleaned = String(text).replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+    if (!cleaned) {
+      return "";
+    }
+    return cleaned.length > limit ? `${cleaned.slice(0, limit - 1)}…` : cleaned;
+  }
+
+  if (summaryHighlights.length) {
+    const bulletList = summaryHighlights
+      .slice(0, 4)
+      .map((line) => `- ${line}`)
+      .join("\n");
+    const focusLine = normalizedGuidance ? `Keep the review anchored on ${normalizedGuidance}.` : "";
+    addSuggestion({
+      id: `prompt-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      label: "Validate Brief Insights",
+      channel: "ChatGPT",
+      tags: ["Strategy", "Validation"],
+      promptText: `You are supporting the ${projectName} brief. Review the following highlights and suggest concrete research tasks that would validate them:\n${bulletList}\nList the investigations to run, why they matter, and which sources to tap.${focusLine ? ` ${focusLine}` : ""}`
+    });
+  }
+
+  if (personas.length) {
+    const persona = personas[0];
+    const personaDetails = [persona.bio, persona.goals?.[0], persona.painPoints?.[0]]
+      .flat()
+      .map((value) => condense(value, 120))
+      .filter(Boolean)
+      .join(" ");
+    const focusLine = normalizedGuidance ? `Prioritize findings tied to ${normalizedGuidance}.` : "";
+    addSuggestion({
+      id: `prompt-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      label: `${persona.name || "Audience"} Deep Dive`,
+      channel: "Gemini",
+      tags: ["Audience", persona.role || "Persona"],
+      promptText: `Act as a research strategist analyzing ${persona.name || "the target audience"}. We currently believe: ${
+        personaDetails || "they are evaluating solutions like ours."
+      } Identify publications, communities, and data that explain how they discover and assess offers like ${projectName}. Highlight unmet needs, buying triggers, and language we should mirror.${
+        focusLine ? ` ${focusLine}` : ""
+      }`
+    });
+  }
+
+  if (answeredQuestions.length) {
+    const firstAnswer = answeredQuestions[0];
+    const focusLine = normalizedGuidance ? `Focus on ${normalizedGuidance}.` : "";
+    addSuggestion({
+      id: `prompt-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      label: "Pressure-Test Key Assumption",
+      channel: "Perplexity",
+      tags: ["Validation", "Risks"],
+      promptText: `We captured the following during brief clarification:\nQuestion: ${condense(firstAnswer.prompt, 140)}\nAnswer: ${condense(
+        firstAnswer.answer,
+        180
+      )}\nOutline fact-finding prompts we can run with industry tools to validate or challenge this answer. Recommend search angles, expert sources, and metrics to confirm accuracy.${
+        focusLine ? ` ${focusLine}` : ""
+      }`
+    });
+  }
+
+  if (!suggestions.length) {
+    const focus = normalizedGuidance || summaryHighlights[0] || `the goals outlined for ${projectName}`;
+    addSuggestion({
+      id: `prompt-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      label: "Landscape Scan",
+      channel: "ChatGPT",
+      tags: ["Market"],
+      promptText: `Develop a quick research plan to understand ${focus}. Provide the top questions to investigate, recommended data sources, and keywords that should guide our desk research.`
+    });
+  }
+
+  if (!suggestions.length) {
+    showToast("No new prompts generated.");
+    return 0;
+  }
+
+  const timestamp = new Date().toLocaleString();
+  const createdPrompts = suggestions.slice(0, 4).map((suggestion) => ({
+    id: suggestion.id,
+    label: suggestion.label,
+    channel: suggestion.channel,
+    promptText: suggestion.promptText,
+    tags: Array.isArray(suggestion.tags) ? suggestion.tags : [],
+    generated: true,
+    lastGenerated: timestamp,
+    lastUpdated: timestamp,
+    response: "",
+    responseLoggedAt: "",
+    convertedToSource: false,
+    convertedSourceId: ""
+  }));
+
+  detail.prompts = [...createdPrompts, ...(detail.prompts || [])];
+  detail.lastGuidance = normalizedGuidance;
+  detail.selectedPromptIds = (detail.selectedPromptIds || []).filter((id) =>
+    detail.prompts.some((prompt) => prompt.id === id && prompt.response && !prompt.convertedToSource)
+  );
+
+  persistDetail(module.id, "research-prompts", detail);
+  showToast(`${createdPrompts.length} prompt${createdPrompts.length === 1 ? "" : "s"} generated.`);
+  return createdPrompts.length;
 }
 
 function openPromptEditor(detail, module, options = {}) {
@@ -2071,11 +2401,16 @@ function openPromptEditor(detail, module, options = {}) {
         channel: "ChatGPT",
         promptText: "",
         tags: [],
-        status: "ready",
-        lastRun: "Not run"
+        generated: true,
+        lastGenerated: "",
+        lastUpdated: "",
+        response: "",
+        responseLoggedAt: "",
+        convertedToSource: false,
+        convertedSourceId: ""
       };
 
-  const modal = openModal(isEdit ? "Edit Prompt" : "New Research Prompt");
+  const modal = openModal(isEdit ? "Refine Prompt" : "New Research Prompt");
   const form = document.createElement("form");
   form.className = "modal-form";
 
@@ -2121,7 +2456,7 @@ function openPromptEditor(detail, module, options = {}) {
   const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
   cancelBtn.type = "button";
   cancelBtn.addEventListener("click", () => modal.close());
-  const submitBtn = createElement("button", { classes: "primary-button", text: isEdit ? "Save Prompt" : "Add Prompt" });
+  const submitBtn = createElement("button", { classes: "primary-button", text: "Save Prompt" });
   submitBtn.type = "submit";
   actions.appendChild(cancelBtn);
   actions.appendChild(submitBtn);
@@ -2141,28 +2476,48 @@ function openPromptEditor(detail, module, options = {}) {
     }
 
     const payload = {
+      ...current,
       id: current.id || `prompt-${Date.now()}`,
       label: labelValue,
       channel: channelInput.value.trim() || "ChatGPT",
       promptText: promptValue,
-      status: current.status || "ready",
-      lastRun: current.lastRun || "Not run",
       tags: tagsInput.value
         .split(",")
         .map((value) => value.trim())
         .filter(Boolean)
     };
 
+    const timestamp = new Date().toLocaleString();
+    if (isEdit) {
+      payload.lastUpdated = timestamp;
+      if (!payload.lastGenerated) {
+        payload.lastGenerated = timestamp;
+      }
+    } else {
+      payload.generated = true;
+      payload.lastGenerated = timestamp;
+      payload.lastUpdated = timestamp;
+      payload.response = "";
+      payload.responseLoggedAt = "";
+      payload.convertedToSource = false;
+      payload.convertedSourceId = "";
+    }
+
     detail.prompts = detail.prompts || [];
     if (isEdit) {
       detail.prompts.splice(options.index, 1, payload);
     } else {
-      payload.lastRun = "Not run";
       detail.prompts.unshift(payload);
     }
 
+    detail.selectedPromptIds = Array.isArray(detail.selectedPromptIds)
+      ? detail.selectedPromptIds.filter((id) =>
+          detail.prompts.some((prompt) => prompt.id === id && prompt.response && !prompt.convertedToSource)
+        )
+      : [];
+
     persistDetail(module.id, "research-prompts", detail);
-    showToast(isEdit ? "Prompt updated." : "Prompt added.");
+    showToast(isEdit ? "Prompt updated." : "Prompt saved.");
     modal.close();
     renderResearchPromptView(detail, module);
   });
@@ -2178,7 +2533,11 @@ function removePrompt(detail, module, index) {
     confirmLabel: "Remove",
     onConfirm: () => {
       detail.prompts = detail.prompts || [];
-      detail.prompts.splice(index, 1);
+      const [removed] = detail.prompts.splice(index, 1);
+      const removedId = removed?.id;
+      detail.selectedPromptIds = Array.isArray(detail.selectedPromptIds)
+        ? detail.selectedPromptIds.filter((id) => id !== removedId)
+        : [];
       persistDetail(module.id, "research-prompts", detail);
       showToast("Prompt removed.");
       renderResearchPromptView(detail, module);
@@ -2186,15 +2545,138 @@ function removePrompt(detail, module, index) {
   });
 }
 
-function runPrompt(detail, module, index) {
+function openPromptResponseDialog(detail, module, index) {
   const promptItem = detail.prompts?.[index];
   if (!promptItem) {
     return;
   }
-  promptItem.lastRun = new Date().toLocaleString();
-  promptItem.status = "queued";
+
+  const modal = openModal(promptItem.response ? "Update Response" : "Log Response");
+  modal.body.appendChild(
+    createElement("p", {
+      classes: "muted",
+      text: "Paste the highlights captured from your external research run."
+    })
+  );
+
+  const form = document.createElement("form");
+  form.className = "modal-form";
+
+  const label = createElement("label");
+  label.appendChild(createElement("span", { text: "Response Summary" }));
+  const textarea = document.createElement("textarea");
+  textarea.rows = 5;
+  textarea.required = true;
+  textarea.value = promptItem.response || "";
+  label.appendChild(textarea);
+  form.appendChild(label);
+
+  const actions = createElement("div", { classes: "modal-actions" });
+  const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
+  cancelBtn.type = "button";
+  cancelBtn.addEventListener("click", () => modal.close());
+  const submitBtn = createElement("button", { classes: "primary-button", text: "Save Response" });
+  submitBtn.type = "submit";
+  actions.appendChild(cancelBtn);
+  actions.appendChild(submitBtn);
+  form.appendChild(actions);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const responseText = textarea.value.trim();
+    if (!responseText) {
+      textarea.focus();
+      return;
+    }
+
+    const timestamp = new Date().toLocaleString();
+    promptItem.response = responseText;
+    promptItem.responseLoggedAt = timestamp;
+    promptItem.lastUpdated = timestamp;
+    if (promptItem.convertedToSource) {
+      promptItem.convertedToSource = false;
+      promptItem.convertedSourceId = "";
+    }
+
+    detail.selectedPromptIds = (detail.selectedPromptIds || []).filter((id) => id !== promptItem.id);
+
+    persistDetail(module.id, "research-prompts", detail);
+    showToast("Response saved.");
+    modal.close();
+    renderResearchPromptView(detail, module);
+  });
+
+  modal.body.appendChild(form);
+  textarea.focus();
+}
+
+function togglePromptSelection(detail, module, promptId, checked) {
+  detail.selectedPromptIds = Array.isArray(detail.selectedPromptIds) ? detail.selectedPromptIds : [];
+  const exists = detail.selectedPromptIds.includes(promptId);
+  if (checked && !exists) {
+    detail.selectedPromptIds.push(promptId);
+  } else if (!checked && exists) {
+    detail.selectedPromptIds = detail.selectedPromptIds.filter((id) => id !== promptId);
+  }
   persistDetail(module.id, "research-prompts", detail);
-  showToast(`Prompt "${promptItem.label}" queued.`);
+  renderResearchPromptView(detail, module);
+}
+
+function convertSelectedPrompts(detail, module) {
+  const selectedIds = (detail.selectedPromptIds || []).filter(Boolean);
+  if (!selectedIds.length) {
+    return;
+  }
+
+  const structureDetail = ensureStepDetail(module, "structure-input");
+  structureDetail.sources = Array.isArray(structureDetail.sources) ? structureDetail.sources : [];
+
+  let createdCount = 0;
+  const timestamp = new Date().toLocaleString();
+
+  selectedIds.forEach((promptId) => {
+    const promptItem = detail.prompts.find((item) => item.id === promptId);
+    if (!promptItem || !promptItem.response || promptItem.convertedToSource) {
+      return;
+    }
+
+    const sourceId = `source-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    const responseText = promptItem.response.trim();
+    const source = {
+      id: sourceId,
+      type: "Research Insight",
+      title:
+        promptItem.label && promptItem.label.length > 90
+          ? `${promptItem.label.slice(0, 87)}…`
+          : promptItem.label || "Research insight",
+      summary: responseText.length > 140 ? `${responseText.slice(0, 137)}…` : responseText,
+      contentPreview: responseText.slice(0, 220),
+      owner: promptItem.channel || "Research",
+      timestamp,
+      archived: false,
+      raw: responseText,
+      createdFromPromptId: promptItem.id
+    };
+
+    structureDetail.sources.unshift(source);
+    promptItem.convertedToSource = true;
+    promptItem.convertedSourceId = sourceId;
+    createdCount += 1;
+  });
+
+  detail.selectedPromptIds = detail.selectedPromptIds.filter((id) =>
+    detail.prompts.some((prompt) => prompt.id === id && prompt.response && !prompt.convertedToSource)
+  );
+
+  if (!createdCount) {
+    showToast("Log a response before converting prompts.");
+    persistDetail(module.id, "research-prompts", detail);
+    return;
+  }
+
+  persistDetail(module.id, "structure-input", structureDetail);
+  persistDetail(module.id, "research-prompts", detail);
+  showToast(`${createdCount} source${createdCount === 1 ? "" : "s"} created from research responses.`);
   renderResearchPromptView(detail, module);
 }
 
