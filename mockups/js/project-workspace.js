@@ -14,7 +14,7 @@ import {
   setText,
   showToast
 } from "./workspace/helpers.js";
-import { createConceptRenderers } from "./workspace/renderers/concept.js";
+import { createConceptRenderers } from "./workspace/concept/index.js";
 
 const STEP_RENDERERS = {
   "structure-input": renderIntakeSummaryView,
