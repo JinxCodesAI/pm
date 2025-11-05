@@ -67,7 +67,6 @@ async function loadWorkspace() {
     renderModuleSwitcher();
     renderStepList();
     renderDefaultStepBody();
-    renderArtifactSection();
   }
 }
 
@@ -132,7 +131,6 @@ function selectModule(moduleId) {
   }
 
   renderStepDetail();
-  renderArtifactSection();
 }
 
 function renderStepList() {
@@ -184,7 +182,6 @@ function renderStepDetail() {
     setText("step-description", "Pick a step from the left to start working.");
     applyPill(statusPill, null, "Status");
     renderDefaultStepBody();
-    renderArtifactSection();
     return;
   }
 
@@ -197,7 +194,6 @@ function renderStepDetail() {
 
   const detail = ensureStepDetail(module, step.id);
   renderStepSpecific(step.id, detail, module);
-  renderArtifactSection();
 }
 
 function renderStepSpecific(stepId, detail, module) {
@@ -2026,24 +2022,6 @@ function setText(id, value) {
   const element = document.getElementById(id);
   if (element) {
     element.textContent = value ?? "—";
-  }
-}
-
-function renderArtifactSection() {
-  const module = currentModule();
-  const artifactStatus = document.getElementById("artifact-status");
-  const artifactSummary = document.getElementById("artifact-summary");
-  if (!artifactStatus || !artifactSummary) {
-    return;
-  }
-
-  if (module?.artifact) {
-    applyPill(artifactStatus, module.artifact.status, formatStatus(module.artifact.status) || "Status");
-    artifactSummary.textContent = module.artifact.summary || "No summary provided yet.";
-  } else {
-    artifactStatus.className = "pill";
-    artifactStatus.textContent = "Not Tracked";
-    artifactSummary.textContent = "This stage does not track an artifact.";
   }
 }
 
