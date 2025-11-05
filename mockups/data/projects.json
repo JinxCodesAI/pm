@@ -55,9 +55,9 @@
           {
             "id": "persona-builder",
             "name": "Audience Personas",
-            "description": "Grow detailed audience snapshots that evolve with client feedback.",
-            "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
-            "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+            "description": "Coach the AI to spin personas from the brief before making manual tweaks.",
+            "aiSupport": "Pulls from the intake summary and answered probes, applies coaching notes, and remembers rejected directions as the brief shifts.",
+            "humanFocus": "Drop guidance like in Clarify the Brief, review the AI draft, and only hand-edit for polish.",
             "status": "not-started",
             "notes": "",
             "next": ""
@@ -181,9 +181,9 @@
             {
               "id": "persona-builder",
               "name": "Audience Personas",
-              "description": "Grow detailed audience snapshots that evolve with client feedback.",
-              "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
-              "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+              "description": "Coach the AI to spin personas from the brief before making manual tweaks.",
+              "aiSupport": "Pulls from the intake summary and answered probes, applies coaching notes, and remembers rejected directions as the brief shifts.",
+              "humanFocus": "Drop guidance like in Clarify the Brief, review the AI draft, and only hand-edit for polish.",
               "status": "in-progress",
               "notes": "Personas approved but tone needs to reflect more pragmatism.",
               "next": "Tighten 'Primary Buyer' motivations before sharing with client."
@@ -302,6 +302,16 @@
             },
             "persona-builder": {
               "updated": "2025-04-09 13:15",
+              "lastGuidance": "Dial up pragmatic motivations.",
+              "lastInputs": {
+                "summary": [
+                  "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'",
+                  "Primary KPI is an 18% sales lift on bundled starter kits within six weeks of launch."
+                ],
+                "answered": [
+                  "What budget ceiling should we assume when crafting hero concepts? → Client approved $650k with headroom if we prove paid social lift."
+                ]
+              },
               "personas": [
                 {
                   "id": "persona-keisha",
@@ -312,14 +322,19 @@
                   "goals": [
                     "Host memorable gatherings with minimal prep.",
                     "Invest in tech that makes everyday rituals feel special.",
-                    "Showcase smart purchases on social without seeming try-hard."
+                    "Dial up pragmatic motivations in the launch storytelling."
                   ],
                   "painPoints": [
                     "Feels overwhelmed by overly technical smart home setups.",
                     "Limited time to tweak lighting for different moods.",
                     "Skeptical about tech that requires constant app management."
                   ],
-                  "quote": "If I can set the vibe with one voice command, I'm in."
+                  "quote": "If I can set the vibe with one voice command, I'm in.",
+                  "anchors": [
+                    "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'",
+                    "What budget ceiling should we assume when crafting hero concepts? → Client approved $650k with headroom if we prove paid social lift."
+                  ],
+                  "generated": true
                 },
                 {
                   "id": "persona-elliot",
@@ -337,7 +352,12 @@
                     "Frustrated by products that require permanent installation.",
                     "Needs clear ROI on any premium purchase."
                   ],
-                  "quote": "Smart lighting should be smarter about real-life apartments."
+                  "quote": "Smart lighting should be smarter about real-life apartments.",
+                  "anchors": [
+                    "Primary KPI is an 18% sales lift on bundled starter kits within six weeks of launch.",
+                    "What budget ceiling should we assume when crafting hero concepts? → Client approved $650k with headroom if we prove paid social lift."
+                  ],
+                  "generated": true
                 }
               ]
             },
@@ -508,9 +528,9 @@
             {
               "id": "persona-builder",
               "name": "Audience Personas",
-              "description": "Grow detailed audience snapshots that evolve with client feedback.",
-              "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
-              "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+              "description": "Coach the AI to spin personas from the brief before making manual tweaks.",
+              "aiSupport": "Pulls from the intake summary and answered probes, applies coaching notes, and remembers rejected directions as the brief shifts.",
+              "humanFocus": "Drop guidance like in Clarify the Brief, review the AI draft, and only hand-edit for polish.",
               "status": "not-started",
               "notes": "",
               "next": "Draft initial personas once audience priorities lock."
@@ -628,7 +648,17 @@
               ]
             },
             "persona-builder": {
-              "updated": "",
+              "updated": "2025-04-07 18:20",
+              "lastGuidance": "Keep personas welcoming for first-time hikers while reinforcing sustainability proof.",
+              "lastInputs": {
+                "summary": [
+                  "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof.",
+                  "Retail partners want sell-in packages ready by mid-May with measurable bundle incentives."
+                ],
+                "answered": [
+                  "Do we have flexibility to test paid creator partnerships in July? → Marketing approved a $40k test provided we deliver two hero stories by late May."
+                ]
+              },
               "personas": [
                 {
                   "id": "persona-avery",
@@ -639,14 +669,19 @@
                   "goals": [
                     "Find reliable starter kits without feeling overwhelmed by tech specs.",
                     "Learn from relatable creators that make alpine travel feel achievable.",
-                    "Invest in gear that signals quality while staying budget-conscious."
+                    "Keep sustainability proof simple enough to share with friends."
                   ],
                   "painPoints": [
                     "Intimidated by hardcore outdoor content.",
                     "Unsure which sustainability claims actually matter.",
                     "Limited time to compare gear bundles."
                   ],
-                  "quote": "Show me a kit that helps me feel confident and prepared, not like an impostor."
+                  "quote": "Show me a kit that helps me feel confident and prepared, not like an impostor.",
+                  "anchors": [
+                    "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof.",
+                    "Do we have flexibility to test paid creator partnerships in July? → Marketing approved a $40k test provided we deliver two hero stories by late May."
+                  ],
+                  "generated": true
                 },
                 {
                   "id": "persona-mateo",
@@ -657,14 +692,19 @@
                   "goals": [
                     "Equip newcomers with dependable starter packs.",
                     "Highlight brands that invest in environmental stewardship.",
-                    "Build trust with club sponsors by recommending proven gear."
+                    "Deliver bundle recommendations that satisfy retail partners' expectations."
                   ],
                   "painPoints": [
                     "Needs clear bundle pricing he can confidently recommend.",
                     "Skeptical of greenwashing and vague material claims.",
                     "Seeks assets he can easily share in newsletters."
                   ],
-                  "quote": "Give me something that keeps our club safe and proves we picked the right partner."
+                  "quote": "Give me something that keeps our club safe and proves we picked the right partner.",
+                  "anchors": [
+                    "Retail partners want sell-in packages ready by mid-May with measurable bundle incentives.",
+                    "Do we have flexibility to test paid creator partnerships in July? → Marketing approved a $40k test provided we deliver two hero stories by late May."
+                  ],
+                  "generated": true
                 }
               ]
             },

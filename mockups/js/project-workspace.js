@@ -25,7 +25,12 @@ const STEP_DETAIL_FACTORIES = {
   }),
   "persona-builder": () => ({
     personas: [],
-    updated: ""
+    updated: "",
+    lastGuidance: "",
+    lastInputs: {
+      summary: [],
+      answered: []
+    }
   }),
   "research-prompts": () => ({
     prompts: [],
@@ -252,6 +257,24 @@ function ensureStepDetail(module, stepId) {
     merged.selectedQuestionIds = Array.isArray(merged.selectedQuestionIds)
       ? merged.selectedQuestionIds.filter((id) => merged.questions.some((question) => question.id === id))
       : [];
+  } else if (stepId === "persona-builder") {
+    merged.personas = Array.isArray(merged.personas) ? merged.personas : [];
+    merged.personas = merged.personas.map((persona) => ({
+      id: persona.id || `persona-${Date.now()}`,
+      name: persona.name || "Audience Persona",
+      age: persona.age || "",
+      role: persona.role || "",
+      bio: persona.bio || "",
+      goals: Array.isArray(persona.goals) ? persona.goals : [],
+      painPoints: Array.isArray(persona.painPoints) ? persona.painPoints : [],
+      quote: persona.quote || "",
+      anchors: Array.isArray(persona.anchors) ? persona.anchors : [],
+      generated: Boolean(persona.generated)
+    }));
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.lastInputs = merged.lastInputs || {};
+    merged.lastInputs.summary = Array.isArray(merged.lastInputs.summary) ? merged.lastInputs.summary : [];
+    merged.lastInputs.answered = Array.isArray(merged.lastInputs.answered) ? merged.lastInputs.answered : [];
   }
   module.details[stepId] = merged;
   return merged;
@@ -1367,34 +1390,153 @@ function renderPersonaStudioView(detail, module) {
   clearChildren(body);
   body.classList.remove("muted");
 
-  const header = createSectionHeading("Persona Set", "Regenerate or refine personas as the audience evolves.");
-  const addBtn = createActionButton("Add Persona", () => openPersonaEditor(detail, module));
-  addBtn.classList.add("primary-chip");
-  header.appendChild(addBtn);
-  const regenerateBtn = createActionButton("Regenerate", () => {
-    detail.updated = new Date().toLocaleString();
+  const generatorHeading = createSectionHeading(
+    "Persona Generator",
+    "Guide the AI just like Clarify the Brief—manual edits come last."
+  );
+  body.appendChild(generatorHeading);
+
+  const generator = createElement("div", { classes: "persona-generator" });
+  generator.appendChild(
+    createElement("div", {
+      classes: "persona-generator-copy",
+      text: "Use the intake summary and resolved probes to auto-draft personas before polishing manually."
+    })
+  );
+
+  const checklist = createElement("ul", { classes: "persona-generator-list" });
+  [
+    "Pulls from the latest Intake Summary and answered clarifying questions.",
+    "Add coaching notes to steer tone, motivations, or priority segments before each run.",
+    "Regenerate whenever the brief shifts—manual tweaks are only for final polish."
+  ].forEach((item) => checklist.appendChild(createElement("li", { text: item })));
+  generator.appendChild(checklist);
+
+  const guidanceLabel = createElement("label", { classes: "persona-guidance" });
+  guidanceLabel.appendChild(createElement("span", { text: "Coaching notes for the AI (optional)" }));
+  const guidanceInput = document.createElement("textarea");
+  guidanceInput.rows = 3;
+  guidanceInput.placeholder = "e.g. Spotlight pragmatic renters and ROI proof.";
+  guidanceInput.value = detail.lastGuidance || "";
+  guidanceInput.addEventListener("change", () => {
+    detail.lastGuidance = guidanceInput.value;
     persistDetail(module.id, "persona-builder", detail);
-    showToast("Persona regeneration queued.");
-    renderPersonaStudioView(detail, module);
   });
-  header.appendChild(regenerateBtn);
-  body.appendChild(header);
+  guidanceLabel.appendChild(guidanceInput);
+  generator.appendChild(guidanceLabel);
+
+  const actions = createElement("div", { classes: "persona-generator-actions" });
+  actions.appendChild(
+    createElement("span", {
+      classes: "muted",
+      text: "AI references Intake Summary insights and answered probes."
+    })
+  );
+
+  const buttonsWrap = createElement("div", { classes: "persona-generator-buttons" });
+  const generateBtn = document.createElement("button");
+  generateBtn.className = "primary-button";
+  generateBtn.type = "button";
+  const updateGeneratorLabel = () => {
+    generateBtn.textContent = detail.personas?.length ? "Regenerate with AI" : "Generate Personas";
+  };
+  updateGeneratorLabel();
+  generateBtn.addEventListener("click", () => {
+    if (generateBtn.disabled) {
+      return;
+    }
+    const coaching = guidanceInput.value.trim();
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Generating…";
+    window.setTimeout(() => {
+      const created = runPersonaGeneration(detail, module, coaching);
+      generateBtn.disabled = false;
+      updateGeneratorLabel();
+      if (created) {
+        renderPersonaStudioView(detail, module);
+      }
+    }, 60);
+  });
+  buttonsWrap.appendChild(generateBtn);
+
+  const manualBtn = createActionButton("Add Persona Manually", () => openPersonaEditor(detail, module));
+  manualBtn.classList.add("ghost-chip");
+  buttonsWrap.appendChild(manualBtn);
+
+  actions.appendChild(buttonsWrap);
+  generator.appendChild(actions);
+
+  if (
+    detail.updated &&
+    (detail.lastGuidance || detail.lastInputs?.summary?.length || detail.lastInputs?.answered?.length)
+  ) {
+    const recap = createElement("div", { classes: "persona-last-run" });
+    recap.appendChild(
+      createElement("p", {
+        classes: "persona-last-run-title",
+        text: `Last AI run ${detail.updated}`
+      })
+    );
+    if (detail.lastGuidance) {
+      recap.appendChild(
+        createElement("p", {
+          classes: "persona-last-run-note muted",
+          text: `Coaching note: ${detail.lastGuidance}`
+        })
+      );
+    }
+    if (detail.lastInputs?.summary?.length) {
+      recap.appendChild(createElement("p", { classes: "persona-last-run-label", text: "Anchored to brief:" }));
+      const list = createElement("ul", { classes: "persona-last-run-list" });
+      detail.lastInputs.summary.forEach((item) => list.appendChild(createElement("li", { text: item })));
+      recap.appendChild(list);
+    }
+    if (detail.lastInputs?.answered?.length) {
+      recap.appendChild(
+        createElement("p", { classes: "persona-last-run-label", text: "Anchored to resolved probes:" })
+      );
+      const list = createElement("ul", { classes: "persona-last-run-list" });
+      detail.lastInputs.answered.forEach((item) => list.appendChild(createElement("li", { text: item })));
+      recap.appendChild(list);
+    }
+    generator.appendChild(recap);
+  }
+
+  body.appendChild(generator);
+
+  const personasHeading = createSectionHeading(
+    "Persona Set",
+    detail.personas?.length
+      ? "Approve or fine-tune the AI draft before sharing."
+      : "Run the generator to populate personas from the brief."
+  );
+  body.appendChild(personasHeading);
 
   const grid = createElement("div", { classes: "persona-grid" });
   if (!detail.personas?.length) {
     grid.appendChild(
       createElement("div", {
         classes: "empty-card",
-        text: "No personas generated yet. Add a persona to start mapping your audience."
+        text: "No personas generated yet. Use the AI generator above or add one manually."
       })
     );
   } else {
+    const defaultAnchors = [
+      ...(detail.lastInputs?.summary || []),
+      ...(detail.lastInputs?.answered || [])
+    ].filter(Boolean);
     detail.personas.forEach((persona, index) => {
       const card = createElement("article", { classes: "persona-card" });
-      card.appendChild(createElement("h4", { text: persona.name || "Persona" }));
+
+      const titleRow = createElement("div", { classes: "persona-card-header" });
+      titleRow.appendChild(createElement("h4", { text: persona.name || "Persona" }));
+      if (persona.generated) {
+        titleRow.appendChild(createElement("span", { classes: ["tag-chip", "ai-chip"], text: "AI generated" }));
+      }
+      card.appendChild(titleRow);
 
       const meta = createElement("p", { classes: "persona-meta muted" });
-      meta.textContent = [persona.age || "-", persona.role || "Role unspecified"].filter(Boolean).join(" | " );
+      meta.textContent = [persona.age || "-", persona.role || "Role unspecified"].filter(Boolean).join(" | ");
       card.appendChild(meta);
 
       if (persona.bio) {
@@ -1419,6 +1561,16 @@ function renderPersonaStudioView(detail, module) {
         card.appendChild(createElement("blockquote", { text: `"${persona.quote}"` }));
       }
 
+      const anchorSources = (persona.anchors && persona.anchors.length ? persona.anchors : defaultAnchors).slice(0, 2);
+      if (anchorSources.length) {
+        const anchorBlock = createElement("div", { classes: "persona-anchor-block" });
+        anchorBlock.appendChild(createElement("span", { classes: "persona-anchor-label", text: "Anchored to" }));
+        const anchorList = createElement("ul", { classes: "persona-anchor-list" });
+        anchorSources.forEach((anchor) => anchorList.appendChild(createElement("li", { text: anchor })));
+        anchorBlock.appendChild(anchorList);
+        card.appendChild(anchorBlock);
+      }
+
       const actions = createElement("div", { classes: "persona-actions" });
       actions.appendChild(createActionButton("Edit", () => openPersonaEditor(detail, module, { index })));
       actions.appendChild(createActionButton("Duplicate", () => duplicatePersona(detail, module, index)));
@@ -1431,17 +1583,256 @@ function renderPersonaStudioView(detail, module) {
   body.appendChild(grid);
 
   const footer = createElement("p", {
-    classes: "muted",
-    text: detail.updated ? `Last regenerated ${detail.updated}` : "Personas have not been regenerated yet."
+    classes: "muted persona-footer",
+    text: detail.personas?.length
+      ? `AI personas last generated ${detail.updated || "—"}.`
+      : "Manual personas are optional—start by running the AI generator."
   });
   body.appendChild(footer);
+}
+
+function runPersonaGeneration(detail, module, guidance) {
+  const output = buildPersonaDrafts(module, guidance);
+  if (!output) {
+    showToast("Add intake summary insights or answer probes before generating personas.");
+    return false;
+  }
+
+  const { personas, summaryAnchors, answeredAnchors } = output;
+  if (!personas.length) {
+    showToast("No personas generated. Add more context to the brief and try again.");
+    return false;
+  }
+
+  detail.personas = personas;
+  detail.updated = new Date().toLocaleString();
+  detail.lastGuidance = guidance;
+  detail.lastInputs = {
+    summary: summaryAnchors,
+    answered: answeredAnchors
+  };
+
+  persistDetail(module.id, "persona-builder", detail);
+  showToast(`Persona${personas.length === 1 ? "" : "s"} generated.`);
+  return true;
+}
+
+function buildPersonaDrafts(module, guidance) {
+  const structureDetail = ensureStepDetail(module, "structure-input");
+  const activeSummary = getActiveSummaryVersion(structureDetail);
+  let summaryAnchors = Array.isArray(activeSummary?.summary)
+    ? activeSummary.summary
+    : Array.isArray(structureDetail.summary)
+    ? structureDetail.summary
+    : [];
+
+  if (!summaryAnchors.length && Array.isArray(structureDetail.sources)) {
+    summaryAnchors = structureDetail.sources
+      .map((source) => source.summary || source.contentPreview || "")
+      .filter(Boolean);
+  }
+
+  const formattedSummaryAnchors = summaryAnchors.map(formatAnchorSnippet).filter(Boolean);
+
+  const questionDetail = ensureStepDetail(module, "guided-brief");
+  const formattedAnswerAnchors = (questionDetail.questions || [])
+    .filter((question) => question.status === "answered" && question.answer)
+    .map((question) => formatAnchorSnippet(`${question.prompt} → ${question.answer}`))
+    .filter(Boolean);
+
+  const normalizedGuidance = (guidance || "").replace(/\s+/g, " ").trim();
+
+  if (!formattedSummaryAnchors.length && !formattedAnswerAnchors.length) {
+    return null;
+  }
+
+  const templates = composePersonaTemplates(formattedSummaryAnchors, formattedAnswerAnchors, normalizedGuidance);
+  const anchorPool = [...formattedSummaryAnchors, ...formattedAnswerAnchors];
+  const timestamp = Date.now();
+
+  const personas = templates.map((template, index) => {
+    const anchorSlice = anchorPool.slice(index * 2, index * 2 + 2);
+    const anchors = anchorSlice.length
+      ? anchorSlice
+      : anchorPool.slice(0, Math.min(anchorPool.length, 2));
+    return {
+      id: `persona-${timestamp}-${index}`,
+      name: template.name,
+      age: template.age,
+      role: template.role,
+      bio: template.bio,
+      goals: template.goals,
+      painPoints: template.painPoints,
+      quote: template.quote,
+      anchors,
+      generated: true
+    };
+  });
+
+  return {
+    personas,
+    summaryAnchors: formattedSummaryAnchors,
+    answeredAnchors: formattedAnswerAnchors
+  };
+}
+
+function composePersonaTemplates(summaryAnchors, answeredAnchors, guidance) {
+  const combinedText = `${summaryAnchors.join(" ")} ${answeredAnchors.join(" ")} ${guidance}`.toLowerCase();
+  const guidanceLower = guidance.toLowerCase();
+
+  const themes = {
+    hook: "a refreshing customer experience",
+    proof: "tangible performance wins",
+    friction: "time to execute across teams",
+    channel: "campaign rollouts",
+    safeguard: "ROI proof",
+    primaryName: "Momentum Maker",
+    primaryAge: "35",
+    primaryRole: "Marketing lead steering launch strategy",
+    secondaryName: "Pragmatic Gatekeeper",
+    secondaryAge: "41",
+    secondaryRole: "Operations partner validating feasibility"
+  };
+
+  if (/season|spring|refresh|mood/.test(combinedText)) {
+    themes.hook = "seasonal mood shifts";
+    themes.primaryName = "Seasonal Storyteller";
+    themes.primaryRole = "Homeowner curating gathering-ready spaces";
+    themes.primaryAge = "34";
+  }
+
+  if (/first-time|beginner|newcomer/.test(combinedText)) {
+    themes.primaryName = "Approachable Trailblazer";
+    themes.primaryRole = "First-time adopter seeking confidence";
+    themes.primaryAge = "29";
+    themes.channel = "community storytelling";
+  }
+
+  if (/home|host|gather/.test(combinedText)) {
+    themes.primaryRole = "Homeowner curating gathering-ready spaces";
+    themes.primaryAge = "34";
+  }
+
+  if (/bundle|upsell|starter kit|kit/.test(combinedText)) {
+    themes.proof = "bundle conversion lift";
+    themes.safeguard = "bundle performance";
+  }
+
+  if (/renter|rental|apartment/.test(combinedText)) {
+    themes.secondaryName = "Practical Renter";
+    themes.secondaryRole = "Renter upgrading without permanent installs";
+    themes.secondaryAge = "39";
+  }
+
+  if (/budget|roi|finance|cfo|pragmatic/.test(combinedText) || guidanceLower.includes("pragmatic")) {
+    themes.secondaryName = "Pragmatic Evaluator";
+    themes.secondaryRole = "Finance-minded stakeholder vetting spend";
+    themes.secondaryAge = "42";
+    themes.friction = "budget justification debates";
+    themes.safeguard = "ROI proof";
+  }
+
+  if (/tech|smart|automation|integration/.test(combinedText)) {
+    themes.friction = "complex smart-tech setups";
+  }
+
+  if (/voice|hands-free/.test(combinedText)) {
+    themes.hook = "hands-free control";
+  }
+
+  if (/sustain|eco|green|biodegradable|energy/.test(combinedText) || guidanceLower.includes("sustain")) {
+    themes.hook = "energy-efficient comfort";
+    themes.safeguard = "sustainability proof";
+  }
+
+  if (/retail/.test(combinedText)) {
+    themes.channel = "retail enablement";
+  }
+
+  if (/social|creator|tiktok|paid social|content/.test(combinedText)) {
+    themes.channel = "social storytelling";
+  }
+
+  const guidanceFragment = toSentenceFragment(guidance);
+  const safeguard = themes.safeguard || themes.proof;
+
+  const primaryGoals = [
+    `Translate ${themes.hook} into ${themes.channel} moments that feel effortless.`,
+    `Lock partners that can prove ${themes.proof}.`,
+    guidanceFragment ? `${guidanceFragment}.` : `Keep stakeholders aligned without slowing approvals.`
+  ];
+
+  const primary = {
+    name: themes.primaryName,
+    age: themes.primaryAge,
+    role: themes.primaryRole,
+    bio: `Champions ${themes.hook} while rallying teams around ${themes.proof}. Balances ambition with ${themes.friction}.`,
+    goals: primaryGoals,
+    painPoints: [
+      `Momentum stalls when ${themes.friction}.`,
+      `Distrusts pitches that lack a path to ${themes.proof}.`,
+      `Overloaded by decks that ignore day-to-day execution.`
+    ],
+    quote: `"Make ${themes.hook} tangible and the team will move yesterday."`
+  };
+
+  const secondaryGoals = [
+    `See a clear line from concept to ${safeguard}.`,
+    `Protect bandwidth while the team experiments with ${themes.hook}.`,
+    guidanceFragment ? `${guidanceFragment} without losing practicality.` : `Champion realistic rollout plans.`
+  ];
+
+  const secondary = {
+    name: themes.secondaryName,
+    age: themes.secondaryAge,
+    role: themes.secondaryRole,
+    bio: `Evaluates every pitch through the lens of ${safeguard} and team capacity.`,
+    goals: secondaryGoals,
+    painPoints: [
+      `Skeptical when ${themes.proof} is vague or unquantified.`,
+      `Frustrated by ${themes.friction}.`,
+      `Rejects ideas that ignore operational constraints.`
+    ],
+    quote: `"Show me the path to ${safeguard} and I'm comfortable greenlighting bold creative."`
+  };
+
+  return [primary, secondary];
+}
+
+function toSentenceFragment(text) {
+  if (!text) {
+    return "";
+  }
+  const cleaned = String(text).trim();
+  if (!cleaned) {
+    return "";
+  }
+  const normalized = cleaned.replace(/[\.!?]+$/g, "");
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function formatAnchorSnippet(text) {
+  if (!text) {
+    return "";
+  }
+  const cleaned = String(text).replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return "";
+  }
+  return cleaned.length > 140 ? `${cleaned.slice(0, 137)}…` : cleaned;
 }
 
 function openPersonaEditor(detail, module, options = {}) {
   const isEdit = typeof options.index === "number";
   const existing = isEdit ? detail.personas?.[options.index] : null;
   const current = existing
-    ? { ...existing, goals: [...(existing.goals || [])], painPoints: [...(existing.painPoints || [])] }
+    ? {
+        ...existing,
+        goals: [...(existing.goals || [])],
+        painPoints: [...(existing.painPoints || [])],
+        anchors: [...(existing.anchors || [])],
+        generated: Boolean(existing.generated)
+      }
     : {
         id: `persona-${Date.now()}`,
         name: "",
@@ -1450,7 +1841,9 @@ function openPersonaEditor(detail, module, options = {}) {
         bio: "",
         goals: [],
         painPoints: [],
-        quote: ""
+        quote: "",
+        anchors: [],
+        generated: false
       };
 
   const modal = openModal(isEdit ? "Edit Persona" : "New Persona");
@@ -1551,7 +1944,9 @@ function openPersonaEditor(detail, module, options = {}) {
         .split("\\n")
         .map((value) => value.trim())
         .filter(Boolean),
-      quote: quoteInput.value.trim()
+      quote: quoteInput.value.trim(),
+      anchors: Array.isArray(current.anchors) ? [...current.anchors] : [],
+      generated: isEdit ? Boolean(existing?.generated) : false
     };
 
     detail.personas = detail.personas || [];

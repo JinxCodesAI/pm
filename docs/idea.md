@@ -25,9 +25,9 @@ This module transforms the chaos of initial client conversations into a solid, s
     *   **Iteration & Feedback Loop:** As the freelancer answers, rejects, or reopens probes, the system tracks state. Rejected questions (optionally tagged with a reason) inform future AI runs, while answered items can be promoted into the source library for downstream reuse.
 
 *   **Step 3: Persona Builder**
-    *   **How it works:** Based on the audience description, the user clicks "Generate Personas."
-    *   **AI Action:** Creates detailed user personas.
-    *   **Iteration & Feedback Loop:** If the client feedback is "let's target a slightly older demographic," the freelancer updates the audience section in the brief, and can then regenerate the personas with a single click, which will now reflect the new target.
+    *   **How it works:** Just like **Clarify the Brief**, the flow starts with an AI generator. Strategists drop coaching notes, run the AI against the active intake summary and resolved probes, and review the resulting persona set. Manual creation remains available but is treated as a polishing step.
+    *   **AI Action:** Drafts persona narratives grounded in the latest brief inputs, carries forward rejected directions, and applies new coaching notes on every regeneration.
+    *   **Iteration & Feedback Loop:** When feedback lands (e.g., "target a slightly older, more pragmatic buyer"), the freelancer updates the audience section, adds a coaching note, and regenerates the personas. They only dive into manual edits to finesse the copy after approving the AI draft.
 
 *   **Step 4: The Research Prompt Generator**
     *   **How it works:** Provides expertly crafted prompts for external tools like Gemini or ChatGPT.
