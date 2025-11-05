@@ -2026,3 +2026,207 @@ p {
   font-size: 0.85rem;
 }
 
+.concept-generator {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.1rem 1.25rem;
+  background: rgba(79, 70, 229, 0.05);
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.concept-generator-copy {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 600;
+}
+
+.concept-anchor-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.concept-persona-line {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.concept-generator-controls {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.concept-generator-controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.concept-generator-controls textarea {
+  resize: vertical;
+  min-height: 2.6rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.concept-generator-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.concept-idea-list,
+.concept-board-list,
+.concept-critique-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.concept-idea-card,
+.concept-board-card,
+.concept-critique-card,
+.concept-history-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.concept-idea-header,
+.concept-board-header,
+.concept-critique-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.concept-logline {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.concept-score-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.concept-score {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.35rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: rgba(99, 102, 241, 0.06);
+  font-size: 0.75rem;
+  gap: 0.25rem;
+}
+
+.concept-tag-row,
+.concept-tone-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.concept-idea-actions,
+.concept-board-actions,
+.concept-critique-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.concept-board-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.concept-visual-list,
+.concept-critique-items {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.concept-history {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 0.8rem;
+}
+
+.concept-board-assist {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.concept-score-input {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0;
+}
+
+.concept-score-input label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.concept-board-form textarea,
+.concept-board-form input[type="text"] {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.concept-strategy-link {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.concept-critique-controls {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+}
+
+.concept-critique-controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.concept-critique-controls select,
+.concept-critique-controls textarea {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.concept-critique-card strong {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.concept-critique-actions .chip-button {
+  font-size: 0.75rem;
+}
+
