@@ -1,6 +1,20 @@
 import { getProjectById, saveStepDetail } from "./data-service.js";
 import { initGlobalNav } from "./navigation.js";
 import { parseQuery, applyPill, formatStatus, statusToClass, clearChildren, createElement } from "./utils.js";
+import {
+  clone,
+  createActionButton,
+  createSectionHeading,
+  getStepBody,
+  openConfirmModal,
+  openModal,
+  renderDefaultStepBody,
+  renderError,
+  renderFallbackStepBody,
+  setText,
+  showToast
+} from "./workspace/helpers.js";
+import { createConceptRenderers } from "./workspace/renderers/concept.js";
 
 const STEP_RENDERERS = {
   "structure-input": renderIntakeSummaryView,
@@ -35,6 +49,17 @@ const STEP_DETAIL_FACTORIES = {
   "research-prompts": () => ({
     prompts: [],
     watch: []
+  }),
+  "concept-explore": () => ({
+    ideas: [],
+    boards: [],
+    lastGuidance: "",
+    lastGeneratedAt: ""
+  }),
+  "concept-critique": () => ({
+    critiques: [],
+    lastGuidance: "",
+    lastRun: ""
   })
 };
 
@@ -43,6 +68,22 @@ const state = {
   selectedModuleId: null,
   selectedStepId: null
 };
+
+const conceptContext = {
+  getProject: () => state.project,
+  persistDetail: (moduleId, stepId, detail) => persistDetail(moduleId, stepId, detail),
+  ensureStepDetail: (module, stepId) => ensureStepDetail(module, stepId),
+  getActiveSummaryVersion,
+  showToast,
+  createSectionHeading,
+  createActionButton,
+  openModal,
+  openConfirmModal,
+  renderDefaultStepBody,
+  clone
+};
+
+Object.assign(STEP_RENDERERS, createConceptRenderers(conceptContext));
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -275,9 +316,82 @@ function ensureStepDetail(module, stepId) {
     merged.lastInputs = merged.lastInputs || {};
     merged.lastInputs.summary = Array.isArray(merged.lastInputs.summary) ? merged.lastInputs.summary : [];
     merged.lastInputs.answered = Array.isArray(merged.lastInputs.answered) ? merged.lastInputs.answered : [];
+  } else if (stepId === "concept-explore") {
+    merged.ideas = Array.isArray(merged.ideas) ? merged.ideas : [];
+    merged.ideas = merged.ideas.map((idea) => ({
+      id: idea.id || `idea-${Date.now()}`,
+      title: idea.title || "Concept",
+      logline: idea.logline || "",
+      description: idea.description || "",
+      status: ["draft", "shortlisted", "archived"].includes(idea.status) ? idea.status : "draft",
+      score: {
+        boldness: sanitizeScore(idea.score?.boldness),
+        clarity: sanitizeScore(idea.score?.clarity),
+        fit: sanitizeScore(idea.score?.fit)
+      },
+      tags: Array.isArray(idea.tags) ? idea.tags.filter(Boolean) : [],
+      createdAt: idea.createdAt || ""
+    }));
+    merged.boards = Array.isArray(merged.boards) ? merged.boards : [];
+    merged.boards = merged.boards.map((board, index) => {
+      const versions = Array.isArray(board.versions) ? board.versions : [];
+      const cleanedVersions = versions.map((version, versionIndex) => {
+        const generatedId = `board-version-${Date.now()}-${index}-${versionIndex}`;
+        return {
+          id: version.id || generatedId,
+          version: Number.parseInt(version.version, 10) || versionIndex + 1,
+          createdAt: version.createdAt || "",
+          logline: version.logline || board.logline || "",
+          narrative: version.narrative || "",
+          keyVisuals: Array.isArray(version.keyVisuals) ? version.keyVisuals.filter(Boolean) : [],
+          tone: Array.isArray(version.tone) ? version.tone.filter(Boolean) : [],
+          strategyLink: version.strategyLink || "",
+          aiGuidance: version.aiGuidance || "",
+          anchorSummary: Array.isArray(version.anchorSummary) ? version.anchorSummary.filter(Boolean) : []
+        };
+      });
+      const activeVersionId = cleanedVersions.find((version) => version.id === board.activeVersionId)
+        ? board.activeVersionId
+        : cleanedVersions[0]?.id || "";
+      return {
+        id: board.id || `board-${Date.now()}-${index}`,
+        ideaId: board.ideaId || "",
+        title: board.title || "Concept Board",
+        logline: board.logline || "",
+        status: ["draft", "in-review", "client-ready", "archived"].includes(board.status) ? board.status : "draft",
+        versions: cleanedVersions,
+        activeVersionId
+      };
+    });
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.lastGeneratedAt = merged.lastGeneratedAt || "";
+  } else if (stepId === "concept-critique") {
+    merged.critiques = Array.isArray(merged.critiques) ? merged.critiques : [];
+    merged.critiques = merged.critiques.map((critique) => ({
+      id: critique.id || `critique-${Date.now()}`,
+      boardId: critique.boardId || "",
+      versionId: critique.versionId || "",
+      boardTitle: critique.boardTitle || "Concept Board",
+      createdAt: critique.createdAt || "",
+      strengths: Array.isArray(critique.strengths) ? critique.strengths.filter(Boolean) : [],
+      risks: Array.isArray(critique.risks) ? critique.risks.filter(Boolean) : [],
+      questions: Array.isArray(critique.questions) ? critique.questions.filter(Boolean) : [],
+      recommendations: Array.isArray(critique.recommendations) ? critique.recommendations.filter(Boolean) : [],
+      status: critique.status === "closed" ? "closed" : "open"
+    }));
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.lastRun = merged.lastRun || "";
   }
   module.details[stepId] = merged;
   return merged;
+}
+
+function sanitizeScore(value) {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) {
+    return Math.min(5, Math.max(1, Math.round(numeric)));
+  }
+  return 3;
 }
 
 function renderIntakeSummaryView(detail, module) {
@@ -2258,183 +2372,8 @@ function fallbackCopy(text) {
   showToast("Prompt copied to clipboard.");
 }
 
-let activeModal = null;
-
-function openModal(title, options = {}) {
-  if (activeModal) {
-    activeModal.close();
-  }
-
-  const modalEl = document.createElement("div");
-  modalEl.className = "modal dynamic-modal";
-
-  const backdrop = document.createElement("div");
-  backdrop.className = "modal-backdrop";
-  modalEl.appendChild(backdrop);
-
-  const dialog = document.createElement("div");
-  dialog.className = "modal-dialog";
-  if (options.dialogClass) {
-    dialog.classList.add(options.dialogClass);
-  }
-  modalEl.appendChild(dialog);
-
-  const header = document.createElement("header");
-  header.className = "modal-header";
-  const titleWrap = document.createElement("div");
-  const heading = document.createElement("h2");
-  heading.textContent = title || "Dialog";
-  titleWrap.appendChild(heading);
-  header.appendChild(titleWrap);
-
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "ghost-icon-button";
-  closeBtn.type = "button";
-  closeBtn.innerHTML = "&times;";
-  closeBtn.setAttribute("aria-label", "Close dialog");
-  header.appendChild(closeBtn);
-  dialog.appendChild(header);
-
-  const body = document.createElement("div");
-  body.className = "modal-body";
-  dialog.appendChild(body);
-
-  function cleanup() {
-    document.removeEventListener("keydown", onKeyDown);
-    if (modalEl.parentNode) {
-      modalEl.parentNode.removeChild(modalEl);
-    }
-    if (activeModal?.element === modalEl) {
-      activeModal = null;
-    }
-  }
-
-  function close() {
-    cleanup();
-    if (typeof options.onClose === "function") {
-      options.onClose();
-    }
-  }
-
-  function onKeyDown(event) {
-    if (event.key === "Escape") {
-      close();
-    }
-  }
-
-  closeBtn.addEventListener("click", close);
-  backdrop.addEventListener("click", close);
-  document.addEventListener("keydown", onKeyDown);
-
-  document.body.appendChild(modalEl);
-  setTimeout(() => {
-    const focusable = body.querySelector("input, textarea, select, button");
-    (focusable || closeBtn).focus();
-  }, 20);
-
-  const handle = { close, element: modalEl, body };
-  activeModal = handle;
-  return handle;
-}
-
-function openConfirmModal({ title, message, confirmLabel = "Confirm", cancelLabel = "Cancel", onConfirm }) {
-  const modal = openModal(title || "Confirm");
-  modal.body.appendChild(createElement("p", { classes: "muted", text: message }));
-
-  const actions = createElement("div", { classes: "modal-actions" });
-  const cancelBtn = createElement("button", { classes: "secondary-button", text: cancelLabel });
-  cancelBtn.type = "button";
-  cancelBtn.addEventListener("click", () => modal.close());
-  const confirmBtn = createElement("button", { classes: "primary-button", text: confirmLabel });
-  confirmBtn.type = "button";
-  confirmBtn.addEventListener("click", () => {
-    modal.close();
-    if (typeof onConfirm === "function") {
-      onConfirm();
-    }
-  });
-  actions.appendChild(cancelBtn);
-  actions.appendChild(confirmBtn);
-  modal.body.appendChild(actions);
-
-  return modal;
-}
-
-function renderFallbackStepBody(detail) {
-  const body = getStepBody();
-  clearChildren(body);
-  body.classList.remove("muted");
-  body.appendChild(createElement("p", { text: "This step does not yet have a dedicated workspace view." }));
-  if (detail && Object.keys(detail).length) {
-    body.appendChild(createElement("pre", { classes: "muted", text: JSON.stringify(detail, null, 2) }));
-  }
-}
-
-function renderDefaultStepBody(message = "Select a step to view detailed tools.") {
-  const body = getStepBody();
-  clearChildren(body);
-  body.classList.add("muted");
-  body.textContent = message;
-}
-
 function persistDetail(moduleId, stepId, detail) {
   saveStepDetail(state.project.id, moduleId, stepId, detail);
-}
-
-function createSectionHeading(title, subtitle) {
-  const wrapper = createElement("div", { classes: "section-heading" });
-  wrapper.appendChild(createElement("h3", { text: title }));
-  if (subtitle) {
-    wrapper.appendChild(createElement("p", { classes: "muted", text: subtitle }));
-  }
-  return wrapper;
-}
-
-function createActionButton(label, handler) {
-  const button = createElement("button", { classes: "chip-button", text: label });
-  button.type = "button";
-  button.addEventListener("click", handler);
-  return button;
-}
-
-function getStepBody() {
-  return document.getElementById("step-body");
-}
-
-function showToast(message) {
-  let container = document.querySelector(".toast");
-  if (!container) {
-    container = document.createElement("div");
-    container.className = "toast";
-    document.body.appendChild(container);
-  }
-  container.textContent = message;
-  container.classList.add("visible");
-  setTimeout(() => container.classList.remove("visible"), 2600);
-}
-
-function setText(id, value) {
-  const element = document.getElementById(id);
-  if (element) {
-    element.textContent = value ?? "—";
-  }
-}
-
-function renderError(error) {
-  const shell = document.querySelector(".workspace-shell");
-  if (!shell) {
-    return;
-  }
-  shell.innerHTML = `
-    <section class="card" style="grid-column: 1 / -1;">
-      <h2>Unable to load project</h2>
-      <p class="muted">${error.message}</p>
-    </section>
-  `;
-}
-
-function clone(value) {
-  return JSON.parse(JSON.stringify(value));
 }
 
 
