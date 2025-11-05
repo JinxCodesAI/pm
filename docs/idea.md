@@ -20,9 +20,9 @@ This module transforms the chaos of initial client conversations into a solid, s
     *   **Iteration & Feedback Loop:** This is the base layer. The user can edit this structured summary at any time. If they have a follow-up call and get new information, they can add it here. The tool will flag downstream artifacts (the brief, personas) that might be affected by the changes, suggesting a review.
 
 *   **Step 2: The Guided Brief Builder**
-    *   **How it works:** The AI identifies gaps in the summary and generates "Clarifying Questions & Strategic Probes" to help the freelancer strengthen the strategy.
-    *   **AI Action:** Generates a list of insightful questions for the freelancer to consider or ask the client.
-    *   **Iteration & Feedback Loop:** As the freelancer answers these questions or gets client responses, they update the structured summary. The AI dynamically removes questions that have been addressed and may suggest new ones if the project scope changes.
+    *   **How it works:** The AI works alongside manual capture. Strategists can jot a quick probe in a single text field, or point the generator at the Intake Summary with optional guidance (e.g. “focus on budget risk”). One click produces a set of AI-suggested follow-ups grounded in the active sources.
+    *   **AI Action:** Generates new, clearly labeled follow-up questions that respect previously rejected prompts. Individual answers can be selected and converted directly into new intake sources so the upstream summary stays versioned.
+    *   **Iteration & Feedback Loop:** As the freelancer answers, rejects, or reopens probes, the system tracks state. Rejected questions (optionally tagged with a reason) inform future AI runs, while answered items can be promoted into the source library for downstream reuse.
 
 *   **Step 3: Persona Builder**
     *   **How it works:** Based on the audience description, the user clicks "Generate Personas."

@@ -19,7 +19,9 @@ const STEP_DETAIL_FACTORIES = {
     hideArchived: false
   }),
   "guided-brief": () => ({
-    questions: []
+    questions: [],
+    lastGuidance: "",
+    selectedQuestionIds: []
   }),
   "persona-builder": () => ({
     personas: [],
@@ -234,6 +236,26 @@ function ensureStepDetail(module, stepId) {
       merged.activeVersionId ||
       (merged.summaryVersions.length ? merged.summaryVersions[merged.summaryVersions.length - 1].id : null);
     merged.hideArchived = Boolean(merged.hideArchived);
+  } else if (stepId === "guided-brief") {
+    merged.questions = Array.isArray(merged.questions) ? merged.questions : [];
+    merged.questions = merged.questions.map((question) => ({
+      id: question.id || `q-${Date.now()}`,
+      prompt: question.prompt || "",
+      owner: question.owner || (question.status === "answered" ? "Client" : "Unassigned"),
+      impact: Array.isArray(question.impact) ? question.impact : [],
+      status: question.status === "answered" ? "answered" : "open",
+      answer: question.answer || "",
+      lastUpdated: question.lastUpdated || "",
+      generated: Boolean(question.generated),
+      rejected: Boolean(question.rejected),
+      rejectionReason: question.rejectionReason || "",
+      convertedToSource: Boolean(question.convertedToSource),
+      convertedSourceId: question.convertedSourceId || ""
+    }));
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.selectedQuestionIds = Array.isArray(merged.selectedQuestionIds)
+      ? merged.selectedQuestionIds.filter((id) => merged.questions.some((question) => question.id === id))
+      : [];
   }
   module.details[stepId] = merged;
   return merged;
@@ -735,6 +757,57 @@ function renderBriefQuestionsView(detail, module) {
   header.appendChild(addButton);
   body.appendChild(header);
 
+  const generator = createElement("div", { classes: "question-generator" });
+  generator.appendChild(
+    createElement("div", {
+      classes: "question-generator-copy",
+      text: "Use the intake summary to surface fresh follow-ups."
+    })
+  );
+
+  const guidanceLabel = createElement("label", { classes: "question-guidance" });
+  guidanceLabel.appendChild(createElement("span", { text: "Guidance for the AI (optional)" }));
+  const guidanceInput = document.createElement("textarea");
+  guidanceInput.rows = 2;
+  guidanceInput.placeholder = "e.g. Prioritize budget risk or missing approvals.";
+  guidanceInput.value = detail.lastGuidance || "";
+  guidanceInput.addEventListener("change", () => {
+    detail.lastGuidance = guidanceInput.value;
+    persistDetail(module.id, "guided-brief", detail);
+  });
+  guidanceLabel.appendChild(guidanceInput);
+  generator.appendChild(guidanceLabel);
+
+  const generatorActions = createElement("div", { classes: "question-generator-actions" });
+  const generateBtn = document.createElement("button");
+  generateBtn.className = "primary-button";
+  generateBtn.type = "button";
+  generateBtn.textContent = "Generate Questions";
+  generateBtn.addEventListener("click", () => {
+    if (generateBtn.disabled) {
+      return;
+    }
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Generating…";
+    window.setTimeout(() => {
+      const created = generateClarifyingQuestions(detail, module, guidanceInput.value.trim());
+      generateBtn.disabled = false;
+      generateBtn.textContent = "Generate Questions";
+      if (!created) {
+        return;
+      }
+      renderBriefQuestionsView(detail, module);
+    }, 60);
+  });
+  generatorActions.appendChild(generateBtn);
+  const helperText = createElement("span", {
+    classes: "muted",
+    text: "Outputs leverage active sources from the Intake Summary."
+  });
+  generatorActions.appendChild(helperText);
+  generator.appendChild(generatorActions);
+  body.appendChild(generator);
+
   if (!detail.questions?.length) {
     body.appendChild(
       createElement("div", {
@@ -746,18 +819,30 @@ function renderBriefQuestionsView(detail, module) {
   }
 
   const list = createElement("div", { classes: "question-list" });
+  const selectionSet = new Set(detail.selectedQuestionIds || []);
   detail.questions.forEach((question, index) => {
     const card = createElement("article", { classes: "question-card" });
 
     const headerRow = createElement("div", { classes: "question-meta" });
-    headerRow.appendChild(createElement("strong", { text: question.prompt || "Clarifying question" }));
-    const pillClass = question.status === "answered" ? "status-complete" : "status-attention";
-    headerRow.appendChild(
-      createElement("span", {
-        classes: ["pill", pillClass],
-        text: question.status === "answered" ? "Answered" : "Open"
-      })
-    );
+    const titleWrap = createElement("div", { classes: "question-title" });
+    titleWrap.appendChild(createElement("strong", { text: question.prompt || "Clarifying question" }));
+    if (question.generated) {
+      titleWrap.appendChild(createElement("span", { classes: "tag-chip", text: "AI suggested" }));
+    }
+    headerRow.appendChild(titleWrap);
+
+    const statusPill = createElement("span", { classes: ["pill"] });
+    if (question.status === "answered") {
+      statusPill.classList.add(question.convertedToSource ? "status-queued" : "status-complete");
+      statusPill.textContent = question.convertedToSource ? "Source logged" : "Answered";
+    } else if (question.rejected) {
+      statusPill.classList.add("status-muted");
+      statusPill.textContent = "Rejected";
+    } else {
+      statusPill.classList.add("status-attention");
+      statusPill.textContent = "Open";
+    }
+    headerRow.appendChild(statusPill);
     card.appendChild(headerRow);
 
     const answerBlock = createElement("div", { classes: "question-answer" });
@@ -767,6 +852,12 @@ function renderBriefQuestionsView(detail, module) {
       answerBlock.appendChild(createElement("p", { classes: "muted", text: "Awaiting answer." }));
     }
     card.appendChild(answerBlock);
+
+    if (question.rejected && question.rejectionReason) {
+      card.appendChild(
+        createElement("p", { classes: "question-rejection muted", text: `Rejection note: ${question.rejectionReason}` })
+      );
+    }
 
     if (question.impact?.length) {
       const impactRow = createElement("div", { classes: "question-impact" });
@@ -785,8 +876,19 @@ function renderBriefQuestionsView(detail, module) {
     footer.textContent = metaBits.join(" | " );
     card.appendChild(footer);
 
+    if (question.status === "answered" && !question.convertedToSource) {
+      const selectionLabel = createElement("label", { classes: "question-select" });
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = selectionSet.has(question.id);
+      checkbox.addEventListener("change", () => toggleQuestionSelection(detail, module, question.id, checkbox.checked));
+      selectionLabel.appendChild(checkbox);
+      selectionLabel.appendChild(createElement("span", { classes: "muted", text: "Select" }));
+      card.appendChild(selectionLabel);
+    }
+
     const actions = createElement("div", { classes: "question-actions" });
-    actions.appendChild(createActionButton("Edit Details", () => openQuestionComposer(detail, module, { index })));
+    actions.appendChild(createActionButton("Edit Question", () => openQuestionComposer(detail, module, { index })));
     if (question.status === "answered") {
       actions.appendChild(createActionButton("Update Answer", () => openAnswerDialog(detail, module, index)));
       actions.appendChild(createActionButton("Reopen", () => reopenQuestion(detail, module, index)));
@@ -794,6 +896,11 @@ function renderBriefQuestionsView(detail, module) {
       actions.appendChild(
         createActionButton("Log Answer", () => openAnswerDialog(detail, module, index, { markComplete: true }))
       );
+      if (question.rejected) {
+        actions.appendChild(createActionButton("Clear Rejection", () => clearQuestionRejection(detail, module, index)));
+      } else {
+        actions.appendChild(createActionButton("Reject", () => openRejectionDialog(detail, module, index)));
+      }
     }
     actions.appendChild(createActionButton("Remove", () => removeQuestion(detail, module, index)));
     card.appendChild(actions);
@@ -802,21 +909,303 @@ function renderBriefQuestionsView(detail, module) {
   });
 
   body.appendChild(list);
+
+  const convertible = detail.questions.filter(
+    (question) => question.status === "answered" && !question.convertedToSource
+  );
+  if (convertible.length) {
+    const convertBar = createElement("div", { classes: "question-convert-bar" });
+    convertBar.appendChild(
+      createElement("span", {
+        classes: "muted",
+        text: detail.selectedQuestionIds?.length
+          ? `${detail.selectedQuestionIds.length} selected for source capture.`
+          : "Select resolved questions to log their answers as intake sources."
+      })
+    );
+    const convertBtn = document.createElement("button");
+    convertBtn.className = "primary-button";
+    convertBtn.type = "button";
+    convertBtn.textContent = "Convert into Source";
+    convertBtn.disabled = !detail.selectedQuestionIds?.length;
+    convertBtn.addEventListener("click", () => convertSelectedQuestions(detail, module));
+    convertBar.appendChild(convertBtn);
+    body.appendChild(convertBar);
+  }
+}
+
+function generateClarifyingQuestions(detail, module, guidance) {
+  const normalizedExisting = new Set(
+    (detail.questions || [])
+      .map((question) => (question.prompt || "").trim().toLowerCase())
+      .filter(Boolean)
+  );
+
+  const intakeDetail = ensureStepDetail(module, "structure-input");
+  const activeSummary = getActiveSummaryVersion(intakeDetail);
+  const summaryLines = Array.isArray(activeSummary?.summary)
+    ? activeSummary.summary
+    : Array.isArray(intakeDetail.summary)
+    ? intakeDetail.summary
+    : [];
+  const activeSources = (intakeDetail.sources || []).filter((source) => !source.archived);
+
+  const normalizedGuidance = (guidance || "").replace(/\s+/g, " ").trim();
+  const suggestions = [];
+
+  function addSuggestion(prompt) {
+    const normalized = prompt.replace(/\s+/g, " ").trim().toLowerCase();
+    if (!normalized) {
+      return;
+    }
+    if (
+      normalizedExisting.has(normalized) ||
+      suggestions.some((item) => item.replace(/\s+/g, " ").trim().toLowerCase() === normalized)
+    ) {
+      return;
+    }
+    suggestions.push(prompt.trim());
+  }
+
+  if (normalizedGuidance) {
+    addSuggestion(`What information is still missing about "${normalizedGuidance}"?`);
+  }
+
+  summaryLines.slice(0, 5).forEach((line) => {
+    const focus = extractFocusFromLine(line);
+    let prompt = `What clarification do we need about ${focus}?`;
+    if (normalizedGuidance) {
+      prompt += ` (${normalizedGuidance})`;
+    }
+    addSuggestion(prompt);
+  });
+
+  activeSources.slice(0, 5).forEach((source) => {
+    const label = source.title || extractFocusFromLine(source.summary || source.contentPreview || "this source");
+    let prompt = `What should we confirm from ${label}?`;
+    if (normalizedGuidance) {
+      prompt += ` (${normalizedGuidance})`;
+    }
+    addSuggestion(prompt);
+
+    if (source.summary) {
+      const focus = extractFocusFromLine(source.summary);
+      let secondary = `What client context backs up "${focus}"?`;
+      if (normalizedGuidance) {
+        secondary += ` (${normalizedGuidance})`;
+      }
+      addSuggestion(secondary);
+    }
+  });
+
+  if (!suggestions.length) {
+    showToast("No new follow-up questions identified.");
+    return 0;
+  }
+
+  const timestamp = new Date().toLocaleString();
+  const createdQuestions = suggestions.slice(0, 4).map((prompt) => ({
+    id: `q-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    prompt,
+    owner: "Unassigned",
+    impact: [],
+    status: "open",
+    answer: "",
+    lastUpdated: timestamp,
+    generated: true,
+    rejected: false,
+    rejectionReason: "",
+    convertedToSource: false,
+    convertedSourceId: ""
+  }));
+
+  detail.questions = [...createdQuestions, ...(detail.questions || [])];
+  detail.lastGuidance = normalizedGuidance;
+  detail.selectedQuestionIds = (detail.selectedQuestionIds || []).filter((id) =>
+    detail.questions.some((question) => question.id === id && question.status === "answered" && !question.convertedToSource)
+  );
+
+  persistDetail(module.id, "guided-brief", detail);
+  showToast(`${createdQuestions.length} question${createdQuestions.length === 1 ? "" : "s"} added.`);
+  return createdQuestions.length;
+}
+
+function extractFocusFromLine(text) {
+  if (!text) {
+    return "this point";
+  }
+  const cleaned = String(text).replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return "this point";
+  }
+  const words = cleaned.split(" ");
+  const preview = words.slice(0, 10).join(" ");
+  return words.length > 10 ? `${preview}…` : preview;
+}
+
+function toggleQuestionSelection(detail, module, questionId, checked) {
+  detail.selectedQuestionIds = Array.isArray(detail.selectedQuestionIds) ? detail.selectedQuestionIds : [];
+  const exists = detail.selectedQuestionIds.includes(questionId);
+  if (checked && !exists) {
+    detail.selectedQuestionIds.push(questionId);
+  } else if (!checked && exists) {
+    detail.selectedQuestionIds = detail.selectedQuestionIds.filter((id) => id !== questionId);
+  }
+  persistDetail(module.id, "guided-brief", detail);
+  renderBriefQuestionsView(detail, module);
+}
+
+function convertSelectedQuestions(detail, module) {
+  const selectedIds = (detail.selectedQuestionIds || []).filter((id) => Boolean(id));
+  if (!selectedIds.length) {
+    return;
+  }
+
+  const structureDetail = ensureStepDetail(module, "structure-input");
+  structureDetail.sources = Array.isArray(structureDetail.sources) ? structureDetail.sources : [];
+
+  let createdCount = 0;
+  const timestamp = new Date().toLocaleString();
+
+  selectedIds.forEach((questionId) => {
+    const question = detail.questions.find((item) => item.id === questionId);
+    if (!question || question.status !== "answered" || !question.answer || question.convertedToSource) {
+      return;
+    }
+
+    const sourceId = `source-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    const answerText = question.answer.trim();
+    const source = {
+      id: sourceId,
+      type: "Clarified Answer",
+      title:
+        question.prompt.length > 90 ? `${question.prompt.slice(0, 87)}…` : question.prompt || "Clarifying answer",
+      summary: answerText.length > 140 ? `${answerText.slice(0, 137)}…` : answerText,
+      contentPreview: answerText.slice(0, 220),
+      owner: question.owner || "Unassigned",
+      timestamp,
+      archived: false,
+      raw: answerText,
+      createdFromQuestionId: question.id
+    };
+
+    structureDetail.sources.unshift(source);
+    question.convertedToSource = true;
+    question.convertedSourceId = sourceId;
+    createdCount += 1;
+  });
+
+  detail.selectedQuestionIds = detail.selectedQuestionIds.filter((id) =>
+    detail.questions.some((question) => question.id === id && question.status === "answered" && !question.convertedToSource)
+  );
+
+  if (!createdCount) {
+    showToast("Selected questions must be answered before conversion.");
+    persistDetail(module.id, "guided-brief", detail);
+    return;
+  }
+
+  persistDetail(module.id, "structure-input", structureDetail);
+  persistDetail(module.id, "guided-brief", detail);
+  showToast(`${createdCount} source${createdCount === 1 ? "" : "s"} created from answers.`);
+  renderBriefQuestionsView(detail, module);
+}
+
+function openRejectionDialog(detail, module, index) {
+  const question = detail.questions?.[index];
+  if (!question) {
+    return;
+  }
+
+  const modal = openModal("Reject Question");
+  modal.body.appendChild(
+    createElement("p", {
+      classes: "muted",
+      text: "Flag this probe as irrelevant so future AI suggestions can de-prioritize it."
+    })
+  );
+
+  const form = document.createElement("form");
+  form.className = "modal-form";
+
+  const label = createElement("label");
+  label.appendChild(createElement("span", { text: "Reason (optional)" }));
+  const textarea = document.createElement("textarea");
+  textarea.rows = 3;
+  textarea.placeholder = "Why doesn't this matter for the brief?";
+  label.appendChild(textarea);
+  form.appendChild(label);
+
+  const actions = createElement("div", { classes: "modal-actions" });
+  const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
+  cancelBtn.type = "button";
+  cancelBtn.addEventListener("click", () => modal.close());
+
+  const skipBtn = createElement("button", { classes: "ghost-button", text: "Reject without reason" });
+  skipBtn.type = "button";
+  skipBtn.addEventListener("click", () => {
+    applyQuestionRejection(question, detail, module, "");
+    modal.close();
+  });
+
+  const confirmBtn = createElement("button", { classes: "primary-button", text: "Reject" });
+  confirmBtn.type = "submit";
+
+  actions.appendChild(cancelBtn);
+  actions.appendChild(skipBtn);
+  actions.appendChild(confirmBtn);
+  form.appendChild(actions);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    applyQuestionRejection(question, detail, module, textarea.value.trim());
+    modal.close();
+  });
+
+  modal.body.appendChild(form);
+}
+
+function applyQuestionRejection(question, detail, module, reason) {
+  question.rejected = true;
+  question.rejectionReason = reason || "";
+  question.lastUpdated = new Date().toLocaleString();
+  detail.selectedQuestionIds = (detail.selectedQuestionIds || []).filter((id) => id !== question.id);
+  persistDetail(module.id, "guided-brief", detail);
+  showToast("Question rejected.");
+  renderBriefQuestionsView(detail, module);
+}
+
+function clearQuestionRejection(detail, module, index) {
+  const question = detail.questions?.[index];
+  if (!question) {
+    return;
+  }
+  question.rejected = false;
+  question.rejectionReason = "";
+  question.lastUpdated = new Date().toLocaleString();
+  persistDetail(module.id, "guided-brief", detail);
+  showToast("Rejection cleared.");
+  renderBriefQuestionsView(detail, module);
 }
 
 function openQuestionComposer(detail, module, options = {}) {
   const isEdit = typeof options.index === "number";
   const existing = isEdit ? detail.questions?.[options.index] : null;
   const current = existing
-    ? { ...existing, impact: [...(existing.impact || [])] }
+    ? { ...existing }
     : {
         id: `q-${Date.now()}`,
         prompt: "",
-        owner: "",
+        owner: "Unassigned",
         impact: [],
         status: "open",
         answer: "",
-        lastUpdated: ""
+        lastUpdated: "",
+        generated: false,
+        rejected: false,
+        rejectionReason: "",
+        convertedToSource: false,
+        convertedSourceId: ""
       };
 
   const modal = openModal(isEdit ? "Edit Question" : "New Clarifying Question");
@@ -831,24 +1220,6 @@ function openQuestionComposer(detail, module, options = {}) {
   promptInput.value = current.prompt || "";
   promptLabel.appendChild(promptInput);
   form.appendChild(promptLabel);
-
-  const ownerLabel = createElement("label");
-  ownerLabel.appendChild(createElement("span", { text: "Owner" }));
-  const ownerInput = document.createElement("input");
-  ownerInput.type = "text";
-  ownerInput.placeholder = "Who will close this gap?";
-  ownerInput.value = current.owner || "";
-  ownerLabel.appendChild(ownerInput);
-  form.appendChild(ownerLabel);
-
-  const impactLabel = createElement("label");
-  impactLabel.appendChild(createElement("span", { text: "Impact Areas" }));
-  const impactInput = document.createElement("input");
-  impactInput.type = "text";
-  impactInput.placeholder = "Comma-separated (e.g. Personas, Concept targeting)";
-  impactInput.value = current.impact.join(", " );
-  impactLabel.appendChild(impactInput);
-  form.appendChild(impactLabel);
 
   const actions = createElement("div", { classes: "modal-actions" });
   const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
@@ -869,24 +1240,14 @@ function openQuestionComposer(detail, module, options = {}) {
     }
 
     const payload = {
+      ...current,
       id: current.id || `q-${Date.now()}`,
       prompt: promptValue,
-      owner: ownerInput.value.trim() || "Unassigned",
-      impact: impactInput.value
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean),
-      status: current.status || "open",
-      answer: current.answer || "",
       lastUpdated: new Date().toLocaleString()
     };
 
     detail.questions = detail.questions || [];
     if (isEdit) {
-      const existingAnswer = detail.questions[options.index]?.answer;
-      const existingStatus = detail.questions[options.index]?.status;
-      payload.answer = existingAnswer || "";
-      payload.status = existingStatus || payload.status;
       detail.questions.splice(options.index, 1, payload);
     } else {
       detail.questions.unshift(payload);
@@ -951,6 +1312,14 @@ function openAnswerDialog(detail, module, index, options = {}) {
     question.answer = answerText;
     question.status = checkbox.checked ? "answered" : "open";
     question.lastUpdated = new Date().toLocaleString();
+    question.rejected = false;
+    question.rejectionReason = "";
+    if (question.status === "answered") {
+      question.convertedToSource = false;
+      question.convertedSourceId = "";
+    } else {
+      detail.selectedQuestionIds = (detail.selectedQuestionIds || []).filter((id) => id !== question.id);
+    }
 
     persistDetail(module.id, "guided-brief", detail);
     showToast("Answer recorded.");
@@ -969,6 +1338,11 @@ function reopenQuestion(detail, module, index) {
   }
   question.status = "open";
   question.lastUpdated = new Date().toLocaleString();
+  question.convertedToSource = false;
+  question.convertedSourceId = "";
+  question.rejected = false;
+  question.rejectionReason = "";
+  detail.selectedQuestionIds = (detail.selectedQuestionIds || []).filter((id) => id !== question.id);
   persistDetail(module.id, "guided-brief", detail);
   showToast("Question reopened.");
   renderBriefQuestionsView(detail, module);
@@ -982,6 +1356,9 @@ function removeQuestion(detail, module, index) {
     onConfirm: () => {
       detail.questions = detail.questions || [];
       detail.questions.splice(index, 1);
+      detail.selectedQuestionIds = (detail.selectedQuestionIds || []).filter(
+        (id) => detail.questions.some((question) => question.id === id && question.status === "answered" && !question.convertedToSource)
+      );
       persistDetail(module.id, "guided-brief", detail);
       showToast("Question removed.");
       renderBriefQuestionsView(detail, module);
