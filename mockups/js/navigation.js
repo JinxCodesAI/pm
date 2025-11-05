@@ -23,7 +23,11 @@ export async function initGlobalNav(options = {}) {
     <div class="nav-actions">
       <div class="project-switcher" data-role="project-switcher">
         <button class="nav-button" data-action="toggle-project-menu" type="button">
-          ${activeProject ? `<strong>${activeProject.menuLabel}</strong>` : "Select project"}
+          ${
+            activeProject
+              ? `<strong>${activeProject.name}</strong><span class="muted">${activeProject.client}</span>`
+              : "Select project"
+          }
         </button>
         <div class="project-menu hidden" data-role="project-menu"></div>
       </div>
@@ -44,14 +48,23 @@ function populateProjectMenu(nav, projects, activeProject) {
   }
 
   menu.innerHTML = "";
+  if (!projects.length) {
+    const empty = document.createElement("div");
+    empty.className = "muted";
+    empty.style.fontSize = "0.85rem";
+    empty.textContent = "No projects yet. Create one from the portfolio view.";
+    menu.appendChild(empty);
+    return;
+  }
+
   projects.forEach((project) => {
     const link = document.createElement("a");
     link.href = `project.html?projectId=${encodeURIComponent(project.id)}`;
     link.className = project.id === (activeProject && activeProject.id) ? "active" : "";
     link.innerHTML = `
-      <strong>${project.menuLabel}</strong>
+      <strong>${project.name}</strong>
       <div class="muted" style="font-size:0.75rem; margin-top:0.25rem;">
-        ${formatStatus(project.status)} • ${project.stage}
+        ${project.client} • ${formatStatus(project.status)}
       </div>
     `;
     menu.appendChild(link);

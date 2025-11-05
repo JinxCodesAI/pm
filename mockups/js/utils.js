@@ -1,21 +1,19 @@
 const STATUS_LABELS = {
-  progress: "In Progress",
-  active: "Active",
-  attention: "Needs Attention",
+  "in-progress": "In Progress",
+  "needs-review": "Needs Review",
   complete: "Complete",
-  queued: "Queued",
-  "Active iterations": "Active iterations",
-  "Discovery in progress": "Discovery in progress"
+  "not-started": "Not Started",
+  planning: "Planning",
+  discovery: "Discovery"
 };
 
 const STATUS_CLASSES = {
-  progress: "status-progress",
-  active: "status-active",
-  attention: "status-attention",
+  "in-progress": "status-progress",
+  "needs-review": "status-attention",
   complete: "status-complete",
-  queued: "status-queued",
-  "Active iterations": "status-progress",
-  "Discovery in progress": "status-active"
+  "not-started": "status-queued",
+  planning: "status-progress",
+  discovery: "status-active"
 };
 
 export function formatStatus(status) {

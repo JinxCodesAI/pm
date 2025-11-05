@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Workspace • Creative Co-Pilot</title>
+  <title>Project Workspace - Creative Co-Pilot</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,127 +12,55 @@
 <body>
   <header class="global-nav" data-role="global-nav"></header>
 
-  <main class="workspace-shell">
-    <aside class="workspace-menu">
-      <section class="card project-summary" id="project-summary">
-        <div class="summary-header">
+  <main class="workspace-shell wide">
+    <section class="project-banner card" id="project-banner">
+      <div class="banner-left">
+        <div class="banner-status">
           <span id="project-status-pill" class="pill">—</span>
-          <span class="muted" id="project-code">—</span>
+          <span class="muted" id="project-client">—</span>
         </div>
-        <h1 id="project-name">Loading project…</h1>
+        <h1 id="project-name">Loading project...</h1>
         <p class="muted" id="project-overview">—</p>
-        <div class="summary-metrics" id="project-metrics"></div>
-        <div class="summary-next">
-          <strong>Next Milestone</strong>
-          <span id="project-next">—</span>
-        </div>
-      </section>
-
-      <nav class="card module-menu" id="module-menu">
-        <div class="section-header">
-          <h2>Workflow Tracks</h2>
-        </div>
-        <div class="module-list" id="module-list"></div>
-      </nav>
-
-      <section class="card loops-card">
-        <div class="section-header">
-          <h2>Active Loops</h2>
-        </div>
-        <div id="loop-summary" class="loop-list"></div>
-      </section>
-    </aside>
-
-    <section class="workspace-main">
-      <section class="card module-hero" id="module-hero">
-        <div class="module-heading">
-          <div>
-            <span class="module-sublabel" id="module-system-label">—</span>
-            <h2 id="module-label">Select a track</h2>
-          </div>
-          <span class="pill" id="module-status-pill">—</span>
-        </div>
-        <p class="muted" id="module-summary">Choose a workflow track to see its flow, versions, and loops.</p>
-        <div class="module-meta">
-          <div class="teams" id="module-teams"></div>
-          <div class="module-loops" id="module-loops"></div>
-        </div>
-        <div class="module-headline" id="module-headline"></div>
-      </section>
-
-      <div class="panel-tabs" id="module-tabs">
-        <button class="tab active" data-panel="flow" type="button">Workflow</button>
-        <button class="tab" data-panel="versions" type="button">Versions</button>
-        <button class="tab" data-panel="feedback" type="button">Feedback &amp; AI</button>
       </div>
-
-      <section class="card module-panel" data-panel="flow">
-        <div class="flow-columns">
-          <div class="phase-list" id="phase-list"></div>
-          <div class="phase-detail" id="phase-detail">
-            <p class="muted">Select a phase to see the collaborative loop.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="card module-panel hidden" data-panel="versions">
-        <div class="version-layout">
-          <div class="version-timeline" id="version-timeline"></div>
-          <div class="version-detail" id="version-detail">
-            <p class="muted">Pick a version to inspect its ripple effects.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="card module-panel hidden" data-panel="feedback">
-        <div class="feedback-panels">
-          <div class="module-feedback" id="module-feedback">
-            <h3>Feedback Feed</h3>
-            <p class="muted">Waiting for a module selection.</p>
-          </div>
-          <div class="module-ai" id="module-ai-log">
-            <h3>AI Collaboration Log</h3>
-            <p class="muted">Select a module to review AI interactions.</p>
-          </div>
-        </div>
-      </section>
     </section>
 
-    <aside class="workspace-secondary">
-      <section class="card status-card">
-        <div class="section-header">
-          <h2>Project Status</h2>
+    <div class="workspace-grid">
+      <nav class="flow-panel card">
+        <h2 class="panel-title">Project Flow</h2>
+        <div id="module-switcher" class="module-switcher"></div>
+        <div class="steps-panel">
+          <h3 class="panel-subtitle">Current Stage</h3>
+          <div id="step-list" class="step-list"></div>
         </div>
-        <div id="project-status"></div>
-      </section>
+      </nav>
 
-      <section class="card feedback-feed-card">
-        <div class="section-header">
-          <h2>Feedback Stream</h2>
-        </div>
-        <div id="project-feedback" class="feedback-stream"></div>
-        <button id="simulate-feedback" class="secondary-button" type="button">Simulate Next Feedback</button>
-      </section>
+      <section class="work-panel card">
+        <header class="work-header">
+          <div>
+            <span class="muted" id="module-label">Select a stage</span>
+            <h2 id="step-name">Choose a step</h2>
+          </div>
+          <span id="step-status" class="pill">Status</span>
+        </header>
+        <p class="muted" id="step-description">Pick a step from the left to start working.</p>
 
-      <section class="card loop-spotlight-card">
-        <div class="section-header">
-          <h2>Loop Spotlight</h2>
-        </div>
-        <div id="loop-spotlight" class="muted">Select a loop to explore the ripple.</div>
-      </section>
-    </aside>
-  </main>
+        <section id="step-body" class="step-body muted">
+          Select a step to view detailed tools.
+        </section>
 
-  <template id="ai-message-template">
-    <div class="ai-message">
-      <div class="meta">
-        <span class="role"></span>
-        <span class="time muted"></span>
-      </div>
-      <p class="body"></p>
+        <section class="artifact-summary">
+          <header>
+            <h3>Artifact Snapshot</h3>
+            <span id="artifact-status" class="pill">Status</span>
+          </header>
+          <p id="artifact-summary" class="muted">Select a stage to view the artifact summary.</p>
+        </section>
+
+      </section>
     </div>
-  </template>
+  </main>
 
   <script type="module" src="js/project-workspace.js"></script>
 </body>
 </html>
+

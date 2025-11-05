@@ -1,45 +1,57 @@
-import { getPortfolio, getProjects, getLoopsAcrossPortfolio, buildProjectLink } from "./data-service.js";
+import { getPortfolio, getProjects, addProject } from "./data-service.js";
 import { initGlobalNav } from "./navigation.js";
 import { createElement, clearChildren, formatStatus, statusToClass } from "./utils.js";
 
 const state = {
   projects: [],
-  filter: "all"
+  filter: "all",
+  portfolio: null
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     await initGlobalNav();
     await loadPortfolio();
+    bindProjectFilters();
+    bindNewProjectForm();
   } catch (error) {
     renderError(error);
   }
 });
 
 async function loadPortfolio() {
-  const [portfolio, projects, loops] = await Promise.all([
-    getPortfolio(),
-    getProjects(),
-    getLoopsAcrossPortfolio()
-  ]);
-
+  const [portfolio, projects] = await Promise.all([getPortfolio(), getProjects()]);
+  state.portfolio = portfolio;
   state.projects = projects;
   renderHero(portfolio, projects);
   renderProjectGrid();
-  renderSignals(portfolio.signals);
-  renderLoopWatchlist(loops);
-  bindProjectFilters();
 }
 
 function renderHero(portfolio, projects) {
   const overview = document.getElementById("portfolio-overview");
   if (overview) {
-    overview.textContent = `Tracking ${projects.length} active creative journeys with ${portfolio.metrics?.[0]?.value || "0"} artefacts live.`;
+    overview.textContent = portfolio.summary || `Tracking ${projects.length} active creative journeys.`;
   }
 
   const metricsGrid = document.getElementById("portfolio-metrics");
   clearChildren(metricsGrid);
-  (portfolio.metrics || []).forEach((metric) => {
+
+  const metrics = portfolio.metrics?.length
+    ? portfolio.metrics
+    : [
+        { label: "Projects", value: String(projects.length) },
+        {
+          label: "Modules In Progress",
+          value: String(
+            projects.reduce(
+              (total, project) => total + (project.modules || []).filter((module) => module.status === "in-progress").length,
+              0
+            )
+          )
+        }
+      ];
+
+  metrics.forEach((metric) => {
     const card = createElement("div", { classes: "metric-card" });
     card.appendChild(createElement("span", { classes: "muted", text: metric.label }));
     card.appendChild(createElement("strong", { text: metric.value }));
@@ -59,6 +71,94 @@ function bindProjectFilters() {
   });
 }
 
+function bindNewProjectForm() {
+  const form = document.getElementById("new-project-form");
+  const modal = document.getElementById("project-modal");
+  const openButton = document.getElementById("open-project-modal");
+  const closeButton = document.getElementById("close-project-modal");
+  const cancelButton = document.getElementById("cancel-project");
+  const backdrop = document.getElementById("project-modal-backdrop");
+
+  if (!form || !modal) {
+    return;
+  }
+
+  const hideModal = () => {
+    modal.classList.add("hidden");
+    form.reset();
+    const note = form.querySelector(".form-message");
+    if (note) {
+      note.remove();
+    }
+  };
+
+  const showModal = () => {
+    modal.classList.remove("hidden");
+    const firstField = form.querySelector("input, textarea, select");
+    if (firstField) {
+      firstField.focus();
+    }
+  };
+
+  openButton?.addEventListener("click", showModal);
+  closeButton?.addEventListener("click", hideModal);
+  cancelButton?.addEventListener("click", hideModal);
+  backdrop?.addEventListener("click", hideModal);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+      hideModal();
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const name = formData.get("name");
+    const client = formData.get("client");
+    const summary = formData.get("summary");
+
+    try {
+      const project = await addProject({ name, client, summary });
+      state.projects.push(project);
+      if (state.portfolio) {
+        renderHero(state.portfolio, state.projects);
+      }
+      renderProjectGrid();
+      form.reset();
+      hideModal();
+      showToast(`Project "${project.name}" created.`);
+      await initGlobalNav();
+    } catch (error) {
+      showFormMessage(form, error.message, true);
+    }
+  });
+}
+
+function showFormMessage(form, message, isError) {
+  let note = form.querySelector(".form-message");
+  if (!note) {
+    note = document.createElement("p");
+    note.className = "form-message muted";
+    form.appendChild(note);
+  }
+  note.textContent = message;
+  note.classList.toggle("error", Boolean(isError));
+}
+
+function showToast(message) {
+  let container = document.querySelector(".toast");
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "toast";
+    document.body.appendChild(container);
+  }
+  container.textContent = message;
+  container.classList.add("visible");
+  setTimeout(() => {
+    container.classList.remove("visible");
+  }, 2600);
+}
+
 function renderProjectGrid() {
   const grid = document.getElementById("project-grid");
   clearChildren(grid);
@@ -70,11 +170,11 @@ function renderProjectGrid() {
     return project.status === state.filter;
   });
 
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     grid.appendChild(
       createElement("div", {
         classes: "card",
-        html: "<strong>No projects match this filter.</strong><p class=\"muted\">Try a different filter to see active journeys.</p>"
+        html: `<strong>No projects match this filter.</strong><p class="muted">Try a different filter or start a new project.</p>`
       })
     );
     return;
@@ -94,83 +194,29 @@ function buildProjectCard(project) {
   titleBlock.appendChild(createElement("span", { classes: "muted", text: project.client }));
 
   const statusPill = createElement("span", { classes: "pill" });
-  const projectStatusClass = statusToClass(project.status) || "status-progress";
-  statusPill.classList.add(projectStatusClass);
+  const statusClass = statusToClass(project.status) || "status-progress";
+  statusPill.classList.add(statusClass);
   statusPill.textContent = formatStatus(project.status);
 
   header.appendChild(titleBlock);
   header.appendChild(statusPill);
 
-  const overview = createElement("p", { classes: "muted", text: project.overview });
+  const summary = createElement("p", { classes: "muted", text: project.summary || "No overview provided yet." });
 
-  const meta = createElement("div", { classes: "project-meta" });
-  meta.appendChild(createElement("span", { text: project.stage }));
-  meta.appendChild(createElement("span", { text: project.nextMilestone }));
-
-  const loopsRow = createElement("div", { classes: "project-loops" });
-  (project.loops || []).slice(0, 3).forEach((loop) => {
-    const loopChip = createElement("span", { classes: "loop-chip", text: loop.name });
-    loopsRow.appendChild(loopChip);
+  const moduleList = createElement("div", { classes: "project-modules" });
+  (project.modules || []).forEach((module) => {
+    const chip = createElement("span", { classes: ["module-chip", statusToClass(module.status)], text: module.title });
+    moduleList.appendChild(chip);
   });
 
-  const metricsInline = createElement("div", { classes: "summary-metrics" });
-  (project.metrics || []).slice(0, 2).forEach((metric) => {
-    const span = createElement("span");
-    span.appendChild(createElement("span", { text: metric.label }));
-    span.appendChild(createElement("strong", { text: metric.value }));
-    metricsInline.appendChild(span);
-  });
+  const actions = createElement("div", { classes: "project-actions" });
+  const link = createElement("a", { classes: "ghost-button", text: "Open Workspace" });
+  link.href = `project.html?projectId=${encodeURIComponent(project.id)}`;
+  actions.appendChild(link);
 
-  const footer = createElement("div", { classes: "section-header" });
-  footer.appendChild(metricsInline);
-  const link = buildProjectLink(project);
-  footer.appendChild(link);
-
-  [header, overview, meta, loopsRow, footer].forEach((node) => card.appendChild(node));
+  [header, summary, moduleList, actions].forEach((node) => card.appendChild(node));
 
   return card;
-}
-
-function renderSignals(signals = []) {
-  const list = document.getElementById("portfolio-signals");
-  clearChildren(list);
-
-  if (!signals.length) {
-    list.appendChild(createElement("li", { classes: "muted", text: "No portfolio signals right now." }));
-    return;
-  }
-
-  signals.forEach((signal) => {
-    list.appendChild(createElement("li", { text: signal }));
-  });
-}
-
-function renderLoopWatchlist(loops = []) {
-  const list = document.getElementById("loop-watchlist");
-  clearChildren(list);
-
-  if (!loops.length) {
-    list.appendChild(
-      createElement("div", {
-        classes: "muted",
-        text: "Iteration loops will appear here once projects are in motion."
-      })
-    );
-    return;
-  }
-
-  loops.slice(0, 6).forEach((loop) => {
-    const card = createElement("article", { classes: "loop-card" });
-    card.appendChild(createElement("strong", { text: loop.name }));
-    card.appendChild(
-      createElement("span", {
-        classes: "muted loop-meta",
-        text: `${loop.projectName} • ${loop.lastUpdate || "Recently updated"}`
-      })
-    );
-    card.appendChild(createElement("p", { text: loop.summary }));
-    list.appendChild(card);
-  });
 }
 
 function renderError(error) {

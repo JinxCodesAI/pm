@@ -1,1008 +1,785 @@
 {
-  "lastUpdated": "2025-04-11T13:40:00Z",
   "portfolio": {
-    "owner": "Maya Chen Collective",
+    "summary": "Live overview of every client journey from first intake to production-ready script.",
     "metrics": [
-      { "label": "Active Campaigns", "value": "3" },
-      { "label": "AI Feedback Loops", "value": "7 open" },
-      { "label": "Approvals Due", "value": "4" }
-    ],
-    "signals": [
-      "New legal clause added for Haynes Foods budget shift",
-      "Storyboard automation pilot unlocked for Lumen Fitness project",
-      "Two projects awaiting tone alignment before script polish"
+      {
+        "label": "Active Clients",
+        "value": "2"
+      },
+      {
+        "label": "Projects in Discovery",
+        "value": "1"
+      },
+      {
+        "label": "Concept Boards Delivered",
+        "value": "7"
+      },
+      {
+        "label": "Scripts in Review",
+        "value": "2"
+      }
+    ]
+  },
+  "templates": {
+    "modules": [
+      {
+        "id": "discover-brief",
+        "title": "Discover & Brief",
+        "status": "not-started",
+        "artifact": {
+          "name": "Creative Brief",
+          "status": "not-started",
+          "summary": "Living version-controlled brief ready for client feedback."
+        },
+        "steps": [
+          {
+            "id": "structure-input",
+            "name": "Intake Summary",
+            "description": "Upload call notes, emails, and transcripts so the AI can highlight the throughline.",
+            "aiSupport": "Parses raw sources into a structured summary and flags inconsistencies.",
+            "humanFocus": "Capture every source, tag it, and sanity-check the generated outline.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          },
+          {
+            "id": "guided-brief",
+            "name": "Clarify the Brief",
+            "description": "Work through clarifying probes to close gaps before presenting the strategy.",
+            "aiSupport": "Generates follow-up questions based on what's missing in the summary.",
+            "humanFocus": "Log answers, assign owners, and resolve blockers.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          },
+          {
+            "id": "persona-builder",
+            "name": "Audience Personas",
+            "description": "Grow detailed audience snapshots that evolve with client feedback.",
+            "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
+            "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          },
+          {
+            "id": "research-prompts",
+            "name": "Research Prompt Kit",
+            "description": "Launch ready-to-use prompts for deeper market or audience research.",
+            "aiSupport": "Transforms the current brief into channel-specific prompts.",
+            "humanFocus": "Queue prompts, capture outputs, and log insights.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          }
+        ]
+      },
+      {
+        "id": "concept-studio",
+        "title": "Concept Studio",
+        "status": "not-started",
+        "artifact": {
+          "name": "Concept Boards",
+          "status": "not-started",
+          "summary": "Set of versioned concept boards that storytell the campaign vision."
+        },
+        "steps": [
+          {
+            "id": "concept-explore",
+            "name": "Concept Explorer",
+            "description": "Spin up multiple loglines from the approved brief and shortlist the strongest ideas.",
+            "aiSupport": "Suggests differentiated angles and reframes based on audience goals.",
+            "humanFocus": "Score viability, pick 2-3 concepts, and brief revisions.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          },
+          {
+            "id": "concept-critique",
+            "name": "AI Creative Director",
+            "description": "Stress-test each concept board before it goes in front of the client.",
+            "aiSupport": "Provides constructive critique and anticipates client pushback.",
+            "humanFocus": "Integrate feedback, duplicate versions, and prep talking points.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          }
+        ]
+      },
+      {
+        "id": "script-lab",
+        "title": "Script Workshop",
+        "status": "not-started",
+        "artifact": {
+          "name": "Shooting Script",
+          "status": "not-started",
+          "summary": "Production-ready script annotated with cues for every department."
+        },
+        "steps": [
+          {
+            "id": "scene-outline",
+            "name": "Scene Outline",
+            "description": "Lay out the scene-by-scene roadmap before diving into dialogue.",
+            "aiSupport": "Suggests pacing adjustments and coverage notes.",
+            "humanFocus": "Lock structure and confirm pacing with stakeholders.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          },
+          {
+            "id": "script-draft",
+            "name": "Draft & Iterate",
+            "description": "Draft the script, run targeted rewrites, and capture revision history.",
+            "aiSupport": "Supports punch-ups, tonal rewrites, and production cue insertion.",
+            "humanFocus": "Approve final lines, mark revisions, and log change rationale.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          }
+        ]
+      }
     ]
   },
   "projects": [
     {
-      "id": "haynes-beans",
-      "menuLabel": "Haynes • Beans Spring Campaign",
-      "name": "Haynes Beans Launch",
-      "client": "Haynes Foods",
-      "clientType": "CPG",
-      "status": "Active iterations",
-      "stage": "Concept refinements",
-      "nextMilestone": "Client tone alignment — Apr 15",
-      "overview": "Launching high-fibre baked beans to health-conscious Gen Z and Millennial parents. Budget shift requires cascading updates across brief, concepts, and script.",
-      "accountLead": "Maya Chen",
-      "projectCode": "HF-2025-CPG-02",
-      "metrics": [
-        { "label": "Artifacts Live", "value": "3" },
-        { "label": "Feedback Threads", "value": "4 open" },
-        { "label": "Version Delta", "value": "v1.3 → v1.4" }
-      ],
-      "aiHighlights": [
-        "AI flagged persona mismatch after budget change and queued regeneration.",
-        "Creative Director AI suggested tone pivot away from hard sci-fi in Concept Aurora.",
-        "Script Assistant auto-tagged production notes affected by the new inflation clause."
-      ],
-      "timeline": [
-        {
-          "id": "tl-1",
-          "label": "Discovery Locked",
-          "status": "complete",
-          "summary": "Kickoff transcript structured into strategic nucleus.",
-          "timestamp": "Apr 10 • 09:00",
-          "moduleId": "discover",
-          "phaseId": "capture-intake"
-        },
-        {
-          "id": "tl-2",
-          "label": "Brief Advancing",
-          "status": "active",
-          "summary": "Clarifying questions resolving before v1.4 approval.",
-          "timestamp": "Apr 11 • 10:32",
-          "moduleId": "discover",
-          "phaseId": "brief-strategy"
-        },
-        {
-          "id": "tl-3",
-          "label": "Concept Iteration",
-          "status": "active",
-          "summary": "Aurora tone pivot in review; Hearthlight tracking well.",
-          "timestamp": "Apr 11 • 11:45",
-          "moduleId": "concept",
-          "phaseId": "generate-concepts"
-        },
-        {
-          "id": "tl-4",
-          "label": "Script Drafting",
-          "status": "active",
-          "summary": "Script v0.6 awaiting tone pass and hero beat confirmation.",
-          "timestamp": "Apr 11 • 12:20",
-          "moduleId": "script",
-          "phaseId": "script-draft"
-        },
-        {
-          "id": "tl-5",
-          "label": "Production Prep",
-          "status": "queued",
-          "summary": "Shot list automation unlocks after script hits v1.0.",
-          "timestamp": "Queued",
-          "moduleId": "script",
-          "phaseId": "production-hand-off"
-        },
-        {
-          "id": "concept",
-          "uiLabel": "Concept Story Lab",
-          "systemLabel": "Concept & Ideation Studio",
-          "status": "progress",
-          "accent": "#f472b6",
-          "headline": "Keeping two territories fresh while tone pivots",
-          "summary": "Shortlisted concepts Aurora and Hearthlight are mid-iteration to reflect new budget and tone constraints.",
-          "teams": ["Creative", "AI Director"],
-          "phases": [
-            {
-              "id": "generate-concepts",
-              "title": "Generate & Develop Territories",
-              "status": "progress",
-              "timestamp": "Today • 11:45",
-              "preview": "Two concepts shortlisted; Aurora flagged for tone shift.",
-              "description": "AI produced six loglines mapped to personas. Team shortlisted Aurora and Hearthlight to develop into presentation-ready boards.",
-              "ai": [
-                "Scored each concept against persona motivations.",
-                "Auto-tagged tone and production complexity markers.",
-                "Drafted narrative paragraphs for shortlisted concepts."
-              ],
-              "human": [
-                "Merged and refined Hearthlight narrative.",
-                "Captured live client reactions to each territory.",
-                "Flagged tonal adjustments for Aurora."
-              ],
-              "feedback": [
-                "Triggers critique routine before client share-out.",
-                "Syncs storyboard prompts when narratives update."
-              ],
-              "next": [
-                "Revise Aurora narrative with grounded magic tone.",
-                "Collect internal notes on Hearthlight's resolution beat."
-              ],
-              "flags": [
-                "Aurora still references lunar reveal in key visuals."
-              ],
-              "loopRefs": ["loop-tone", "loop-budget"]
-            },
-            {
-              "id": "ai-critique",
-              "title": "AI Creative Director Critique",
-              "status": "attention",
-              "timestamp": "Today • 12:05",
-              "preview": "Critique ready; needs human response before deck share.",
-              "description": "AI director stress-tests each concept and offers constructive critique to anticipate client questions.",
-              "ai": [
-                "Flagged tone mismatch between Aurora and persona motivations.",
-                "Suggested stronger tie between key visual and key message.",
-                "Recommended budget-friendly alternative to VFX gag."
-              ],
-              "human": [
-                "Assigned follow-ups to copywriter and art director.",
-                "Annotated concept board with critique highlights.",
-                "Prepped response plan for expected client pushback."
-              ],
-              "feedback": [
-                "Updates once new client notes arrive.",
-                "Feeds adjustments into script module when concept locks."
-              ],
-              "next": [
-                "Accept or dismiss critique notes.",
-                "Share revised Aurora concept for tone confirmation."
-              ],
-              "flags": [
-                "Client requested 'grounded magic' instead of sci-fi."
-              ],
-              "loopRefs": ["loop-tone"]
-            },
-            {
-              "id": "concept-iteration",
-              "title": "Version & Present Concepts",
-              "status": "queued",
-              "timestamp": "Queued",
-              "preview": "Awaiting client tone confirmation before branching v3.",
-              "description": "Duplication workflow ready to spin new versions quickly once direction locks.",
-              "ai": [
-                "Prepared iteration template with version tracking.",
-                "Suggested alternate headlines for backyard reveal.",
-                "Ready to auto-refresh storyboard prompts upon approval."
-              ],
-              "human": [
-                "Queued storyboard artist request post-tone approval."
-              ],
-              "feedback": [
-                "Auto-pings script module after iteration decisions."
-              ],
-              "next": [
-                "Lock Aurora tone with client.",
-                "Trigger storyboard prompt regeneration."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-tone"]
-            }
-          ],
-          "versions": [
-            {
-              "id": "aurora-v2",
-              "label": "Aurora v2 • Backyard reveal",
-              "date": "Apr 11 • 11:10",
-              "notes": [
-                "Shifted climax to family backyard hero moment.",
-                "Reduced VFX reliance; added practical effect suggestion."
-              ],
-              "impacts": [
-                "Script hero beat flagged for matching tone.",
-                "Storyboard prompts queued for regeneration."
-              ]
-            },
-            {
-              "id": "hearthlight-v1",
-              "label": "Hearthlight v1 • Neighbourhood potluck",
-              "date": "Apr 11 • 10:05",
-              "notes": [
-                "New concept created after AI tone workshop.",
-                "Highlights bean recipe reveal tied to persona motivations."
-              ],
-              "impacts": [
-                "Research prompts updated with community focus."
-              ]
-            },
-            {
-              "id": "aurora-v1",
-              "label": "Aurora v1 • Lunar misdirect",
-              "date": "Apr 10 • 15:20",
-              "notes": [
-                "Initial concept drafted from brief v1.2.",
-                "Introduced humorous sci-fi misdirect."
-              ],
-              "impacts": [
-                "Script skeleton generated for first draft."
-              ]
-            }
-          ],
-          "aiThread": [
-            {
-              "role": "user",
-              "content": "Generate six concept loglines using updated personas and tone descriptors.",
-              "timestamp": "11:32"
-            },
-            {
-              "role": "assistant",
-              "content": "Produced six territories. Aurora and Hearthlight scored highest against the brief.",
-              "timestamp": "11:33"
-            },
-            {
-              "role": "user",
-              "content": "Expand Concept Aurora into a one-page narrative with three key visual moments.",
-              "timestamp": "11:34"
-            },
-            {
-              "role": "assistant",
-              "content": "Narrative drafted. Tone skews sci-fi—recommend alternate setting to match persona motivations.",
-              "timestamp": "11:35"
-            }
-          ],
-          "feedbackFeed": [
-            {
-              "source": "Client Workshop",
-              "note": "Love the humour, but let's keep the world grounded. No astronaut suits.",
-              "timestamp": "18 minutes ago",
-              "impact": "Aurora iteration required",
-              "touchpoints": ["script"]
-            },
-            {
-              "source": "Strategy Partner",
-              "note": "Persona motivation emphasises family mealtime ease—lean into communal moments.",
-              "timestamp": "45 minutes ago",
-              "impact": "Boosted Hearthlight emphasis",
-              "touchpoints": ["discover"]
-            }
-          ]
-        },
-        {
-          "id": "script",
-          "uiLabel": "Script Blueprint Room",
-          "systemLabel": "Scriptwriter's Room",
-          "status": "progress",
-          "accent": "#38bdf8",
-          "headline": "Preparing v0.7 with backyard hero beat",
-          "summary": "Script assistant keeps formatting industry-standard while production notes adapt to concept shifts.",
-          "teams": ["Copy", "Production"],
-          "phases": [
-            {
-              "id": "script-draft",
-              "title": "Draft Shooting Script",
-              "status": "progress",
-              "timestamp": "Today • 12:20",
-              "preview": "Hero beat rewritten; needs tone pass.",
-              "description": "Converts concept narrative into formatted script with action, dialogue, and production cues.",
-              "ai": [
-                "Generated slug lines and scene skeleton.",
-                "Suggested comedic timing adjustments in scene 2.",
-                "Drafted production note placeholders for VFX/SFX."
-              ],
-              "human": [
-                "Edited dialogue for warmth and pacing.",
-                "Inserted client-preferred tagline on final line.",
-                "Annotated locations needing scout input."
-              ],
-              "feedback": [
-                "Director review triggers once tone pass completes.",
-                "Storyboard sync scheduled after slug line updates."
-              ],
-              "next": [
-                "Run tone pass to ensure humour lands.",
-                "Confirm runtime with producer."
-              ],
-              "flags": [
-                "Scene 2 still references moon dust gag in action line."
-              ],
-              "loopRefs": ["loop-tone", "loop-budget"]
-            },
-            {
-              "id": "feedback-integration",
-              "title": "Integrate Client Feedback",
-              "status": "queued",
-              "timestamp": "Queued",
-              "preview": "Activates after tone alignment sign-off.",
-              "description": "Tracks client notes with AI-assisted rewrites and runtime recalculation.",
-              "ai": [
-                "Prepared change log template for quick approval cycles.",
-                "Queued runtime recalculation after edits.",
-                "Drafted alternative dialogue options by tone."
-              ],
-              "human": [
-                "Awaiting tone alignment before unlocking phase."
-              ],
-              "feedback": [
-                "Notifies concept team when major beats shift."
-              ],
-              "next": [
-                "Collect client notes post tone review.",
-                "Run runtime recalculation after edits."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-tone"]
-            },
-            {
-              "id": "production-hand-off",
-              "title": "Production Notes & Shot List",
-              "status": "queued",
-              "timestamp": "Queued",
-              "preview": "Unlocks when script hits v1.0.",
-              "description": "Generates department-specific notes and shot cues from approved script.",
-              "ai": [
-                "Auto-builds shot list from scene directions.",
-                "Preps VFX, SFX, and camera callouts from comments.",
-                "Generates hand-off summary for producer/director."
-              ],
-              "human": [
-                "Prep production meeting agenda once script final."
-              ],
-              "feedback": [
-                "Alerts storyboard artist when new shots added."
-              ],
-              "next": [
-                "Finalize script to v1.0.",
-                "Schedule production hand-off review."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-budget"]
-            }
-          ],
-          "versions": [
-            {
-              "id": "script-v0-6",
-              "label": "Script v0.6 • Backyard pivot",
-              "date": "Apr 11 • 12:20",
-              "notes": [
-                "Hero beat reimagined to match backyard reveal.",
-                "Added budget-conscious production notes."
-              ],
-              "impacts": [
-                "Storyboard prompts flagged for refresh.",
-                "Sound design cues updated to playful tuba sting."
-              ]
-            },
-            {
-              "id": "script-v0-5",
-              "label": "Script v0.5 • Dialogue polish",
-              "date": "Apr 11 • 11:30",
-              "notes": [
-                "Integrated client dialogue tweaks.",
-                "Shortened scene 2 for pacing."
-              ],
-              "impacts": [
-                "Runtime now 58 seconds.",
-                "Production flagged to scout wider backyard."
-              ]
-            },
-            {
-              "id": "script-v0-4",
-              "label": "Script v0.4 • First draft",
-              "date": "Apr 10 • 18:40",
-              "notes": [
-                "Converted Concept Aurora v1 into script format.",
-                "Added placeholder production cues."
-              ],
-              "impacts": [
-                "Animation pilot flagged for moon dust gag."
-              ]
-            }
-          ],
-          "aiThread": [
-            {
-              "role": "user",
-              "content": "Draft the shooting script from Concept Hearthlight while keeping runtime at 60 seconds.",
-              "timestamp": "12:05"
-            },
-            {
-              "role": "assistant",
-              "content": "Script v0.6 drafted. Highlighted hero beat for tone pass attention.",
-              "timestamp": "12:06"
-            },
-            {
-              "role": "user",
-              "content": "Suggest alternatives to the moon dust gag that fit a backyard setting.",
-              "timestamp": "12:07"
-            },
-            {
-              "role": "assistant",
-              "content": "Proposed inflatable mascot reveal and bean can confetti. Added notes to scene 2.",
-              "timestamp": "12:08"
-            }
-          ],
-          "feedbackFeed": [
-            {
-              "source": "Copy Lead",
-              "note": "Tone reads warm but we still reference moon dust once—swap before client sees it.",
-              "timestamp": "12 minutes ago",
-              "impact": "Scene 2 rewrite required",
-              "touchpoints": ["concept"]
-            },
-            {
-              "source": "Producer",
-              "note": "Need clarity on practical vs VFX for hero reveal before booking studio.",
-              "timestamp": "30 minutes ago",
-              "impact": "Budget loop triggered",
-              "touchpoints": ["discover"]
-            }
-          ]
-        }
-      ],
-      "loops": [
-        {
-          "id": "loop-budget",
-          "name": "Budget Ripple Loop",
-          "status": "active",
-          "summary": "Client capped media spend at $350k, triggering recalibration across brief, personas, and concept tone.",
-          "touchpoints": ["discover", "concept", "script"],
-          "lastUpdate": "18 minutes ago",
-          "actions": [
-            "Reframe objectives and deliverables in brief v1.4.",
-            "Adjust Concept Aurora setting to reduce VFX costs.",
-            "Add production notes for practical effects in script scene 2."
-          ]
-        },
-        {
-          "id": "loop-tone",
-          "name": "Tone Alignment Loop",
-          "status": "attention",
-          "summary": "Client wants humour of Concept Aurora without sci-fi; cascades to script dialogue and storyboard prompts.",
-          "touchpoints": ["concept", "script"],
-          "lastUpdate": "12 minutes ago",
-          "actions": [
-            "Swap moon reveal for family backyard moment.",
-            "Regenerate storyboard prompts with grounded magic tone.",
-            "Update script hero beat to match new visual cues."
-          ]
-        },
-        {
-          "id": "loop-persona",
-          "name": "Persona Sync Loop",
-          "status": "complete",
-          "summary": "Audience age range widened to 28-44; personas and research prompts refreshed.",
-          "touchpoints": ["discover"],
-          "lastUpdate": "Yesterday • 16:40",
-          "actions": [
-            "Regenerated personas with focus on weekday time crunch.",
-            "Linked motivations back into Concept Hearthlight narrative."
-          ]
-        }
-      ],
+      "id": "aurora-spring-launch",
+      "name": "Aurora Spring Launch",
+      "client": "Aurora Lighting",
+      "status": "in-progress",
+      "summary": "Reposition Aurora's smart lighting as the effortless way to refresh any home for spring.",
       "modules": [
         {
-          "id": "discover",
-          "uiLabel": "Discovery & Brief",
-          "systemLabel": "Project Foundation Engine",
-          "status": "attention",
-          "accent": "#6366f1",
-          "headline": "Locking the strategy nucleus after budget shift",
-          "summary": "Clarifying questions and legal updates must resolve before we publish brief v1.4 to downstream teams.",
-          "teams": ["Strategy", "Client Partner"],
-          "phases": [
+          "id": "discover-brief",
+          "title": "Discover & Brief",
+          "status": "in-progress",
+          "artifact": {
+            "name": "Creative Brief",
+            "status": "in-progress",
+            "summary": "v1.1 draft outlines objectives, audience, and positioning for the spring campaign."
+          },
+          "steps": [
             {
-              "id": "capture-intake",
-              "title": "Capture Client Intake",
-              "status": "attention",
-              "timestamp": "Today • 09:45",
-              "preview": "AI summary drafted; legal constraint needs confirmation.",
-              "description": "Kickoff transcript structured into pillars, with budget contradictions surfaced for review.",
-              "ai": [
-                "Clustered notes into goals, blockers, opportunities, risks.",
-                "Flagged conflicting budget statements ($500k vs $350k).",
-                "Generated summary paragraph for brief import."
-              ],
-              "human": [
-                "Reviewed AI summary to match client tone.",
-                "Pinned legal questions for follow-up call.",
-                "Annotated implicit expectations from conversation."
-              ],
-              "feedback": [
-                "Awaiting client confirmation on final spend cap.",
-                "Research partner notified about potential scope shift."
-              ],
-              "next": [
-                "Update summary once budget confirmed.",
-                "Trigger version delta report for concept team."
-              ],
-              "flags": [
-                "Legal disclaimer missing 'naturally sweetened' clause.",
-                "Budget line still references $500k from kickoff."
-              ],
-              "loopRefs": ["loop-budget"]
+              "id": "structure-input",
+              "name": "Intake Summary",
+              "description": "Upload call notes, emails, and transcripts so the AI can highlight the throughline.",
+              "aiSupport": "Parses raw sources into a structured summary and flags inconsistencies.",
+              "humanFocus": "Capture every source, tag it, and sanity-check the generated outline.",
+              "status": "in-progress",
+              "notes": "Waiting on clarification about budget flexibility.",
+              "next": "Add new client feedback from Thursday's call."
             },
             {
-              "id": "brief-strategy",
-              "title": "Clarify Strategy & Mandatories",
-              "status": "progress",
-              "timestamp": "Today • 10:18",
-              "preview": "Two clarifying probes remain before brief lock.",
-              "description": "AI-generated strategic probes keep the brief sharp and highlight downstream impact.",
-              "ai": [
-                "Generated seven clarifying questions, tagged by impact.",
-                "Suggested tone descriptors aligned with client references.",
-                "Auto-updated deliverables with 15s cutdowns."
-              ],
-              "human": [
-                "Answered three probes via client recap email.",
-                "Assigned research question to strategy partner.",
-                "Locked interim brief version for internal review."
-              ],
-              "feedback": [
-                "Client requested clarity on in-store activation scope.",
-                "Persona regeneration queued once tone finalizes."
-              ],
-              "next": [
-                "Attach supporting research links to each section.",
-                "Approve or edit tone descriptors suggested by AI."
-              ],
-              "flags": [
-                "Confirm QR code inclusion for in-store activation.",
-                "Timeline needs legal sign-off after budget change."
-              ],
-              "loopRefs": ["loop-budget"]
+              "id": "guided-brief",
+              "name": "Clarify the Brief",
+              "description": "Work through clarifying probes to close gaps before presenting the strategy.",
+              "aiSupport": "Generates follow-up questions based on what's missing in the summary.",
+              "humanFocus": "Log answers, assign owners, and resolve blockers.",
+              "status": "needs-review",
+              "notes": "Two questions still awaiting client response.",
+              "next": "Email revised probes to Jenna for Monday call."
             },
             {
-              "id": "persona-sync",
-              "title": "Refresh Persona System",
-              "status": "complete",
-              "timestamp": "Yesterday • 16:40",
-              "preview": "Persona set regenerated with widened age range.",
-              "description": "Persona builder re-synced motivations and pain points with the updated audience definition.",
-              "ai": [
-                "Regenerated two primary personas with expanded age range.",
-                "Linked persona pain points to campaign objectives.",
-                "Tagged messaging opportunities with expected impact."
-              ],
-              "human": [
-                "Adjusted persona quotes to match brand voice.",
-                "Added empathy notes from stakeholder interview.",
-                "Archived outdated persona set (v0.9)."
-              ],
-              "feedback": [
-                "Triggers re-check if brief objectives evolve.",
-                "Signals concept team when motivations are updated."
-              ],
-              "next": [
-                "Share persona delta summary with concept team.",
-                "Schedule AI to monitor social chatter for new insights."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-persona"]
+              "id": "persona-builder",
+              "name": "Audience Personas",
+              "description": "Grow detailed audience snapshots that evolve with client feedback.",
+              "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
+              "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+              "status": "in-progress",
+              "notes": "Personas approved but tone needs to reflect more pragmatism.",
+              "next": "Tighten 'Primary Buyer' motivations before sharing with client."
             },
             {
               "id": "research-prompts",
-              "title": "Prime Research Prompts",
-              "status": "queued",
-              "timestamp": "Queued",
-              "preview": "Waiting for brief v1.4 approval before running prompts.",
-              "description": "AI-crafted prompt bank for external tools like Gemini will refresh once strategic questions resolve.",
-              "ai": [
-                "Prepared prompts to validate competitor positioning.",
-                "Outlined thought-starters for consumer sentiment mining.",
-                "Queued watchdog to refresh after brief v1.4 locks."
-              ],
-              "human": [
-                "Deferred execution until budget confirmations arrive.",
-                "Shared draft prompts with research partner for input."
-              ],
-              "feedback": [
-                "Auto-refresh scheduled after objective/target updates."
-              ],
-              "next": [
-                "Confirm research budget allocation post-client call.",
-                "Enable auto-run for social listening once approved."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-budget"]
+              "name": "Research Prompt Kit",
+              "description": "Launch ready-to-use prompts for deeper market or audience research.",
+              "aiSupport": "Transforms the current brief into channel-specific prompts.",
+              "humanFocus": "Queue prompts, capture outputs, and log insights.",
+              "status": "not-started",
+              "notes": "",
+              "next": "Run competitor scan once client approves v1.1 brief."
             }
           ],
-          "versions": [
-            {
-              "id": "v1.3",
-              "label": "v1.3 • Budget recalibration",
-              "date": "Apr 11 • 10:32",
-              "notes": [
-                "Integrated $350k cap and new legal clause.",
-                "Tagged deliverables impacted by spend compression.",
-                "Notified concept module about cost-sensitive beats."
+          "details": {
+            "structure-input": {
+              "lastSync": "2025-04-09 14:32",
+              "sources": [
+                {
+                  "id": "src-aurora-discovery",
+                  "type": "Transcript",
+                  "title": "Initial Discovery Call",
+                  "owner": "Jenna (Client)",
+                  "timestamp": "2025-04-04 10:00",
+                  "summary": "Client wants to move beyond 'smart tech' positioning toward 'seasonal mood'.",
+                  "contentPreview": "Priority is showing ease of switching moods. Need to feature voice presets.",
+                  "archived": false,
+                  "raw": "Priority is showing ease of switching moods. Need to feature voice presets."
+                },
+                {
+                  "id": "src-aurora-email",
+                  "type": "Email",
+                  "title": "Follow-Up Priorities",
+                  "owner": "Liam (Client)",
+                  "timestamp": "2025-04-06 08:47",
+                  "summary": "Clarified KPIs and must-have deliverables for the board.",
+                  "contentPreview": "Primary KPI is 18% uplift in bundle sales vs Q1. TV + paid social assets required.",
+                  "archived": false,
+                  "raw": "Primary KPI is 18% uplift in bundle sales vs Q1. TV + paid social assets required."
+                },
+                {
+                  "id": "src-aurora-research",
+                  "type": "Note",
+                  "title": "Competitive Scan Highlights",
+                  "owner": "You",
+                  "timestamp": "2025-04-08 17:25",
+                  "summary": "Market flooded with tech-first language. No one owns 'seasonal refresh' territory.",
+                  "contentPreview": "Most competitors focus on wattage and integrations. Opportunity: emotional storytelling.",
+                  "archived": false,
+                  "raw": "Most competitors focus on wattage and integrations. Opportunity: emotional storytelling."
+                }
               ],
-              "impacts": [
-                "Persona regeneration triggered.",
-                "Concept Aurora flagged for VFX reduction."
+              "summary": [
+                "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'",
+                "Primary KPI is an 18% sales lift on bundled starter kits within six weeks of launch.",
+                "Budget flexibility exists if the concept proves it can drive bundle sales via paid social."
+              ],
+              "summaryVersions": [
+                {
+                  "id": "summary-aurora-spring-launch-v1",
+                  "createdAt": "2025-04-09 14:32",
+                  "summary": [
+                    "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'",
+                    "Primary KPI is an 18% sales lift on bundled starter kits within six weeks of launch.",
+                    "Budget flexibility exists if the concept proves it can drive bundle sales via paid social."
+                  ],
+                  "sourceIds": [
+                    "src-aurora-discovery",
+                    "src-aurora-email",
+                    "src-aurora-research"
+                  ]
+                }
+              ],
+              "activeVersionId": "summary-aurora-spring-launch-v1",
+              "hideArchived": false
+            },
+            "guided-brief": {
+              "questions": [
+                {
+                  "id": "q-audience-gap",
+                  "prompt": "Which audience segment is most valuable for bundle upsell: new homeowners or renters?",
+                  "status": "open",
+                  "answer": "",
+                  "owner": "You",
+                  "impact": [
+                    "Persona updates",
+                    "Concept targeting"
+                  ],
+                  "lastUpdated": "2025-04-09 11:12"
+                },
+                {
+                  "id": "q-budget-flex",
+                  "prompt": "What budget ceiling should we assume when crafting hero concepts?",
+                  "status": "answered",
+                  "answer": "Client approved $650k with headroom if we prove paid social lift.",
+                  "owner": "Jenna (Client)",
+                  "impact": [
+                    "Media planning"
+                  ],
+                  "lastUpdated": "2025-04-08 09:35"
+                },
+                {
+                  "id": "q-mandatories",
+                  "prompt": "Are there product mandatories beyond showcasing Aurora Glow presets?",
+                  "status": "open",
+                  "answer": "",
+                  "owner": "You",
+                  "impact": [
+                    "Script cues",
+                    "Production planning"
+                  ],
+                  "lastUpdated": "2025-04-08 15:02"
+                }
               ]
             },
-            {
-              "id": "v1.2",
-              "label": "v1.2 • Strategy enriched",
-              "date": "Apr 10 • 17:10",
-              "notes": [
-                "Added tone descriptors from client inspiration deck.",
-                "Clarified KPI baseline for awareness lift.",
-                "Linked key message to persona motivations."
-              ],
-              "impacts": [
-                "Concept prompts updated with new tone language."
+            "persona-builder": {
+              "updated": "2025-04-09 13:15",
+              "personas": [
+                {
+                  "id": "persona-keisha",
+                  "name": "Keisha, The Curated Host",
+                  "age": "34",
+                  "role": "Marketing Manager, new homeowner",
+                  "bio": "Juggles a demanding job and social calendar. Wants effortless ways to make her home feel intentional.",
+                  "goals": [
+                    "Host memorable gatherings with minimal prep.",
+                    "Invest in tech that makes everyday rituals feel special.",
+                    "Showcase smart purchases on social without seeming try-hard."
+                  ],
+                  "painPoints": [
+                    "Feels overwhelmed by overly technical smart home setups.",
+                    "Limited time to tweak lighting for different moods.",
+                    "Skeptical about tech that requires constant app management."
+                  ],
+                  "quote": "If I can set the vibe with one voice command, I'm in."
+                },
+                {
+                  "id": "persona-elliot",
+                  "name": "Elliot, The Practical Upgrader",
+                  "age": "42",
+                  "role": "Finance Director, long-term renter",
+                  "bio": "Wants reliable smart tech that works in rentals without rewiring the space.",
+                  "goals": [
+                    "Modernize the apartment without landlord complications.",
+                    "Save energy without sacrificing comfort.",
+                    "Buy from brands that stand behind their warranties."
+                  ],
+                  "painPoints": [
+                    "No desire to learn complex smart home ecosystems.",
+                    "Frustrated by products that require permanent installation.",
+                    "Needs clear ROI on any premium purchase."
+                  ],
+                  "quote": "Smart lighting should be smarter about real-life apartments."
+                }
               ]
             },
-            {
-              "id": "v1.1",
-              "label": "v1.1 • Structured kickoff",
-              "date": "Apr 10 • 12:24",
-              "notes": [
-                "Transcribed kickoff call into structured summary.",
-                "Flagged conflicting budget statements for follow-up."
+            "research-prompts": {
+              "prompts": [
+                {
+                  "id": "prompt-competitor",
+                  "label": "Competitor Angle Sweep",
+                  "channel": "ChatGPT",
+                  "promptText": "You are a strategist. Review the following brief summary and outline how top smart lighting competitors talk about seasonal refresh. Highlight tone, offer structure, and visual cues.\n\n{{briefSummary}}",
+                  "status": "ready",
+                  "lastRun": "Not run",
+                  "tags": [
+                    "Competitive",
+                    "Messaging"
+                  ]
+                },
+                {
+                  "id": "prompt-persona-voice",
+                  "label": "Persona Voice Stress-Test",
+                  "channel": "Gemini",
+                  "promptText": "Given the Aurora Spring Launch creative brief, propose three narrative hooks that would resonate with pragmatic renters focused on flexible living.",
+                  "status": "ready",
+                  "lastRun": "Not run",
+                  "tags": [
+                    "Persona",
+                    "Narrative"
+                  ]
+                },
+                {
+                  "id": "prompt-media-angles",
+                  "label": "Paid Social Angles",
+                  "channel": "ChatGPT",
+                  "promptText": "From the creative brief objectives, produce five paid social narrative angles that connect effortless mood shifts with measurable outcomes.",
+                  "status": "ready",
+                  "lastRun": "Not run",
+                  "tags": [
+                    "Media",
+                    "Acquisition"
+                  ]
+                }
               ],
-              "impacts": [
-                "Initial persona set generated.",
-                "Research prompts drafted for validation."
+              "watch": [
+                {
+                  "id": "watch-brief-update",
+                  "label": "Brief Change Watcher",
+                  "description": "Alerts Concept Studio when objectives or audience fields are updated."
+                }
               ]
             }
-          ],
-          "aiThread": [
+          }
+        },
+        {
+          "id": "concept-studio",
+          "title": "Concept Studio",
+          "status": "discovery",
+          "artifact": {
+            "name": "Concept Boards",
+            "status": "discovery",
+            "summary": "Concept A is nearing sign-off; Concept B needs new setting exploration."
+          },
+          "steps": [
             {
-              "role": "user",
-              "content": "Summarize the kickoff transcript with an emphasis on budget sensitivities and product claims.",
-              "timestamp": "09:44"
+              "id": "concept-explore",
+              "name": "Concept Explorer",
+              "description": "Spin up multiple loglines from the approved brief and shortlist the strongest ideas.",
+              "aiSupport": "Suggests differentiated angles and reframes based on audience goals.",
+              "humanFocus": "Score viability, pick 2-3 concepts, and brief revisions.",
+              "status": "in-progress",
+              "notes": "Concept shortlist prepared for Monday critique session.",
+              "next": "Run AI critique once the intake summary is updated."
             },
             {
-              "role": "assistant",
-              "content": "Summary ready. Budget references conflict ($500k vs $350k). Flagging for review and updating legal phrasing recommendation.",
-              "timestamp": "09:45"
-            },
-            {
-              "role": "user",
-              "content": "Create a bullet list of open questions I should confirm with the client tomorrow.",
-              "timestamp": "09:46"
-            },
-            {
-              "role": "assistant",
-              "content": "Generated clarifying questions focusing on spend cap, in-store activation, and tone guardrails.",
-              "timestamp": "09:47"
+              "id": "concept-critique",
+              "name": "AI Creative Director",
+              "description": "Stress-test each concept board before it goes in front of the client.",
+              "aiSupport": "Provides constructive critique and anticipates client pushback.",
+              "humanFocus": "Integrate feedback, duplicate versions, and prep talking points.",
+              "status": "not-started",
+              "notes": "",
+              "next": "Queue after Concept Explorer outputs v2."
             }
-          ],
-          "feedbackFeed": [
+          ]
+        },
+        {
+          "id": "script-lab",
+          "title": "Script Workshop",
+          "status": "not-started",
+          "artifact": {
+            "name": "Shooting Script",
+            "status": "not-started",
+            "summary": "Awaiting approved concept to start scripting."
+          },
+          "steps": [
             {
-              "source": "Client Recap Email",
-              "note": "Budget compression confirmed. Need deliverable prioritization before Monday.",
-              "timestamp": "2 hours ago",
-              "impact": "Looped in concept & script modules",
-              "touchpoints": ["concept", "script"]
+              "id": "scene-outline",
+              "name": "Scene Outline",
+              "description": "Lay out the scene-by-scene roadmap before diving into dialogue.",
+              "aiSupport": "Suggests pacing adjustments and coverage notes.",
+              "humanFocus": "Lock structure and confirm pacing with stakeholders.",
+              "status": "not-started",
+              "notes": "",
+              "next": ""
             },
             {
-              "source": "Legal Liaison",
-              "note": "Add 'naturally sweetened' clause to mandatories section.",
-              "timestamp": "1 hour ago",
-              "impact": "Version 1.4 block until clause inserted",
-              "touchpoints": ["discover"]
+              "id": "script-draft",
+              "name": "Draft & Iterate",
+              "description": "Draft the script, run targeted rewrites, and capture revision history.",
+              "aiSupport": "Supports punch-ups, tonal rewrites, and production cue insertion.",
+              "humanFocus": "Approve final lines, mark revisions, and log change rationale.",
+              "status": "not-started",
+              "notes": "",
+              "next": ""
             }
           ]
         }
       ],
-      "feedbackStream": [
+      "notes": [
         {
-          "id": "fb-1",
-          "source": "Client recap call",
-          "summary": "Budget capped at $350k. Prioritize deliverables and adjust tone to feel grounded.",
-          "timestamp": "2 hours ago",
-          "status": "open",
-          "touchpoints": ["discover", "concept", "script"]
+          "id": "note-kickoff",
+          "text": "Kickoff complete. Client aligning on seasonal campaign look & feel next week.",
+          "timestamp": "2025-04-04 17:40"
         },
         {
-          "id": "fb-2",
-          "source": "Internal creative huddle",
-          "summary": "Hearthlight resonance high; keep comedic warmth consistent across script.",
-          "timestamp": "45 minutes ago",
-          "status": "resolved",
-          "touchpoints": ["concept", "script"]
-        },
-        {
-          "id": "fb-3",
-          "source": "Legal update",
-          "summary": "Mandatory phrase 'naturally sweetened' added to packaging references.",
-          "timestamp": "30 minutes ago",
-          "status": "open",
-          "touchpoints": ["discover", "script"]
-        }
-      ],
-      "futureFeedback": [
-        {
-          "id": "fb-next-1",
-          "source": "Client tone review",
-          "summary": "Client to confirm preference for 'family backyard' storyboard. Expect request for alt taglines.",
-          "touchpoints": ["concept", "script"],
-          "status": "predicted"
-        },
-        {
-          "id": "fb-next-2",
-          "source": "Finance checkpoint",
-          "summary": "Possible request to trim one deliverable to protect contingency budget.",
-          "touchpoints": ["discover"],
-          "status": "predicted"
+          "id": "note-budget",
+          "text": "Budget flexibility confirmed up to $650k pending paid social forecast.",
+          "timestamp": "2025-04-08 09:40"
         }
       ]
     },
     {
-      "id": "lumen-fitness",
-      "menuLabel": "Lumen • Connected Fitness Teaser",
-      "name": "Lumen Connected Fitness Launch",
-      "client": "Lumen Labs",
-      "clientType": "Health Tech",
-      "status": "Discovery in progress",
-      "stage": "Brief refinement",
-      "nextMilestone": "Concept sprint kickoff — Apr 16",
-      "overview": "Teasing a connected fitness device aimed at busy professionals. Emphasis on data transparency and playful accountability.",
-      "accountLead": "Jordan Blake",
-      "projectCode": "LL-2025-HT-01",
-      "metrics": [
-        { "label": "Artifacts Live", "value": "1" },
-        { "label": "Feedback Threads", "value": "2 open" },
-        { "label": "Version Delta", "value": "v0.4 → v0.5" }
-      ],
-      "aiHighlights": [
-        "Captured conflicting product claims between hardware and marketing teams.",
-        "Auto-generated clarifying questions around privacy messaging.",
-        "Suggested three concept angles based on competitor differentiators."
-      ],
-      "timeline": [
-        {
-          "id": "lumen-tl-1",
-          "label": "Kickoff Intake",
-          "status": "complete",
-          "summary": "Structured founder interview into opportunity map.",
-          "timestamp": "Apr 09 • 15:10",
-          "moduleId": "discover",
-          "phaseId": "capture-intake"
-        },
-        {
-          "id": "lumen-tl-2",
-          "label": "Brief Drafting",
-          "status": "active",
-          "summary": "Clarifying privacy positioning and hero use case.",
-          "timestamp": "Apr 10 • 12:45",
-          "moduleId": "discover",
-          "phaseId": "brief-strategy"
-        },
-        {
-          "id": "lumen-tl-3",
-          "label": "Concept Sprint",
-          "status": "queued",
-          "summary": "Will begin once brand voice locks.",
-          "timestamp": "Queued",
-          "moduleId": "concept",
-          "phaseId": "generate-concepts"
-        }
-      ],
-      "loops": [
-        {
-          "id": "loop-privacy",
-          "name": "Privacy Alignment Loop",
-          "status": "active",
-          "summary": "Need to align on transparent data messaging before concept sprint.",
-          "touchpoints": ["discover"],
-          "lastUpdate": "1 hour ago",
-          "actions": [
-            "Clarify data retention policy with product lead.",
-            "Prep FAQ insert for concept presentations."
-          ]
-        },
-        {
-          "id": "loop-onboarding",
-          "name": "Onboarding Story Loop",
-          "status": "queued",
-          "summary": "Storyboarding onboarding journey pending hero persona approval.",
-          "touchpoints": ["concept", "script"],
-          "lastUpdate": "Queued",
-          "actions": [
-            "Define hero persona from two candidate profiles.",
-            "Generate sketch prompts once persona locks."
-          ]
-        }
-      ],
+      "id": "northpeak-spring-campaign",
+      "name": "Northpeak Spring Campaign",
+      "client": "Northpeak Gear",
+      "status": "discovery",
+      "summary": "Launch integrated storytelling that positions Northpeak as the trusted gear for ambitious beginners tackling their first peak season.",
       "modules": [
         {
-          "id": "discover",
-          "uiLabel": "Discovery & Brief",
-          "systemLabel": "Project Foundation Engine",
-          "status": "progress",
-          "accent": "#38bdf8",
-          "headline": "Clarifying privacy promise before concept sprint",
-          "summary": "Need crisp positioning for transparency vs accountability before unlocking visual exploration.",
-          "teams": ["Strategy", "Product"],
-          "phases": [
+          "id": "discover-brief",
+          "title": "Discover & Brief",
+          "status": "in-progress",
+          "artifact": {
+            "name": "Creative Brief",
+            "status": "in-progress",
+            "summary": "First draft aligning objectives with outdoor retailer partnerships is in review."
+          },
+          "steps": [
             {
-              "id": "capture-intake",
-              "title": "Digest Founder Interview",
-              "status": "complete",
-              "timestamp": "Apr 09 • 15:10",
-              "preview": "Opportunity map drafted with AI assistance.",
-              "description": "Moved raw transcript into structured summary highlighting product strengths, concerns, and positioning ideas.",
-              "ai": [
-                "Clustered insights into value pillars.",
-                "Flagged conflicting retention messaging.",
-                "Suggested follow-up prompts around privacy."
-              ],
-              "human": [
-                "Annotated emotional moments to reuse in concepts.",
-                "Tagged questions for hardware lead.",
-                "Shared summary with product marketing."
-              ],
-              "feedback": [
-                "Awaiting privacy policy memo.",
-                "Need confirmation on subscription model emphasis."
-              ],
-              "next": [
-                "Integrate policy memo once delivered.",
-                "Draft early brief v0.5 with tone explorations."
-              ],
-              "flags": [
-                "Hardware lead wants to downplay subscription—resolve messaging."
-              ],
-              "loopRefs": ["loop-privacy"]
+              "id": "structure-input",
+              "name": "Intake Summary",
+              "description": "Upload call notes, emails, and transcripts so the AI can highlight the throughline.",
+              "aiSupport": "Parses raw sources into a structured summary and flags inconsistencies.",
+              "humanFocus": "Capture every source, tag it, and sanity-check the generated outline.",
+              "status": "in-progress",
+              "notes": "Waiting on updated sell-through numbers from retail partner.",
+              "next": "Add insights from upcoming REI co-op conversation."
             },
             {
-              "id": "brief-strategy",
-              "title": "Shape the Strategic Brief",
-              "status": "progress",
-              "timestamp": "Apr 10 • 12:45",
-              "preview": "Two strategic questions remain open.",
-              "description": "Working draft of the brief balancing accountability narrative with wellness framing.",
-              "ai": [
-                "Generated clarifying probes around privacy positioning.",
-                "Suggested three tone territories for brand voice.",
-                "Drafted deliverables matrix for launch sequence."
-              ],
-              "human": [
-                "Reviewed probes and assigned to stakeholders.",
-                "Started mapping persona motivations to feature benefits.",
-                "Outlined success metrics with product marketing."
-              ],
-              "feedback": [
-                "Pending answer on data transparency commitments."
-              ],
-              "next": [
-                "Incorporate product team's privacy language.",
-                "Lock tone descriptors before Monday."
-              ],
-              "flags": [
-                "Hero persona not finalized."
-              ],
-              "loopRefs": ["loop-privacy"]
+              "id": "guided-brief",
+              "name": "Clarify the Brief",
+              "description": "Work through clarifying probes to close gaps before presenting the strategy.",
+              "aiSupport": "Generates follow-up questions based on what's missing in the summary.",
+              "humanFocus": "Log answers, assign owners, and resolve blockers.",
+              "status": "in-progress",
+              "notes": "Two probes flagged for sustainability commitments.",
+              "next": "Collect proof points from product team."
             },
             {
-              "id": "persona-planning",
-              "title": "Persona Sketch Workshop",
-              "status": "queued",
-              "timestamp": "Queued",
-              "preview": "Starts after privacy messaging approval.",
-              "description": "Co-creating hero persona with AI prompts and stakeholder input.",
-              "ai": [
-                "Prepared persona template referencing accountability needs.",
-                "Pre-built prompts for fitness vs productivity angles."
-              ],
-              "human": [
-                "Schedule workshop with product marketing.",
-                "Collect anecdotal stories from beta testers."
-              ],
-              "feedback": [
-                "Depends on privacy loop resolution."
-              ],
-              "next": [
-                "Decide between 'Data Geek Dana' and 'Accountability Alex'."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-onboarding"]
+              "id": "persona-builder",
+              "name": "Audience Personas",
+              "description": "Grow detailed audience snapshots that evolve with client feedback.",
+              "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
+              "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+              "status": "not-started",
+              "notes": "",
+              "next": "Draft initial personas once audience priorities lock."
+            },
+            {
+              "id": "research-prompts",
+              "name": "Research Prompt Kit",
+              "description": "Launch ready-to-use prompts for deeper market or audience research.",
+              "aiSupport": "Transforms the current brief into channel-specific prompts.",
+              "humanFocus": "Queue prompts, capture outputs, and log insights.",
+              "status": "not-started",
+              "notes": "",
+              "next": "Run prompts once budget guardrails finalize."
             }
           ],
-          "versions": [
-            {
-              "id": "brief-v0-4",
-              "label": "Brief v0.4 • Accountability emphasis",
-              "date": "Apr 10 • 12:45",
-              "notes": [
-                "Threaded accountability narrative throughout objectives.",
-                "Outlined KPI framework for app engagement."
+          "details": {
+            "structure-input": {
+              "lastSync": "2025-04-08 09:10",
+              "sources": [
+                {
+                  "id": "src-northpeak-kickoff",
+                  "type": "Transcript",
+                  "title": "Kickoff Workshop",
+                  "owner": "Hayley (Client)",
+                  "timestamp": "2025-04-02 11:00",
+                  "summary": "Client wants to celebrate newcomers to hiking without alienating core enthusiasts.",
+                  "contentPreview": "Need episodic storytelling that scales across TikTok and email onboarding.",
+                  "archived": false,
+                  "raw": "Need episodic storytelling that scales across TikTok and email onboarding."
+                },
+                {
+                  "id": "src-northpeak-email",
+                  "type": "Email",
+                  "title": "Retail Partner Goals",
+                  "owner": "Tom (Retail Partnerships)",
+                  "timestamp": "2025-04-03 18:22",
+                  "summary": "Shared co-op expectations and success metrics for sell-in packages.",
+                  "contentPreview": "Target 12% lift in starter bundles, with spotlight on sustainability credentials.",
+                  "archived": false,
+                  "raw": "Target 12% lift in starter bundles, with spotlight on sustainability credentials."
+                },
+                {
+                  "id": "src-northpeak-pulse",
+                  "type": "Note",
+                  "title": "Community Pulse Board",
+                  "owner": "You",
+                  "timestamp": "2025-04-05 14:05",
+                  "summary": "Social listening shows growing interest in approachable alpine content.",
+                  "contentPreview": "Beginners want gear that feels premium but not intimidating.",
+                  "archived": false,
+                  "raw": "Beginners want gear that feels premium but not intimidating."
+                }
               ],
-              "impacts": [
-                "Concept sprint instructions drafted."
+              "summary": [
+                "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof.",
+                "Retail partners want sell-in packages ready by mid-May with measurable bundle incentives.",
+                "Product team can flex biodegradable materials narrative if we supply consumer-friendly language."
+              ],
+              "summaryVersions": [
+                {
+                  "id": "summary-northpeak-spring-campaign-v1",
+                  "createdAt": "2025-04-08 09:10",
+                  "summary": [
+                    "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof.",
+                    "Retail partners want sell-in packages ready by mid-May with measurable bundle incentives.",
+                    "Product team can flex biodegradable materials narrative if we supply consumer-friendly language."
+                  ],
+                  "sourceIds": [
+                    "src-northpeak-kickoff",
+                    "src-northpeak-email",
+                    "src-northpeak-pulse"
+                  ]
+                }
+              ],
+              "activeVersionId": "summary-northpeak-spring-campaign-v1",
+              "hideArchived": false
+            },
+            "guided-brief": {
+              "questions": [
+                {
+                  "id": "q-northpeak-proof",
+                  "prompt": "Which sustainability proof points resonate most with first-time hikers?",
+                  "status": "open",
+                  "answer": "",
+                  "owner": "Lucas (Product)",
+                  "impact": [
+                    "Persona updates",
+                    "Messaging"
+                  ],
+                  "lastUpdated": "2025-04-07 16:40"
+                },
+                {
+                  "id": "q-northpeak-retail",
+                  "prompt": "What training or incentives will retail associates receive alongside the campaign launch?",
+                  "status": "open",
+                  "answer": "",
+                  "owner": "You",
+                  "impact": [
+                    "Activation",
+                    "Enablement"
+                  ],
+                  "lastUpdated": "2025-04-07 09:15"
+                },
+                {
+                  "id": "q-northpeak-budget",
+                  "prompt": "Do we have flexibility to test paid creator partnerships in July?",
+                  "status": "answered",
+                  "answer": "Marketing approved a $40k test provided we deliver two hero stories by late May.",
+                  "owner": "Hayley (Client)",
+                  "impact": [
+                    "Concept Studio"
+                  ],
+                  "lastUpdated": "2025-04-06 10:05"
+                }
               ]
             },
-            {
-              "id": "brief-v0-3",
-              "label": "Brief v0.3 • Insight layering",
-              "date": "Apr 09 • 18:05",
-              "notes": [
-                "Integrated competitive SWOT insights.",
-                "Raised privacy question for product lead."
+            "persona-builder": {
+              "updated": "",
+              "personas": [
+                {
+                  "id": "persona-avery",
+                  "name": "Avery, The First Summit Planner",
+                  "age": "29",
+                  "role": "Project Manager, aspiring hiker",
+                  "bio": "Balances a demanding job with a goal to complete her first 3-day hike this summer.",
+                  "goals": [
+                    "Find reliable starter kits without feeling overwhelmed by tech specs.",
+                    "Learn from relatable creators that make alpine travel feel achievable.",
+                    "Invest in gear that signals quality while staying budget-conscious."
+                  ],
+                  "painPoints": [
+                    "Intimidated by hardcore outdoor content.",
+                    "Unsure which sustainability claims actually matter.",
+                    "Limited time to compare gear bundles."
+                  ],
+                  "quote": "Show me a kit that helps me feel confident and prepared, not like an impostor."
+                },
+                {
+                  "id": "persona-mateo",
+                  "name": "Mateo, The Community Organizer",
+                  "age": "35",
+                  "role": "Local hiking club leader",
+                  "bio": "Plans monthly hikes for new members and wants inclusive gear recs to share.",
+                  "goals": [
+                    "Equip newcomers with dependable starter packs.",
+                    "Highlight brands that invest in environmental stewardship.",
+                    "Build trust with club sponsors by recommending proven gear."
+                  ],
+                  "painPoints": [
+                    "Needs clear bundle pricing he can confidently recommend.",
+                    "Skeptical of greenwashing and vague material claims.",
+                    "Seeks assets he can easily share in newsletters."
+                  ],
+                  "quote": "Give me something that keeps our club safe and proves we picked the right partner."
+                }
+              ]
+            },
+            "research-prompts": {
+              "prompts": [
+                {
+                  "id": "prompt-onboarding",
+                  "label": "Onboarding Story Angles",
+                  "channel": "ChatGPT",
+                  "promptText": "Using the Northpeak brief summary, outline three narrative angles that welcome first-time hikers and show how gear lowers the barrier to entry.",
+                  "status": "ready",
+                  "lastRun": "Not run",
+                  "tags": [
+                    "Narrative",
+                    "Onboarding"
+                  ]
+                },
+                {
+                  "id": "prompt-partner",
+                  "label": "Retail Partner Messaging",
+                  "channel": "Gemini",
+                  "promptText": "Draft talking points retail associates can use to pitch the Northpeak starter bundle, drawing from our sustainability proof points.",
+                  "status": "ready",
+                  "lastRun": "Not run",
+                  "tags": [
+                    "Enablement",
+                    "Retail"
+                  ]
+                }
               ],
-              "impacts": [
-                "Triggered privacy alignment loop."
+              "watch": [
+                {
+                  "id": "watch-sustainability",
+                  "label": "Sustainability Updates",
+                  "description": "Flag Concept Studio when sustainability claims or proof points change."
+                }
               ]
             }
-          ],
-          "aiThread": [
+          }
+        },
+        {
+          "id": "concept-studio",
+          "title": "Concept Studio",
+          "status": "not-started",
+          "artifact": {
+            "name": "Concept Boards",
+            "status": "not-started",
+            "summary": "Waiting on clarified sustainability story before ideation begins."
+          },
+          "steps": [
             {
-              "role": "user",
-              "content": "Turn this founder interview into a structured creative brief outline.",
-              "timestamp": "15:12"
+              "id": "concept-explore",
+              "name": "Concept Explorer",
+              "description": "Spin up multiple loglines from the approved brief and shortlist the strongest ideas.",
+              "aiSupport": "Suggests differentiated angles and reframes based on audience goals.",
+              "humanFocus": "Score viability, pick 2-3 concepts, and brief revisions.",
+              "status": "not-started",
+              "notes": "",
+              "next": "Begin once proof points locked with product."
             },
             {
-              "role": "assistant",
-              "content": "Outline drafted with four opportunity pillars. Privacy messaging flagged for clarification.",
-              "timestamp": "15:13"
-            }
-          ],
-          "feedbackFeed": [
-            {
-              "source": "Product Lead",
-              "note": "We can promise weekly transparency emails, but not real-time dashboards yet.",
-              "timestamp": "1 hour ago",
-              "impact": "Tone needs recalibration",
-              "touchpoints": ["concept"]
+              "id": "concept-critique",
+              "name": "AI Creative Director",
+              "description": "Stress-test each concept board before it goes in front of the client.",
+              "aiSupport": "Provides constructive critique and anticipates client pushback.",
+              "humanFocus": "Integrate feedback, duplicate versions, and prep talking points.",
+              "status": "not-started",
+              "notes": "",
+              "next": ""
             }
           ]
         },
         {
-          "id": "concept",
-          "uiLabel": "Concept Story Lab",
-          "systemLabel": "Concept & Ideation Studio",
-          "status": "queued",
-          "accent": "#a855f7",
-          "headline": "Prepping sprint once persona and privacy lock",
-          "summary": "Concept sprint structure ready; waiting on strategy sign-off to unlock AI ideation.",
-          "teams": ["Creative"],
-          "phases": [
+          "id": "script-lab",
+          "title": "Script Workshop",
+          "status": "not-started",
+          "artifact": {
+            "name": "Shooting Script",
+            "status": "not-started",
+            "summary": "Will activate once a concept board is approved."
+          },
+          "steps": [
             {
-              "id": "generate-concepts",
-              "title": "Sprint Warm-Up Prompts",
-              "status": "queued",
-              "timestamp": "Queued",
-              "preview": "AI prompts prepared, require persona input.",
-              "description": "Prompt bank created for multiple tone explorations once hero persona agreed.",
-              "ai": [
-                "Generated playful vs disciplined tone variations.",
-                "Mapped concept angles to competitor whitespace."
-              ],
-              "human": [
-                "Collect inspiration references from marketing team."
-              ],
-              "feedback": [],
-              "next": [
-                "Finalize hero persona.",
-                "Launch sprint with cross-functional brainstorm."
-              ],
-              "flags": [],
-              "loopRefs": ["loop-onboarding"]
+              "id": "scene-outline",
+              "name": "Scene Outline",
+              "description": "Lay out the scene-by-scene roadmap before diving into dialogue.",
+              "aiSupport": "Suggests pacing adjustments and coverage notes.",
+              "humanFocus": "Lock structure and confirm pacing with stakeholders.",
+              "status": "not-started",
+              "notes": "",
+              "next": ""
+            },
+            {
+              "id": "script-draft",
+              "name": "Draft & Iterate",
+              "description": "Draft the script, run targeted rewrites, and capture revision history.",
+              "aiSupport": "Supports punch-ups, tonal rewrites, and production cue insertion.",
+              "humanFocus": "Approve final lines, mark revisions, and log change rationale.",
+              "status": "not-started",
+              "notes": "",
+              "next": ""
             }
-          ],
-          "versions": [],
-          "aiThread": [],
-          "feedbackFeed": []
+          ]
         }
       ],
-      "feedbackStream": [
+      "notes": [
         {
-          "id": "lumen-fb-1",
-          "source": "Product lead memo",
-          "summary": "Clarify what level of data transparency we can guarantee at launch.",
-          "timestamp": "1 hour ago",
-          "status": "open",
-          "touchpoints": ["discover"]
+          "id": "note-alignment",
+          "text": "Client aligned on welcoming-first approach; awaiting sustainability proof deck.",
+          "timestamp": "2025-04-05 12:20"
         },
         {
-          "id": "lumen-fb-2",
-          "source": "Marketing sync",
-          "summary": "Decide whether hero persona is busy parent or quantified-self power user.",
-          "timestamp": "Yesterday • 19:10",
-          "status": "open",
-          "touchpoints": ["discover", "concept"]
-        }
-      ],
-      "futureFeedback": [
-        {
-          "id": "lumen-next-1",
-          "source": "Legal review",
-          "summary": "Expect requirement to add disclaimer about data sharing with third-party coaches.",
-          "touchpoints": ["discover", "script"],
-          "status": "predicted"
+          "id": "note-retail",
+          "text": "Retail partner wants teaser assets by May 20 to brief store teams.",
+          "timestamp": "2025-04-07 17:05"
         }
       ]
     }
