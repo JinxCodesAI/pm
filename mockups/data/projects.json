@@ -55,9 +55,9 @@
           {
             "id": "persona-builder",
             "name": "Audience Personas",
-            "description": "Grow detailed audience snapshots that evolve with client feedback.",
-            "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
-            "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+            "description": "Spin up AI-drafted personas from the latest brief and fine-tune via guided prompts.",
+            "aiSupport": "Generates persona candidates, applies revisions, and remembers rejected directions as the brief shifts.",
+            "humanFocus": "Coach the AI with clarifications, approve final personas, and only hand-edit when necessary.",
             "status": "not-started",
             "notes": "",
             "next": ""
@@ -181,9 +181,9 @@
             {
               "id": "persona-builder",
               "name": "Audience Personas",
-              "description": "Grow detailed audience snapshots that evolve with client feedback.",
-              "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
-              "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+              "description": "Spin up AI-drafted personas from the latest brief and fine-tune via guided prompts.",
+              "aiSupport": "Generates persona candidates, applies revisions, and remembers rejected directions as the brief shifts.",
+              "humanFocus": "Coach the AI with clarifications, approve final personas, and only hand-edit when necessary.",
               "status": "in-progress",
               "notes": "Personas approved but tone needs to reflect more pragmatism.",
               "next": "Tighten 'Primary Buyer' motivations before sharing with client."
@@ -508,9 +508,9 @@
             {
               "id": "persona-builder",
               "name": "Audience Personas",
-              "description": "Grow detailed audience snapshots that evolve with client feedback.",
-              "aiSupport": "Drafts persona narratives and updates them as the brief shifts.",
-              "humanFocus": "Refine tone, motivations, and friction points for each persona.",
+              "description": "Spin up AI-drafted personas from the latest brief and fine-tune via guided prompts.",
+              "aiSupport": "Generates persona candidates, applies revisions, and remembers rejected directions as the brief shifts.",
+              "humanFocus": "Coach the AI with clarifications, approve final personas, and only hand-edit when necessary.",
               "status": "not-started",
               "notes": "",
               "next": "Draft initial personas once audience priorities lock."
