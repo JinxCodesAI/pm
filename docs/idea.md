@@ -17,6 +17,7 @@ This module transforms the chaos of initial client conversations into a solid, s
 *   **Step 1: Digest and Structure Raw Input**
     *   **How it works:** The user pastes their unstructured meeting notes, emails, or call transcripts into the tool.
     *   **AI Action:** The AI parses and organizes the data into a structured summary.
+    *   **User Guidance:** An optional "Guidance for the AI" field lets the user steer the analysis (e.g., "emphasize budget risks and stakeholder alignment"). The Analyze action incorporates this guidance by prioritizing related insights and labeling the summary with a focus line.
     *   **Iteration & Feedback Loop:** This is the base layer. The user can edit this structured summary at any time. If they have a follow-up call and get new information, they can add it here. The tool will flag downstream artifacts (the brief, personas) that might be affected by the changes, suggesting a review.
 
 *   **Step 2: The Guided Brief Builder**

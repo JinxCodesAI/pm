@@ -30,7 +30,8 @@ const STEP_DETAIL_FACTORIES = {
     lastSync: "",
     summaryVersions: [],
     activeVersionId: null,
-    hideArchived: false
+    hideArchived: false,
+    lastGuidance: ""
   }),
   "guided-brief": () => ({
     questions: [],
@@ -310,7 +311,8 @@ function ensureStepDetail(module, stepId) {
       painPoints: Array.isArray(persona.painPoints) ? persona.painPoints : [],
       quote: persona.quote || "",
       anchors: Array.isArray(persona.anchors) ? persona.anchors : [],
-      generated: Boolean(persona.generated)
+      generated: Boolean(persona.generated),
+      status: persona.status === "approved" ? "approved" : "draft"
     }));
     merged.lastGuidance = merged.lastGuidance || "";
     merged.lastInputs = merged.lastInputs || {};
@@ -479,10 +481,41 @@ function renderIntakeSummaryView(detail, module) {
   }
   body.appendChild(list);
 
-  const analyzeButton = createElement("button", { classes: "primary-button analyze-button", text: "Analyze" });
+  // Use semantic generator classes (backed by CSS aliases)
+  const generator = createElement("div", { classes: "tool-generator" });
+  generator.appendChild(
+    createElement("div", {
+      classes: "tool-generator__intro",
+      text: "Use optional guidance to steer what the analysis emphasizes."
+    })
+  );
+
+  const guidanceLabel = createElement("label", { classes: "tool-generator__guidance" });
+  guidanceLabel.appendChild(createElement("span", { text: "Guidance for the AI (optional)" }));
+  const guidanceInput = document.createElement("textarea");
+  guidanceInput.rows = 2;
+  guidanceInput.placeholder = "e.g. Emphasize budget risks and stakeholder alignment.";
+  guidanceInput.value = detail.lastGuidance || "";
+  guidanceInput.addEventListener("change", () => {
+    detail.lastGuidance = guidanceInput.value;
+    persistDetail(module.id, "structure-input", detail);
+  });
+  guidanceLabel.appendChild(guidanceInput);
+  generator.appendChild(guidanceLabel);
+
+  const generatorActions = createElement("div", { classes: "tool-generator__actions" });
+  const analyzeButton = document.createElement("button");
+  analyzeButton.className = "primary-button";
+  analyzeButton.type = "button";
+  analyzeButton.textContent = "Analyze";
   analyzeButton.disabled = !sources.filter((source) => !source.archived).length;
   analyzeButton.addEventListener("click", () => analyzeSources(detail, module));
-  body.appendChild(analyzeButton);
+  generatorActions.appendChild(analyzeButton);
+  generatorActions.appendChild(
+    createElement("span", { classes: "muted", text: "AI references your guidance plus all active sources." })
+  );
+  generator.appendChild(generatorActions);
+  body.appendChild(generator);
 
   const summaryHeader = createSectionHeading("AI Summary", "Regenerate after each update so downstream steps stay aligned.");
   body.appendChild(summaryHeader);
@@ -771,7 +804,7 @@ function analyzeSources(detail, module, options = {}) {
     return;
   }
 
-  const summary = generateSummaryFromSources(activeSources);
+  const summary = generateSummaryFromSources(activeSources, (detail.lastGuidance || "").trim());
   const version = {
     id: `summary-${Date.now()}`,
     createdAt: timestamp,
@@ -801,7 +834,7 @@ function getActiveSummaryVersion(detail) {
   return detail.summaryVersions[detail.summaryVersions.length - 1] || null;
 }
 
-function generateSummaryFromSources(sources) {
+function generateSummaryFromSources(sources, guidance) {
   const bullets = new Set();
   sources.forEach((source) => {
     const candidates = [];
@@ -828,11 +861,24 @@ function generateSummaryFromSources(sources) {
       .forEach((line) => bullets.add(line));
   });
 
+  const normalizedGuidance = (guidance || "").replace(/\s+/g, " ").trim();
   if (!bullets.size) {
+    if (normalizedGuidance) {
+      return [
+        `Focus: ${normalizedGuidance}`,
+        "No key insights could be extracted from the available sources."
+      ];
+    }
     return ["No key insights could be extracted from the available sources."];
   }
 
-  return Array.from(bullets).slice(0, 6);
+  let list = Array.from(bullets);
+  if (normalizedGuidance) {
+    const prioritized = list.filter((line) => line.toLowerCase().includes(normalizedGuidance.toLowerCase()));
+    const remaining = list.filter((line) => !line.toLowerCase().includes(normalizedGuidance.toLowerCase()));
+    list = [`Focus: ${normalizedGuidance}`, ...prioritized, ...remaining];
+  }
+  return list.slice(0, 6);
 }
 
 function generateSourceMetadata(rawText, file) {
@@ -1647,6 +1693,9 @@ function renderPersonaStudioView(detail, module) {
       if (persona.generated) {
         titleRow.appendChild(createElement("span", { classes: ["tag-chip", "ai-chip"], text: "AI generated" }));
       }
+      const statusPill = createElement("span", { classes: ["pill", persona.status === "approved" ? "status-complete" : "status-muted"] });
+      statusPill.textContent = persona.status === "approved" ? "Approved" : "Draft";
+      titleRow.appendChild(statusPill);
       card.appendChild(titleRow);
 
       const meta = createElement("p", { classes: "persona-meta muted" });
@@ -1686,9 +1735,14 @@ function renderPersonaStudioView(detail, module) {
       }
 
       const actions = createElement("div", { classes: "persona-actions" });
-      actions.appendChild(createActionButton("Edit", () => openPersonaEditor(detail, module, { index })));
-      actions.appendChild(createActionButton("Duplicate", () => duplicatePersona(detail, module, index)));
-      actions.appendChild(createActionButton("Remove", () => removePersona(detail, module, index)));
+      if (persona.status !== "approved") {
+        actions.appendChild(createActionButton("Edit", () => openPersonaEditor(detail, module, { index })));
+        actions.appendChild(createActionButton("Duplicate", () => duplicatePersona(detail, module, index)));
+        actions.appendChild(createActionButton("Remove", () => removePersona(detail, module, index)));
+        actions.appendChild(createActionButton("Approve", () => togglePersonaApproval(detail, module, index, true)));
+      } else {
+        actions.appendChild(createActionButton("Draft", () => togglePersonaApproval(detail, module, index, false)));
+      }
       card.appendChild(actions);
 
       grid.appendChild(card);
@@ -1705,6 +1759,73 @@ function renderPersonaStudioView(detail, module) {
   body.appendChild(footer);
 }
 
+function togglePersonaApproval(detail, module, index, shouldApprove) {
+  const persona = detail.personas?.[index];
+  if (!persona) {
+    return;
+  }
+  persona.status = shouldApprove ? "approved" : "draft";
+  detail.updated = new Date().toLocaleString();
+  persistDetail(module.id, "persona-builder", detail);
+  syncApprovedPersonasSource(module);
+  showToast(shouldApprove ? "Persona approved." : "Persona set to Draft.");
+  renderPersonaStudioView(detail, module);
+}
+
+function syncApprovedPersonasSource(module) {
+  const structureDetail = ensureStepDetail(module, "structure-input");
+  structureDetail.sources = Array.isArray(structureDetail.sources) ? structureDetail.sources : [];
+
+  const personaDetail = ensureStepDetail(module, "persona-builder");
+  const approved = (personaDetail.personas || []).filter((p) => p.status === "approved");
+
+  const sourceId = `${module.id}-approved-personas`;
+  const idx = structureDetail.sources.findIndex((s) => s.id === sourceId);
+
+  if (!approved.length) {
+    if (idx >= 0) {
+      structureDetail.sources.splice(idx, 1);
+      persistDetail(module.id, "structure-input", structureDetail);
+    }
+    return;
+  }
+
+  const timestamp = new Date().toLocaleString();
+  const names = approved.map((p) => p.name).filter(Boolean).join(", ");
+  const summary = names ? `Approved personas: ${names}.` : "Approved personas.";
+  const contentPreview = approved
+    .map((p) => `${p.name}: ${p.role || ""}`.trim())
+    .filter(Boolean)
+    .join(" | ")
+    .slice(0, 220);
+  const raw = approved
+    .map((p) => {
+      const goals = (p.goals || []).join("; ");
+      const pains = (p.painPoints || []).join("; ");
+      return `${p.name}\nRole: ${p.role}\nBio: ${p.bio}\nGoals: ${goals}\nFrustrations: ${pains}\nQuote: ${p.quote}`;
+    })
+    .join("\n\n");
+
+  const payload = {
+    id: sourceId,
+    type: "Approved Personas",
+    title: "Approved Personas",
+    summary: summary.length > 140 ? `${summary.slice(0, 137)}…` : summary,
+    contentPreview,
+    owner: "Strategist",
+    timestamp,
+    archived: false,
+    raw
+  };
+
+  if (idx >= 0) {
+    structureDetail.sources.splice(idx, 1, payload);
+  } else {
+    structureDetail.sources.unshift(payload);
+  }
+  persistDetail(module.id, "structure-input", structureDetail);
+}
+
 function runPersonaGeneration(detail, module, guidance) {
   const output = buildPersonaDrafts(module, guidance);
   if (!output) {
@@ -1718,7 +1839,7 @@ function runPersonaGeneration(detail, module, guidance) {
     return false;
   }
 
-  detail.personas = personas;
+  detail.personas = personas.map((p) => ({ ...p, status: "draft" }));
   detail.updated = new Date().toLocaleString();
   detail.lastGuidance = guidance;
   detail.lastInputs = {
@@ -1939,6 +2060,10 @@ function formatAnchorSnippet(text) {
 function openPersonaEditor(detail, module, options = {}) {
   const isEdit = typeof options.index === "number";
   const existing = isEdit ? detail.personas?.[options.index] : null;
+  if (isEdit && existing?.status === "approved") {
+    showToast("Approved personas cannot be edited. Revert to Draft first.");
+    return;
+  }
   const current = existing
     ? {
         ...existing,
@@ -1957,7 +2082,8 @@ function openPersonaEditor(detail, module, options = {}) {
         painPoints: [],
         quote: "",
         anchors: [],
-        generated: false
+      generated: false,
+      status: "draft"
       };
 
   const modal = openModal(isEdit ? "Edit Persona" : "New Persona");
@@ -2067,11 +2193,12 @@ function openPersonaEditor(detail, module, options = {}) {
     if (isEdit) {
       detail.personas.splice(options.index, 1, payload);
     } else {
-      detail.personas.push(payload);
+      detail.personas.push({ ...payload, status: "draft" });
     }
     detail.updated = new Date().toLocaleString();
 
     persistDetail(module.id, "persona-builder", detail);
+    syncApprovedPersonasSource(module);
     showToast(isEdit ? "Persona updated." : "Persona added.");
     modal.close();
     renderPersonaStudioView(detail, module);
@@ -2089,6 +2216,7 @@ function duplicatePersona(detail, module, index) {
   const copy = clone(persona);
   copy.id = `persona-${Date.now()}`;
   copy.name = `${persona.name} Copy`;
+  copy.status = "draft";
   detail.personas.splice(index + 1, 0, copy);
   detail.updated = new Date().toLocaleString();
   persistDetail(module.id, "persona-builder", detail);
@@ -2103,10 +2231,16 @@ function removePersona(detail, module, index) {
     confirmLabel: "Remove",
     onConfirm: () => {
       detail.personas = detail.personas || [];
+      const persona = detail.personas[index];
+      if (persona?.status === "approved") {
+        showToast("Approved personas cannot be removed. Revert to Draft first.");
+        return;
+      }
       detail.personas.splice(index, 1);
       detail.updated = new Date().toLocaleString();
       persistDetail(module.id, "persona-builder", detail);
       showToast("Persona removed.");
+      syncApprovedPersonasSource(module);
       renderPersonaStudioView(detail, module);
     }
   });

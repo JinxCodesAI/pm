@@ -1595,7 +1595,8 @@ p {
 
 .question-generator,
 .persona-generator,
-.prompt-generator {
+.prompt-generator,
+.tool-generator {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1rem 1.1rem;
@@ -1607,14 +1608,16 @@ p {
 
 .question-generator-copy,
 .persona-generator-copy,
-.prompt-generator-copy {
+.prompt-generator-copy,
+.tool-generator__intro {
   font-weight: 600;
   color: var(--text);
 }
 
 .question-guidance,
 .persona-guidance,
-.prompt-guidance {
+.prompt-guidance,
+.tool-generator__guidance {
   display: grid;
   gap: 0.35rem;
   font-size: 0.85rem;
@@ -1622,7 +1625,8 @@ p {
 
 .question-guidance textarea,
 .persona-guidance textarea,
-.prompt-guidance textarea {
+.prompt-guidance textarea,
+.tool-generator__guidance textarea {
   resize: vertical;
   min-height: 2.8rem;
   border-radius: 10px;
@@ -1633,7 +1637,8 @@ p {
 
 .question-generator-actions,
 .persona-generator-actions,
-.prompt-generator-actions {
+.prompt-generator-actions,
+.tool-generator__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
