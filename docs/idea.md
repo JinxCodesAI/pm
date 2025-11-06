@@ -64,9 +64,9 @@ This module is built for creative exploration and client presentation, with iter
     *   **AI Action:** For each selected logline, the AI helps the user flesh it out into a full "Concept Board."
 
 *   **Step 2: The AI Creative Director (Concept Stress-Test)**
-    *   **How it works:** Before presenting to the client, the freelancer runs each Concept Board through the "Critique This Concept" function.
+    *   **How it works:** Before presenting to the client, the freelancer picks a Concept Board from the dropdown and runs a critique on demand. The panel stays empty until a board is reviewed, so it is always clear which concept the arguments belong to.
     *   **AI Action:** The AI provides a constructive critique for each concept as categorized argument cards (Strength, Risk, Question, Recommendation). Each run captures the guidance used, the board version that was reviewed, and a status so teams can mark critiques as addressed.
-    *   **Designer Workflow:** Strategists can tap any argument card to add it to the board's persistent Concept Critique notes. Those notes live inside the Concept Board editor and View Details modal so talking points stay attached to the asset the client will see.
+    *   **Designer Workflow:** Every argument card now ships with Address, Ignore, and Explain actions. Address routes the talking point into the board's persistent Concept Critique notes, Ignore archives the argument inside the critique, and Explain is staged for a future deep-dive response flow. Saved notes live inside the Concept Board editor and View Details modal so talking points stay attached to the asset the client will see.
 
 *   **Iteration & Feedback Loop:** This is the core of Module 2. The client will give feedback like, "We love Concept A, but can we make it less sci-fi? And we like the humor of Concept B, but not the setting." The freelancer returns to the tool, saves a new version of the existing Concept Board as a "v2," and uses **Refine with AI** with short guidance ("Tighten pacing; swap moon for family backyard") to rapidly generate the next iteration for the client. The tool keeps a clear history of all versions.
 

@@ -2266,6 +2266,11 @@ p {
   gap: 0.6rem;
 }
 
+.concept-critique-results {
+  display: grid;
+  gap: 1rem;
+}
+
 .concept-critique-argument-card {
   border: 1px dashed var(--border);
   border-radius: 14px;
@@ -2275,12 +2280,28 @@ p {
   gap: 0.45rem;
 }
 
+.concept-critique-argument-card.is-addressed {
+  border-style: solid;
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.concept-critique-argument-card.is-ignored {
+  opacity: 0.55;
+}
+
 .concept-critique-argument-type {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
+}
+
+.concept-critique-argument-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .concept-board-critique-section {

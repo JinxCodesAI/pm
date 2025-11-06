@@ -8,7 +8,7 @@ import {
 } from "../helpers.js";
 import { getActiveVersion } from "./boards.js";
 
-export function renderConceptCritique(detail, module, context) {
+export function renderConceptCritique(detail, module, context, preferredSelection) {
   const body = getStepBody();
   if (!body) {
     return;
@@ -43,6 +43,11 @@ export function renderConceptCritique(detail, module, context) {
     option.textContent = `${board.title || "Concept"} • v${activeVersion?.version || 1}`;
     boardSelect.appendChild(option);
   });
+  const selectionToUse =
+    preferredSelection || detail.lastSelection || (boardSelect.options[0]?.value ?? "");
+  if (selectionToUse) {
+    boardSelect.value = selectionToUse;
+  }
   boardSelectLabel.appendChild(boardSelect);
   controlBar.appendChild(boardSelectLabel);
 
@@ -66,11 +71,12 @@ export function renderConceptCritique(detail, module, context) {
     }
     runBtn.disabled = true;
     runBtn.textContent = "Reviewing…";
+    const selectedValue = boardSelect.value;
     window.setTimeout(() => {
-      runConceptCritique(detail, module, context, boardSelect.value, guidanceInput.value.trim());
+      runConceptCritique(detail, module, context, selectedValue, guidanceInput.value.trim());
       runBtn.disabled = false;
       runBtn.textContent = "Run Critique";
-      renderConceptCritique(detail, module, context);
+      renderConceptCritique(detail, module, context, selectedValue);
     }, 120);
   });
   controlBar.appendChild(runBtn);
@@ -81,17 +87,24 @@ export function renderConceptCritique(detail, module, context) {
 
   body.appendChild(controlBar);
 
-  if (!detail.critiques?.length) {
-    body.appendChild(
-      createElement("div", {
-        classes: "empty-card",
-        text: "No critiques logged yet. Run a critique to pressure-test the board before the client sees it."
-      })
-    );
-    return;
-  }
+  const resultsContainer = createElement("div", { classes: "concept-critique-results" });
+  body.appendChild(resultsContainer);
 
-  renderCritiqueList(detail, module, context, conceptDetail);
+  const renderResults = () => {
+    detail.lastSelection = boardSelect.value;
+    renderCritiqueResults({
+      detail,
+      module,
+      context,
+      conceptDetail,
+      container: resultsContainer,
+      selectionValue: boardSelect.value
+    });
+  };
+
+  boardSelect.addEventListener("change", renderResults);
+
+  renderResults();
 }
 
 function runConceptCritique(detail, module, context, selectionValue, guidance) {
@@ -111,6 +124,9 @@ function runConceptCritique(detail, module, context, selectionValue, guidance) {
   const critiqueId = `critique-${Date.now()}`;
   const critique = buildCritique(version, guidance, critiqueId);
   detail.critiques = detail.critiques || [];
+  detail.critiques = detail.critiques.filter(
+    (item) => !(item.boardId === boardId && item.versionId === version.id)
+  );
   detail.critiques.unshift({
     id: critiqueId,
     boardId,
@@ -124,6 +140,7 @@ function runConceptCritique(detail, module, context, selectionValue, guidance) {
   });
   detail.lastGuidance = guidance;
   detail.lastRun = new Date().toLocaleString();
+  detail.lastSelection = selectionValue;
 
   context.persistDetail(module.id, "concept-critique", detail);
   showToast("Critique ready.");
@@ -163,7 +180,8 @@ function buildCritique(version, guidance, critiqueId) {
       argumentList.push({
         id: `${critiqueId || "critique"}-arg-${index}`,
         type,
-        text
+        text,
+        status: "open"
       });
     });
   };
@@ -176,92 +194,164 @@ function buildCritique(version, guidance, critiqueId) {
   return { arguments: argumentList, strengths, risks, questions, recommendations };
 }
 
-function renderCritiqueList(detail, module, context, conceptDetail) {
-  const body = getStepBody();
-  if (!body) {
+function renderCritiqueResults({
+  detail,
+  module,
+  context,
+  conceptDetail,
+  container,
+  selectionValue
+}) {
+  container.innerHTML = "";
+  if (!selectionValue) {
     return;
   }
-  const list = createElement("div", { classes: "concept-critique-list" });
-  detail.critiques.forEach((critique, index) => {
-    const argumentsList = normalizeCritiqueArguments(critique);
-    const board = conceptDetail?.boards?.find((item) => item.id === critique.boardId);
-    const card = createElement("article", { classes: "concept-critique-card" });
-    const header = createElement("div", { classes: "concept-critique-header" });
-    const versionLabel = critique.versionLabel || critique.versionId?.split("-").pop();
-    header.appendChild(
-      createElement("h4", {
-        text: `${critique.boardTitle || "Concept"} • v${versionLabel || "?"}`
-      })
-    );
-    const pill = createElement("span", {
-      classes: ["pill", critique.status === "closed" ? "status-complete" : "status-attention"]
-    });
-    pill.textContent = critique.status === "closed" ? "Addressed" : "Open";
-    header.appendChild(pill);
-    card.appendChild(header);
 
-    card.appendChild(createElement("p", { classes: "muted", text: `Ran ${critique.createdAt}` }));
+  const [boardId, versionId] = selectionValue.split(":");
+  const critique = detail.critiques?.find(
+    (item) => item.boardId === boardId && item.versionId === versionId
+  );
+  if (!critique) {
+    return;
+  }
 
-    if (critique.focus) {
-      card.appendChild(createElement("p", { classes: "muted", text: `Focus: ${critique.focus}` }));
-    }
-
-    if (argumentsList.length) {
-      const argumentContainer = createElement("div", { classes: "concept-critique-argument-list" });
-      const existingNotes = board?.critiqueNotes || [];
-      argumentsList.forEach((argument) => {
-        const typeClass = argument.type.toLowerCase().replace(/\s+/g, "-");
-        const argumentCard = createElement("div", {
-          classes: ["concept-critique-argument-card", `argument-${typeClass}`]
-        });
-        argumentCard.appendChild(
-          createElement("span", {
-            classes: "concept-critique-argument-type",
-            text: argument.type
-          })
-        );
-        argumentCard.appendChild(createElement("p", { text: argument.text }));
-
-        const alreadyAdded = existingNotes.some((note) => note.argumentId === argument.id);
-        const addBtn = document.createElement("button");
-        addBtn.type = "button";
-        addBtn.className = "chip-button";
-        if (alreadyAdded) {
-          addBtn.textContent = "Added to Concept";
-          addBtn.disabled = true;
-          addBtn.classList.add("is-disabled");
-        } else {
-          addBtn.textContent = "Add to Concept Critique";
-          addBtn.addEventListener("click", () => {
-            addArgumentToConceptBoard({
-              module,
-              context,
-              boardId: critique.boardId,
-              critiqueId: critique.id,
-              argument
-            });
-            renderConceptCritique(detail, module, context);
-          });
-        }
-        argumentCard.appendChild(addBtn);
-        argumentContainer.appendChild(argumentCard);
-      });
-      card.appendChild(argumentContainer);
-    }
-
-    const actions = createElement("div", { classes: "concept-critique-actions" });
-    if (critique.status === "open") {
-      actions.appendChild(
-        createActionButton("Mark Addressed", () => markCritiqueAddressed(detail, module, context, index))
-      );
-    } else {
-      actions.appendChild(createElement("span", { classes: "muted", text: "Archived in history." }));
-    }
-    card.appendChild(actions);
-
-    list.appendChild(card);
+  const card = buildCritiqueCard({
+    detail,
+    module,
+    context,
+    conceptDetail,
+    critique
   });
-  body.appendChild(list);
+  container.appendChild(card);
+}
+
+function buildCritiqueCard({ detail, module, context, conceptDetail, critique }) {
+  const argumentsList = normalizeCritiqueArguments(critique);
+  const board = conceptDetail?.boards?.find((item) => item.id === critique.boardId);
+  const card = createElement("article", { classes: "concept-critique-card" });
+  const header = createElement("div", { classes: "concept-critique-header" });
+  const versionLabel = critique.versionLabel || critique.versionId?.split("-").pop();
+  header.appendChild(
+    createElement("h4", {
+      text: `${critique.boardTitle || "Concept"} • v${versionLabel || "?"}`
+    })
+  );
+  const pill = createElement("span", {
+    classes: ["pill", critique.status === "closed" ? "status-complete" : "status-attention"]
+  });
+  pill.textContent = critique.status === "closed" ? "Addressed" : "Open";
+  header.appendChild(pill);
+  card.appendChild(header);
+
+  card.appendChild(createElement("p", { classes: "muted", text: `Ran ${critique.createdAt}` }));
+
+  if (critique.focus) {
+    card.appendChild(createElement("p", { classes: "muted", text: `Focus: ${critique.focus}` }));
+  }
+
+  if (argumentsList.length) {
+    const argumentContainer = createElement("div", { classes: "concept-critique-argument-list" });
+    const existingNotes = board?.critiqueNotes || [];
+    argumentsList.forEach((argument) => {
+      const typeClass = argument.type.toLowerCase().replace(/\s+/g, "-");
+      const argumentCard = createElement("div", {
+        classes: ["concept-critique-argument-card", `argument-${typeClass}`]
+      });
+
+      if (argument.status === "ignored") {
+        argumentCard.classList.add("is-ignored");
+      }
+      if (argument.status === "addressed") {
+        argumentCard.classList.add("is-addressed");
+      }
+
+      argumentCard.appendChild(
+        createElement("span", {
+          classes: "concept-critique-argument-type",
+          text: argument.type
+        })
+      );
+      argumentCard.appendChild(createElement("p", { text: argument.text }));
+
+      const alreadyAdded = existingNotes.some((note) => note.argumentId === argument.id);
+      if (alreadyAdded && argument.status !== "addressed") {
+        argument.status = "addressed";
+      }
+
+      const actions = createElement("div", { classes: "concept-critique-argument-actions" });
+
+      const addressBtn = document.createElement("button");
+      addressBtn.type = "button";
+      addressBtn.className = "chip-button primary-chip";
+      if (argument.status === "addressed" || alreadyAdded) {
+        addressBtn.textContent = "Addressed";
+        addressBtn.disabled = true;
+        addressBtn.classList.add("is-disabled");
+      } else if (argument.status === "ignored") {
+        addressBtn.textContent = "Address";
+        addressBtn.disabled = true;
+        addressBtn.classList.add("is-disabled");
+      } else {
+        addressBtn.textContent = "Address";
+        addressBtn.addEventListener("click", () => {
+          addArgumentToConceptBoard({
+            module,
+            context,
+            boardId: critique.boardId,
+            critiqueId: critique.id,
+            argument
+          });
+          updateArgumentStatus(detail, module, context, critique.id, argument.id, "addressed");
+          renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
+        });
+      }
+      actions.appendChild(addressBtn);
+
+      const ignoreBtn = document.createElement("button");
+      ignoreBtn.type = "button";
+      ignoreBtn.className = "chip-button ghost-chip";
+      if (argument.status === "ignored") {
+        ignoreBtn.textContent = "Ignored";
+        ignoreBtn.disabled = true;
+        ignoreBtn.classList.add("is-disabled");
+      } else {
+        ignoreBtn.textContent = "Ignore";
+        ignoreBtn.addEventListener("click", () => {
+          updateArgumentStatus(detail, module, context, critique.id, argument.id, "ignored");
+          renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
+        });
+      }
+      actions.appendChild(ignoreBtn);
+
+      const explainBtn = document.createElement("button");
+      explainBtn.type = "button";
+      explainBtn.className = "chip-button";
+      explainBtn.textContent = "Explain";
+      explainBtn.addEventListener("click", () => {
+        showToast("Explain prompts coming soon.");
+      });
+      actions.appendChild(explainBtn);
+
+      argumentCard.appendChild(actions);
+      argumentContainer.appendChild(argumentCard);
+    });
+    card.appendChild(argumentContainer);
+  }
+
+  const actions = createElement("div", { classes: "concept-critique-actions" });
+  const critiqueIndex = detail.critiques?.indexOf(critique) ?? -1;
+  if (critique.status === "open" && critiqueIndex >= 0) {
+    actions.appendChild(
+      createActionButton("Mark Addressed", () =>
+        markCritiqueAddressed(detail, module, context, critiqueIndex)
+      )
+    );
+  } else {
+    actions.appendChild(createElement("span", { classes: "muted", text: "Archived in history." }));
+  }
+  card.appendChild(actions);
+
+  return card;
 }
 
 function markCritiqueAddressed(detail, module, context, index) {
@@ -272,7 +362,7 @@ function markCritiqueAddressed(detail, module, context, index) {
   critique.status = "closed";
   context.persistDetail(module.id, "concept-critique", detail);
   showToast("Critique marked as addressed.");
-  renderConceptCritique(detail, module, context);
+  renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
 }
 
 function addArgumentToConceptBoard({ module, context, boardId, critiqueId, argument }) {
@@ -303,7 +393,8 @@ function normalizeCritiqueArguments(critique) {
   if (Array.isArray(critique.arguments) && critique.arguments.length) {
     critique.arguments = critique.arguments.map((argument, index) => ({
       ...argument,
-      id: argument.id || `${critique.id || "critique"}-arg-${index + 1}`
+      id: argument.id || `${critique.id || "critique"}-arg-${index + 1}`,
+      status: argument.status || "open"
     }));
     return critique.arguments;
   }
@@ -322,11 +413,29 @@ function normalizeCritiqueArguments(critique) {
       legacy.push({
         id: `${critique.id || "critique"}-arg-${counter}`,
         type,
-        text
+        text,
+        status: "open"
       });
     });
   });
 
   critique.arguments = legacy;
   return legacy;
+}
+
+function updateArgumentStatus(detail, module, context, critiqueId, argumentId, status) {
+  const critique = detail.critiques?.find((item) => item.id === critiqueId);
+  if (!critique) {
+    return;
+  }
+  const argumentsList = normalizeCritiqueArguments(critique);
+  const argument = argumentsList.find((item) => item.id === argumentId);
+  if (!argument) {
+    return;
+  }
+  argument.status = status;
+  if (status === "addressed") {
+    critique.status = critique.status === "closed" ? "closed" : "open";
+  }
+  context.persistDetail(module.id, "concept-critique", detail);
 }
