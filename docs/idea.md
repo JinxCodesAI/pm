@@ -60,14 +60,14 @@ This module is built for creative exploration and client presentation, with iter
 *   **Industry Practice:** You are correct, a single sentence is never enough. The industry standard is to present **2-3 distinct concepts** to give the client a meaningful choice. The tool's output will be a "Concept Board" for each idea, which is a one-page summary designed to sell the vision.
 
 *   **Step 1: Generate & Refine Concepts**
-    *   **How it works:** Based on the approved brief, the user uses the AI to brainstorm several high-level concepts (the one-liners or "loglines"). The user then selects the top 2-3 strongest ideas to develop further.
+    *   **How it works:** Based on the approved brief, the user uses the AI to brainstorm several high-level concepts (the one-liners or "loglines"). The user then identifies the top 2–3 strongest ideas to promote.
     *   **AI Action:** For each selected logline, the AI helps the user flesh it out into a full "Concept Board."
 
 *   **Step 2: The AI Creative Director (Concept Stress-Test)**
     *   **How it works:** Before presenting to the client, the freelancer runs each Concept Board through the "Critique This Concept" function.
     *   **AI Action:** The AI provides a constructive critique for each concept, allowing the freelancer to strengthen their ideas and anticipate client questions before the meeting.
 
-*   **Iteration & Feedback Loop:** This is the core of Module 2. The client will give feedback like, "We love Concept A, but can we make it less sci-fi? And we like the humor of Concept B, but not the setting." The freelancer returns to the tool, duplicates the existing Concept Boards to create a "v2," and uses the AI with new instructions ("Rewrite this narrative with a 'family backyard' setting instead of the moon") to rapidly generate the next iteration for the client. The tool keeps a clear history of all versions.
+*   **Iteration & Feedback Loop:** This is the core of Module 2. The client will give feedback like, "We love Concept A, but can we make it less sci-fi? And we like the humor of Concept B, but not the setting." The freelancer returns to the tool, saves a new version of the existing Concept Board as a "v2," and uses **Refine with AI** with short guidance ("Tighten pacing; swap moon for family backyard") to rapidly generate the next iteration for the client. The tool keeps a clear history of all versions.
 
 #### **Module 2 Artifact: The Concept Board (One per concept)**
 
@@ -81,6 +81,29 @@ This module is built for creative exploration and client presentation, with iter
         *   *Example:* "- FINAL SHOT: A pristine can of Haynes Baked Beans with the tagline 'Not for Astronauts'."
     *   **Tone & Style:** A few keywords to guide the execution (e.g., "Cinematic, Action-Comedy, Epic, Surprising").
     *   **Link to Strategy:** A single sentence that explicitly ties the concept back to the Creative Brief. (e.g., "This concept communicates the 'High in Fibre' message in a highly memorable and shareable way, perfectly targeting our goal of building brand awareness.")
+
+---
+
+#### Concept Explorer: Actions and States
+
+The Concept Explorer has two levels of fidelity with distinct actions:
+
+*   **Idea Pool (Idea Boards):** rough, disposable drafts.
+    *   **Generate Concepts:** Create multiple ideas guided by optional expert input.
+    *   **Edit Idea:** Change title, logline, notes, tags, scores.
+    *   **Duplicate:** Clone to explore variations.
+    *   **Promote to Concept:** Convert an idea into a Concept Board. The idea is removed from the pool.
+    *   **Archive:** Keep but mark as rejected (teaches the AI what not to do). Restorable.
+    *   **Remove:** Permanently delete without signaling the AI.
+
+*   **Concept Boards:** refined, versioned artifacts for client presentation.
+    *   **Edit Concept:** Full editor (title/logline, narrative, key visuals, tone, strategy). Each save creates a new version.
+    *   **Refine with AI:** Ask AI to expand or adjust using a short guidance input.
+    *   **Mark Client Ready:** Set status for presentation.
+    *   **Move to Ideas:** Demote back to Idea Pool with a brief comment (reason). The board is removed; an idea draft is created.
+    *   **Archive:** Keep but mark as rejected. Restorable.
+    *   **Remove:** Permanently delete board and its versions.
+    *   **Version History:** Browse saved versions.
 
 ---
 

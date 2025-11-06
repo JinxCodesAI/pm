@@ -4,7 +4,8 @@ import {
   createSectionHeading,
   getStepBody,
   renderDefaultStepBody,
-  showToast
+  showToast,
+  openModal
 } from "../helpers.js";
 import { getActiveVersion } from "./boards.js";
 
@@ -214,4 +215,53 @@ function markCritiqueAddressed(detail, module, context, index) {
   context.persistDetail(module.id, "concept-critique", detail);
   showToast("Critique marked as addressed.");
   renderConceptCritique(detail, module, context);
+}
+
+// Lightweight integration point: open critique modal for a specific board
+export function openCritiqueModalForBoard({ detail, module, context, board }) {
+  const activeVersion = getActiveVersion(board);
+  if (!activeVersion) {
+    showToast("Save a version of the board before running a critique.");
+    return;
+  }
+  const modal = openModal(`Critique • ${board.title} v${activeVersion.version}`, { dialogClass: "modal-dialog-wide" });
+  const form = document.createElement("form");
+  form.className = "modal-form";
+  const label = createElement("label");
+  label.appendChild(createElement("span", { text: "Focus" }));
+  const input = document.createElement("textarea");
+  input.rows = 2;
+  input.placeholder = "e.g. Challenge the stakes and flag production risks.";
+  label.appendChild(input);
+  form.appendChild(label);
+  const actions = createElement("div", { classes: "modal-actions" });
+  const cancelBtn = createElement("button", { classes: "secondary-button", text: "Close" });
+  cancelBtn.type = "button";
+  cancelBtn.addEventListener("click", () => modal.close());
+  const runBtn = createElement("button", { classes: "primary-button", text: "Run Critique" });
+  runBtn.type = "submit";
+  actions.appendChild(cancelBtn);
+  actions.appendChild(runBtn);
+  form.appendChild(actions);
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const critDetail = context.ensureStepDetail(module, "concept-critique");
+    const payload = buildCritique(activeVersion, input.value.trim());
+    critDetail.critiques = critDetail.critiques || [];
+    critDetail.critiques.unshift({
+      id: `critique-${Date.now()}`,
+      boardId: board.id,
+      versionId: activeVersion.id,
+      boardTitle: board.title,
+      createdAt: new Date().toLocaleString(),
+      ...payload,
+      status: "open"
+    });
+    critDetail.lastGuidance = input.value.trim();
+    critDetail.lastRun = new Date().toLocaleString();
+    context.persistDetail(module.id, "concept-critique", critDetail);
+    showToast("Critique ready.");
+    modal.close();
+  });
+  modal.body.appendChild(form);
 }

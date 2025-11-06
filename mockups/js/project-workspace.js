@@ -459,10 +459,13 @@ function renderIntakeSummaryView(detail, module) {
 
       const actions = createElement("div", { classes: "source-actions" });
       actions.appendChild(createActionButton("Inspect", () => openSourceEditor(detail, module, { index: sourceIndex, source })));
-      if (source.archived) {
-        actions.appendChild(createActionButton("Restore", () => toggleArchiveSource(detail, module, sourceIndex, false)));
-      } else {
-        actions.appendChild(createActionButton("Archive", () => toggleArchiveSource(detail, module, sourceIndex, true)));
+      const isComputed = source.type === "Approved Personas" || Boolean(source.createdFromQuestionId);
+      if (!isComputed) {
+        if (source.archived) {
+          actions.appendChild(createActionButton("Restore", () => toggleArchiveSource(detail, module, sourceIndex, false)));
+        } else {
+          actions.appendChild(createActionButton("Archive", () => toggleArchiveSource(detail, module, sourceIndex, true)));
+        }
       }
       actions.appendChild(createActionButton("Remove", () => removeSource(detail, module, sourceIndex)));
       card.appendChild(actions);
@@ -771,6 +774,10 @@ function removeSource(detail, module, index) {
 function toggleArchiveSource(detail, module, index, shouldArchive) {
   const source = detail.sources?.[index];
   if (!source) {
+    return;
+  }
+  if (source.type === "Approved Personas" || Boolean(source.createdFromQuestionId)) {
+    showToast("This source is computed and cannot be archived. Update it via Personas or Clarify the Brief.");
     return;
   }
   source.archived = shouldArchive;

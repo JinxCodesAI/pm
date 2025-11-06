@@ -33,7 +33,7 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
 
   const modal = openModal("Develop Concept Board", { dialogClass: "modal-dialog-wide" });
   const form = document.createElement("form");
-  form.className = "modal-form";
+  form.className = "modal-form concept-board-form";
 
   const titleField = createElement("label");
   titleField.appendChild(createElement("span", { text: "Title" }));
@@ -86,13 +86,21 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
   form.appendChild(strategyField);
 
   const assistRow = createElement("div", { classes: "concept-board-assist" });
-  const assistBtn = createElement("button", { classes: "ghost-button", text: "Ask AI to Expand" });
+  const feedbackLabel = createElement("label");
+  feedbackLabel.appendChild(createElement("span", { text: "Feedback for AI (optional)" }));
+  const feedbackInput = document.createElement("textarea");
+  feedbackInput.rows = 2;
+  feedbackInput.placeholder = "e.g. Tighten pacing, emphasize humor, avoid sci-fi.";
+  feedbackLabel.appendChild(feedbackInput);
+  assistRow.appendChild(feedbackLabel);
+  const assistBtn = createElement("button", { classes: "ghost-button", text: "Refine with AI" });
   assistBtn.type = "button";
   assistBtn.addEventListener("click", () => {
     const draft = generateBoardDraft({
       context,
       title: titleInput.value.trim(),
-      logline: loglineInput.value.trim() || board.logline
+      logline: loglineInput.value.trim() || board.logline,
+      guidance: feedbackInput.value.trim()
     });
     if (!draft) {
       showToast("Need a logline and strategic anchors first.");
@@ -102,8 +110,8 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
     visualsInput.value = draft.keyVisuals.join("\n");
     toneInput.value = draft.tone.join(", ");
     strategyInput.value = draft.strategyLink;
-    assistBtn.textContent = "Draft Updated";
-    setTimeout(() => (assistBtn.textContent = "Ask AI to Expand"), 1200);
+    assistBtn.textContent = "Refined";
+    setTimeout(() => (assistBtn.textContent = "Refine with AI"), 1200);
   });
   assistRow.appendChild(assistBtn);
   form.appendChild(assistRow);

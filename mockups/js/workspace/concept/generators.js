@@ -53,7 +53,7 @@ export function formatIdeaTitle(anchor, index) {
   return cleaned ? `${cleaned} ${suffix}` : `Concept ${index + 1}`;
 }
 
-export function generateBoardDraft({ context, title, logline }) {
+export function generateBoardDraft({ context, title, logline, guidance }) {
   const anchors = getBriefAnchors(context);
   if (!logline || !anchors.length) {
     return null;
@@ -61,15 +61,23 @@ export function generateBoardDraft({ context, title, logline }) {
   const personas = getPersonaVoices(context);
   const persona = personas[0] || "Audience";
   const hero = title || logline.split(" ").slice(0, 3).join(" ");
+  const cues = guidance
+    ? guidance
+        .split(/[.!?]/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+    : [];
   return {
-    narrative: `${hero} follows ${persona.toLowerCase()} as they realise ${logline.toLowerCase()}. Each beat proves the promise while keeping the product central to the emotion.`,
+    narrative: `${hero} follows ${persona.toLowerCase()} as they realise ${logline.toLowerCase()}. ${
+      cues.length ? `Focus on: ${cues.join("; ")}. ` : ""
+    }Each beat proves the promise while keeping the product central to the emotion.`,
     keyVisuals: [
       "Establishing shot grounding the world and tension",
       "Unexpected visual twist that dramatises the product benefit",
       "Intimate close-up capturing the emotional resolution",
       "Hero product moment with mnemonic lockup"
     ],
-    tone: ["Cinematic", "Human", "Confident"],
+    tone: ["Cinematic", "Human", "Confident", ...(cues.length ? ["Guided"] : [])],
     strategyLink: anchors[0] || "Linked to primary brief insight"
   };
 }

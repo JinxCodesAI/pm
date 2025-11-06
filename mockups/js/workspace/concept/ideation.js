@@ -6,9 +6,11 @@ import {
   getStepBody,
   openModal,
   renderDefaultStepBody,
-  showToast
+  showToast,
+  openConfirmModal
 } from "../helpers.js";
 import { changeBoardStatus, duplicateBoard, getActiveVersion, openConceptBoardEditor, openVersionHistoryDialog, promoteIdeaToBoard, requestBoardArchive } from "./boards.js";
+import { openCritiqueModalForBoard } from "./critique.js";
 import { composeIdeaSeeds } from "./generators.js";
 import { generateId, getBriefAnchors, getPersonaVoices } from "./support.js";
 
@@ -116,8 +118,8 @@ function renderIdeaList({ body, detail, module, context }) {
   const header = createSectionHeading(
     "Idea Pool",
     detail.ideas?.length
-      ? "Shortlist 2-3 concepts to take forward. Use scores to balance ambition and feasibility."
-      : "Run the generator or add a concept manually to build your shortlist."
+      ? "Promote strong ideas to Concepts. Duplicate and explore variations; archive rejects or remove clutter."
+      : "Run the generator or add a concept manually. Promote promising ideas to Concepts."
   );
   body.appendChild(header);
 
@@ -172,21 +174,21 @@ function renderIdeaList({ body, detail, module, context }) {
     }
 
     const actions = createElement("div", { classes: "concept-idea-actions" });
-    actions.appendChild(createActionButton("Edit", () => openIdeaEditor({ detail, module, context, index })));
-    actions.appendChild(
-      createActionButton(
-        idea.status === "shortlisted" ? "Unshortlist" : "Shortlist",
-        () => toggleIdeaStatus({ detail, module, context, index, status: idea.status === "shortlisted" ? "draft" : "shortlisted" })
-      )
-    );
+    actions.appendChild(createActionButton("View Details", () => openIdeaDetailsModal(idea)));
+    actions.appendChild(createActionButton("Edit Idea", () => openIdeaEditor({ detail, module, context, index })));
+    actions.appendChild(createActionButton("Duplicate", () => duplicateIdea({ detail, module, context, index })));
     if (idea.status === "archived") {
       actions.appendChild(createActionButton("Restore", () => toggleIdeaStatus({ detail, module, context, index, status: "draft" })));
     } else {
       actions.appendChild(createActionButton("Archive", () => toggleIdeaStatus({ detail, module, context, index, status: "archived" })));
     }
+    actions.appendChild(createActionButton("Remove", () => removeIdea({ detail, module, context, index })));
     actions.appendChild(
-      createActionButton("Develop Board", () => {
+      createActionButton("Promote to Concept", () => {
         promoteIdeaToBoard(detail, module, context, idea);
+        // remove the idea from the pool after promotion
+        detail.ideas.splice(index, 1);
+        context.persistDetail(module.id, "concept-explore", detail);
         renderConceptExplorer(detail, module, context);
       })
     );
@@ -201,8 +203,8 @@ function renderBoardList({ body, detail, module, context }) {
   const header = createSectionHeading(
     "Concept Boards",
     detail.boards?.length
-      ? "Version boards as the client reacts. Each save keeps prior iterations accessible."
-      : "Shortlist an idea and promote it to draft a board."
+      ? "Refine and version your best directions. Mark client-ready or move back to Ideas with rationale."
+      : "Promote a promising idea to start developing a Concept Board."
   );
   body.appendChild(header);
 
@@ -238,14 +240,7 @@ function renderBoardList({ body, detail, module, context }) {
 
     if (activeVersion) {
       card.appendChild(createElement("p", { classes: "concept-logline", text: activeVersion.logline || board.logline }));
-      if (activeVersion.narrative) {
-        card.appendChild(createElement("p", { text: activeVersion.narrative }));
-      }
-      if (activeVersion.keyVisuals?.length) {
-        const visuals = createElement("ul", { classes: "concept-visual-list" });
-        activeVersion.keyVisuals.forEach((visual) => visuals.appendChild(createElement("li", { text: visual })));
-        card.appendChild(visuals);
-      }
+      // compact by default; offer details modal
       if (activeVersion.tone?.length) {
         const toneRow = createElement("div", { classes: "concept-tone-row" });
         activeVersion.tone.forEach((word) => toneRow.appendChild(createElement("span", { classes: "tag-chip", text: word })));
@@ -271,11 +266,9 @@ function renderBoardList({ body, detail, module, context }) {
     }
 
     const actions = createElement("div", { classes: "concept-board-actions" });
-    actions.appendChild(createActionButton("Edit", () => openConceptBoardEditor(detail, module, context, { index })));
-    actions.appendChild(createActionButton("Duplicate", () => {
-      duplicateBoard(detail, module, context, index);
-      renderConceptExplorer(detail, module, context);
-    }));
+    actions.appendChild(createActionButton("View Details", () => openBoardDetailsModal(board)));
+    actions.appendChild(createActionButton("Edit Concept", () => openConceptBoardEditor(detail, module, context, { index })));
+    actions.appendChild(createActionButton("Critique", () => openCritiqueModalForBoard({ detail, module, context, board })));
     if (board.status === "archived") {
       actions.appendChild(
         createActionButton("Restore", () => {
@@ -292,6 +285,9 @@ function renderBoardList({ body, detail, module, context }) {
         })
       );
     }
+    actions.appendChild(
+      createActionButton("Move to Ideas", () => moveBoardToIdeas({ detail, module, context, index }))
+    );
     if (board.status !== "client-ready") {
       actions.appendChild(
         createActionButton("Mark Client Ready", () => {
@@ -300,6 +296,7 @@ function renderBoardList({ body, detail, module, context }) {
         })
       );
     }
+    actions.appendChild(createActionButton("Remove", () => removeBoard({ detail, module, context, index })));
     card.appendChild(actions);
 
     list.appendChild(card);
@@ -458,4 +455,151 @@ function openIdeaEditor({ detail, module, context, index }) {
 
   modal.body.appendChild(form);
   titleInput.focus();
+}
+
+function openIdeaDetailsModal(idea) {
+  const modal = openModal(idea.title || "Concept Idea");
+  const content = document.createElement("div");
+  if (idea.logline) {
+    content.appendChild(createElement("p", { classes: "concept-logline", text: idea.logline }));
+  }
+  if (idea.description) {
+    content.appendChild(createElement("p", { text: idea.description }));
+  }
+  if (idea.tags?.length) {
+    const row = createElement("div", { classes: "concept-tag-row" });
+    idea.tags.forEach((tag) => row.appendChild(createElement("span", { classes: "tag-chip", text: tag })));
+    content.appendChild(row);
+  }
+  if (idea.score) {
+    const scoreRow = createElement("div", { classes: "concept-score-row" });
+    [["Boldness", idea.score.boldness],["Clarity", idea.score.clarity],["Strategic Fit", idea.score.fit]].forEach(([label, value]) => {
+      const badge = createElement("span", { classes: "concept-score" });
+      badge.appendChild(createElement("strong", { text: label }));
+      badge.appendChild(createElement("span", { text: value != null ? `${value}/5` : "—" }));
+      scoreRow.appendChild(badge);
+    });
+    content.appendChild(scoreRow);
+  }
+  modal.body.appendChild(content);
+}
+
+function openBoardDetailsModal(board) {
+  const activeVersion = getActiveVersion(board);
+  const modal = openModal(board.title || "Concept Board", { dialogClass: "modal-dialog-wide" });
+  const content = document.createElement("div");
+  const logline = activeVersion?.logline || board.logline;
+  if (logline) {
+    content.appendChild(createElement("p", { classes: "concept-logline", text: logline }));
+  }
+  if (activeVersion?.narrative) {
+    content.appendChild(createElement("p", { text: activeVersion.narrative }));
+  }
+  if (activeVersion?.keyVisuals?.length) {
+    const visuals = createElement("ul", { classes: "concept-visual-list" });
+    activeVersion.keyVisuals.forEach((v) => visuals.appendChild(createElement("li", { text: v })));
+    content.appendChild(visuals);
+  }
+  if (activeVersion?.tone?.length) {
+    const toneRow = createElement("div", { classes: "concept-tone-row" });
+    activeVersion.tone.forEach((word) => toneRow.appendChild(createElement("span", { classes: "tag-chip", text: word })));
+    content.appendChild(toneRow);
+  }
+  if (activeVersion?.strategyLink) {
+    content.appendChild(createElement("p", { classes: "concept-strategy-link", text: `Link to strategy: ${activeVersion.strategyLink}` }));
+  }
+  modal.body.appendChild(content);
+}
+
+// Idea utilities
+function duplicateIdea({ detail, module, context, index }) {
+  const idea = detail.ideas?.[index];
+  if (!idea) {
+    return;
+  }
+  const copy = clone(idea);
+  copy.id = generateId("idea");
+  copy.title = `${idea.title || "Concept"} Copy`;
+  detail.ideas.splice(index + 1, 0, copy);
+  context.persistDetail(module.id, "concept-explore", detail);
+  showToast("Idea duplicated.");
+}
+
+function removeIdea({ detail, module, context, index }) {
+  const idea = detail.ideas?.[index];
+  if (!idea) {
+    return;
+  }
+  openConfirmModal({
+    title: "Remove idea?",
+    message: "This will permanently delete the idea. It won't inform the AI like Archive does.",
+    confirmLabel: "Remove",
+    onConfirm: () => {
+      detail.ideas.splice(index, 1);
+      context.persistDetail(module.id, "concept-explore", detail);
+      renderConceptExplorer(detail, module, context);
+    }
+  });
+}
+
+function moveBoardToIdeas({ detail, module, context, index }) {
+  const board = detail.boards?.[index];
+  if (!board) {
+    return;
+  }
+  const modal = openModal("Move to Ideas");
+  const form = document.createElement("form");
+  form.className = "modal-form";
+  const label = createElement("label");
+  label.appendChild(createElement("span", { text: "Reason / comment (optional)" }));
+  const input = document.createElement("textarea");
+  input.rows = 3;
+  input.placeholder = "Why is this moving back to ideas?";
+  label.appendChild(input);
+  form.appendChild(label);
+  const actions = createElement("div", { classes: "modal-actions" });
+  const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
+  cancelBtn.type = "button";
+  cancelBtn.addEventListener("click", () => modal.close());
+  const confirmBtn = createElement("button", { classes: "primary-button", text: "Move" });
+  confirmBtn.type = "submit";
+  actions.appendChild(cancelBtn);
+  actions.appendChild(confirmBtn);
+  form.appendChild(actions);
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const activeVersion = getActiveVersion(board) || {};
+    detail.ideas = Array.isArray(detail.ideas) ? detail.ideas : [];
+    detail.ideas.unshift({
+      id: generateId("idea"),
+      title: board.title || "Concept",
+      logline: activeVersion.logline || board.logline || "",
+      description: activeVersion.narrative || "",
+      status: "draft",
+      tags: ["From Concept"],
+      demoteReason: input.value.trim()
+    });
+    detail.boards.splice(index, 1);
+    context.persistDetail(module.id, "concept-explore", detail);
+    modal.close();
+    renderConceptExplorer(detail, module, context);
+  });
+  modal.body.appendChild(form);
+}
+
+function removeBoard({ detail, module, context, index }) {
+  const board = detail.boards?.[index];
+  if (!board) {
+    return;
+  }
+  openConfirmModal({
+    title: "Remove concept board?",
+    message: "This will permanently delete the board and its versions.",
+    confirmLabel: "Remove",
+    onConfirm: () => {
+      detail.boards.splice(index, 1);
+      context.persistDetail(module.id, "concept-explore", detail);
+      renderConceptExplorer(detail, module, context);
+    }
+  });
 }
