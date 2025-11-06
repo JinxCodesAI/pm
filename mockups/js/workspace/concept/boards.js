@@ -18,7 +18,8 @@ export function promoteIdeaToBoard(detail, module, context, idea) {
     logline: idea.logline,
     status: "draft",
     versions: [],
-    activeVersionId: ""
+    activeVersionId: "",
+    critiqueNotes: []
   };
   detail.boards.unshift(draft);
   context.persistDetail(module.id, "concept-explore", detail);
@@ -115,6 +116,12 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
   });
   assistRow.appendChild(assistBtn);
   form.appendChild(assistRow);
+
+  form.appendChild(
+    createCritiqueNotesSection(board.critiqueNotes, {
+      emptyMessage: "No critique arguments added yet. Capture them in AI Creative Director."
+    })
+  );
 
   const actions = createElement("div", { classes: "modal-actions" });
   const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
@@ -243,4 +250,41 @@ export function getActiveVersion(board) {
     return null;
   }
   return board.versions.find((version) => version.id === board.activeVersionId) || board.versions[0];
+}
+
+export function createCritiqueNotesSection(notes, { emptyMessage } = {}) {
+  const section = createElement("section", { classes: "concept-board-critique-section" });
+  section.appendChild(createElement("h4", { text: "Concept Critique" }));
+
+  if (!notes?.length) {
+    section.appendChild(
+      createElement("p", {
+        classes: "muted",
+        text: emptyMessage || "No critique arguments added yet. Capture them in AI Creative Director."
+      })
+    );
+    return section;
+  }
+
+  const list = createElement("ul", { classes: "concept-board-critique-notes" });
+  notes.forEach((note) => {
+    const typeClass = (note.type || "note").toLowerCase().replace(/\s+/g, "-");
+    const item = createElement("li", {
+      classes: ["concept-board-critique-note", `argument-${typeClass}`]
+    });
+    item.appendChild(
+      createElement("span", {
+        classes: "concept-board-critique-note-type",
+        text: note.type || "Note"
+      })
+    );
+    item.appendChild(createElement("p", { text: note.text || "" }));
+    if (note.createdAt) {
+      item.appendChild(createElement("span", { classes: "muted", text: `Added ${note.createdAt}` }));
+    }
+    list.appendChild(item);
+  });
+
+  section.appendChild(list);
+  return section;
 }

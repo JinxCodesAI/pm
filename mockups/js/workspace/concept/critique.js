@@ -4,8 +4,7 @@ import {
   createSectionHeading,
   getStepBody,
   renderDefaultStepBody,
-  showToast,
-  openModal
+  showToast
 } from "../helpers.js";
 import { getActiveVersion } from "./boards.js";
 
@@ -92,7 +91,7 @@ export function renderConceptCritique(detail, module, context) {
     return;
   }
 
-  renderCritiqueList(detail, module, context);
+  renderCritiqueList(detail, module, context, conceptDetail);
 }
 
 function runConceptCritique(detail, module, context, selectionValue, guidance) {
@@ -109,14 +108,17 @@ function runConceptCritique(detail, module, context, selectionValue, guidance) {
     return;
   }
 
-  const critique = buildCritique(version, guidance);
+  const critiqueId = `critique-${Date.now()}`;
+  const critique = buildCritique(version, guidance, critiqueId);
   detail.critiques = detail.critiques || [];
   detail.critiques.unshift({
-    id: `critique-${Date.now()}`,
+    id: critiqueId,
     boardId,
     versionId: version.id,
+    versionLabel: version.version,
     boardTitle: board.title,
     createdAt: new Date().toLocaleString(),
+    focus: guidance,
     ...critique,
     status: "open"
   });
@@ -127,7 +129,7 @@ function runConceptCritique(detail, module, context, selectionValue, guidance) {
   showToast("Critique ready.");
 }
 
-function buildCritique(version, guidance) {
+function buildCritique(version, guidance, critiqueId) {
   const guidanceCue = guidance ? guidance.toLowerCase() : "";
   const strengths = [
     version.narrative
@@ -153,19 +155,44 @@ function buildCritique(version, guidance) {
     "Draft a social-native cut for the versioned board before the client asks."
   ];
 
-  return { strengths, risks, questions, recommendations };
+  const arguments = [];
+  let index = 0;
+  const register = (type, items) => {
+    items.forEach((text) => {
+      index += 1;
+      arguments.push({
+        id: `${critiqueId || "critique"}-arg-${index}`,
+        type,
+        text
+      });
+    });
+  };
+
+  register("Strength", strengths);
+  register("Risk", risks);
+  register("Question", questions);
+  register("Recommendation", recommendations);
+
+  return { arguments, strengths, risks, questions, recommendations };
 }
 
-function renderCritiqueList(detail, module, context) {
+function renderCritiqueList(detail, module, context, conceptDetail) {
   const body = getStepBody();
   if (!body) {
     return;
   }
   const list = createElement("div", { classes: "concept-critique-list" });
   detail.critiques.forEach((critique, index) => {
+    const argumentsList = normalizeCritiqueArguments(critique);
+    const board = conceptDetail?.boards?.find((item) => item.id === critique.boardId);
     const card = createElement("article", { classes: "concept-critique-card" });
     const header = createElement("div", { classes: "concept-critique-header" });
-    header.appendChild(createElement("h4", { text: `${critique.boardTitle} • v${critique.versionId?.split("-").pop()}` }));
+    const versionLabel = critique.versionLabel || critique.versionId?.split("-").pop();
+    header.appendChild(
+      createElement("h4", {
+        text: `${critique.boardTitle || "Concept"} • v${versionLabel || "?"}`
+      })
+    );
     const pill = createElement("span", {
       classes: ["pill", critique.status === "closed" ? "status-complete" : "status-attention"]
     });
@@ -175,21 +202,52 @@ function renderCritiqueList(detail, module, context) {
 
     card.appendChild(createElement("p", { classes: "muted", text: `Ran ${critique.createdAt}` }));
 
-    const blocks = [
-      ["Strengths", critique.strengths],
-      ["Risks", critique.risks],
-      ["Questions", critique.questions],
-      ["Recommendations", critique.recommendations]
-    ];
-    blocks.forEach(([title, items]) => {
-      if (!items?.length) {
-        return;
-      }
-      card.appendChild(createElement("strong", { text: title }));
-      const ul = createElement("ul", { classes: "concept-critique-items" });
-      items.forEach((item) => ul.appendChild(createElement("li", { text: item })));
-      card.appendChild(ul);
-    });
+    if (critique.focus) {
+      card.appendChild(createElement("p", { classes: "muted", text: `Focus: ${critique.focus}` }));
+    }
+
+    if (argumentsList.length) {
+      const argumentContainer = createElement("div", { classes: "concept-critique-argument-list" });
+      const existingNotes = board?.critiqueNotes || [];
+      argumentsList.forEach((argument) => {
+        const typeClass = argument.type.toLowerCase().replace(/\s+/g, "-");
+        const argumentCard = createElement("div", {
+          classes: ["concept-critique-argument-card", `argument-${typeClass}`]
+        });
+        argumentCard.appendChild(
+          createElement("span", {
+            classes: "concept-critique-argument-type",
+            text: argument.type
+          })
+        );
+        argumentCard.appendChild(createElement("p", { text: argument.text }));
+
+        const alreadyAdded = existingNotes.some((note) => note.argumentId === argument.id);
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "chip-button";
+        if (alreadyAdded) {
+          addBtn.textContent = "Added to Concept";
+          addBtn.disabled = true;
+          addBtn.classList.add("is-disabled");
+        } else {
+          addBtn.textContent = "Add to Concept Critique";
+          addBtn.addEventListener("click", () => {
+            addArgumentToConceptBoard({
+              module,
+              context,
+              boardId: critique.boardId,
+              critiqueId: critique.id,
+              argument
+            });
+            renderConceptCritique(detail, module, context);
+          });
+        }
+        argumentCard.appendChild(addBtn);
+        argumentContainer.appendChild(argumentCard);
+      });
+      card.appendChild(argumentContainer);
+    }
 
     const actions = createElement("div", { classes: "concept-critique-actions" });
     if (critique.status === "open") {
@@ -217,51 +275,58 @@ function markCritiqueAddressed(detail, module, context, index) {
   renderConceptCritique(detail, module, context);
 }
 
-// Lightweight integration point: open critique modal for a specific board
-export function openCritiqueModalForBoard({ detail, module, context, board }) {
-  const activeVersion = getActiveVersion(board);
-  if (!activeVersion) {
-    showToast("Save a version of the board before running a critique.");
+function addArgumentToConceptBoard({ module, context, boardId, critiqueId, argument }) {
+  const conceptDetail = context.ensureStepDetail(module, "concept-explore");
+  const board = conceptDetail?.boards?.find((item) => item.id === boardId);
+  if (!board) {
+    showToast("Board not found for critique argument.");
     return;
   }
-  const modal = openModal(`Critique • ${board.title} v${activeVersion.version}`, { dialogClass: "modal-dialog-wide" });
-  const form = document.createElement("form");
-  form.className = "modal-form";
-  const label = createElement("label");
-  label.appendChild(createElement("span", { text: "Focus" }));
-  const input = document.createElement("textarea");
-  input.rows = 2;
-  input.placeholder = "e.g. Challenge the stakes and flag production risks.";
-  label.appendChild(input);
-  form.appendChild(label);
-  const actions = createElement("div", { classes: "modal-actions" });
-  const cancelBtn = createElement("button", { classes: "secondary-button", text: "Close" });
-  cancelBtn.type = "button";
-  cancelBtn.addEventListener("click", () => modal.close());
-  const runBtn = createElement("button", { classes: "primary-button", text: "Run Critique" });
-  runBtn.type = "submit";
-  actions.appendChild(cancelBtn);
-  actions.appendChild(runBtn);
-  form.appendChild(actions);
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const critDetail = context.ensureStepDetail(module, "concept-critique");
-    const payload = buildCritique(activeVersion, input.value.trim());
-    critDetail.critiques = critDetail.critiques || [];
-    critDetail.critiques.unshift({
-      id: `critique-${Date.now()}`,
-      boardId: board.id,
-      versionId: activeVersion.id,
-      boardTitle: board.title,
-      createdAt: new Date().toLocaleString(),
-      ...payload,
-      status: "open"
-    });
-    critDetail.lastGuidance = input.value.trim();
-    critDetail.lastRun = new Date().toLocaleString();
-    context.persistDetail(module.id, "concept-critique", critDetail);
-    showToast("Critique ready.");
-    modal.close();
+  board.critiqueNotes = board.critiqueNotes || [];
+  const exists = board.critiqueNotes.some((note) => note.argumentId === argument.id);
+  if (exists) {
+    showToast("Argument already added to concept.");
+    return;
+  }
+  board.critiqueNotes.unshift({
+    argumentId: argument.id,
+    critiqueId,
+    type: argument.type,
+    text: argument.text,
+    createdAt: new Date().toLocaleString()
   });
-  modal.body.appendChild(form);
+  context.persistDetail(module.id, "concept-explore", conceptDetail);
+  showToast("Argument added to concept critique.");
+}
+
+function normalizeCritiqueArguments(critique) {
+  if (Array.isArray(critique.arguments) && critique.arguments.length) {
+    critique.arguments = critique.arguments.map((argument, index) => ({
+      ...argument,
+      id: argument.id || `${critique.id || "critique"}-arg-${index + 1}`
+    }));
+    return critique.arguments;
+  }
+
+  const legacy = [];
+  const groups = [
+    ["Strength", critique.strengths],
+    ["Risk", critique.risks],
+    ["Question", critique.questions],
+    ["Recommendation", critique.recommendations]
+  ];
+  let counter = 0;
+  groups.forEach(([type, items]) => {
+    items?.forEach((text) => {
+      counter += 1;
+      legacy.push({
+        id: `${critique.id || "critique"}-arg-${counter}`,
+        type,
+        text
+      });
+    });
+  });
+
+  critique.arguments = legacy;
+  return legacy;
 }

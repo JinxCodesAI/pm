@@ -9,8 +9,16 @@ import {
   showToast,
   openConfirmModal
 } from "../helpers.js";
-import { changeBoardStatus, duplicateBoard, getActiveVersion, openConceptBoardEditor, openVersionHistoryDialog, promoteIdeaToBoard, requestBoardArchive } from "./boards.js";
-import { openCritiqueModalForBoard } from "./critique.js";
+import {
+  changeBoardStatus,
+  createCritiqueNotesSection,
+  duplicateBoard,
+  getActiveVersion,
+  openConceptBoardEditor,
+  openVersionHistoryDialog,
+  promoteIdeaToBoard,
+  requestBoardArchive
+} from "./boards.js";
 import { composeIdeaSeeds } from "./generators.js";
 import { generateId, getBriefAnchors, getPersonaVoices } from "./support.js";
 
@@ -203,7 +211,7 @@ function renderBoardList({ body, detail, module, context }) {
   const header = createSectionHeading(
     "Concept Boards",
     detail.boards?.length
-      ? "Refine and version your best directions. Mark client-ready or move back to Ideas with rationale."
+      ? "Refine and version your best directions. Capture critique arguments in AI Creative Director before client review."
       : "Promote a promising idea to start developing a Concept Board."
   );
   body.appendChild(header);
@@ -265,10 +273,19 @@ function renderBoardList({ body, detail, module, context }) {
       card.appendChild(historyBtn);
     }
 
+    if (board.critiqueNotes?.length) {
+      const noteCount = board.critiqueNotes.length;
+      card.appendChild(
+        createElement("p", {
+          classes: "concept-board-critique-callout",
+          text: `${noteCount} critique argument${noteCount === 1 ? "" : "s"} captured.`
+        })
+      );
+    }
+
     const actions = createElement("div", { classes: "concept-board-actions" });
     actions.appendChild(createActionButton("View Details", () => openBoardDetailsModal(board)));
     actions.appendChild(createActionButton("Edit Concept", () => openConceptBoardEditor(detail, module, context, { index })));
-    actions.appendChild(createActionButton("Critique", () => openCritiqueModalForBoard({ detail, module, context, board })));
     if (board.status === "archived") {
       actions.appendChild(
         createActionButton("Restore", () => {
@@ -508,6 +525,11 @@ function openBoardDetailsModal(board) {
   if (activeVersion?.strategyLink) {
     content.appendChild(createElement("p", { classes: "concept-strategy-link", text: `Link to strategy: ${activeVersion.strategyLink}` }));
   }
+  content.appendChild(
+    createCritiqueNotesSection(board.critiqueNotes, {
+      emptyMessage: "No critique arguments added yet. Capture them in AI Creative Director."
+    })
+  );
   modal.body.appendChild(content);
 }
 
