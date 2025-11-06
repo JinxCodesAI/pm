@@ -65,6 +65,7 @@ This module is built for creative exploration and client presentation, with iter
 
 *   **Step 2: The AI Creative Director (Concept Stress-Test)**
     *   **How it works:** Before presenting to the client, the freelancer picks a Concept Board from the dropdown and runs a critique on demand. The panel stays empty until a board is reviewed, so it is always clear which concept the arguments belong to.
+        *   If a concept hasn't been versioned yet, the tool quietly captures the current snapshot as a draft v1 before generating feedback so the critique always has a concrete artifact to reference.
     *   **AI Action:** The AI provides a constructive critique for each concept as categorized argument cards (Strength, Risk, Question, Recommendation). Each run captures the guidance used, the board version that was reviewed, and a status so teams can mark critiques as addressed.
     *   **Designer Workflow:** Every argument card now ships with Address, Ignore, and Explain actions. Address routes the talking point into the board's persistent Concept Critique notes, Ignore archives the argument inside the critique, and Explain is staged for a future deep-dive response flow. Saved notes live inside the Concept Board editor and View Details modal so talking points stay attached to the asset the client will see.
 

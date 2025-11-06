@@ -73,7 +73,14 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
     runBtn.textContent = "Reviewing…";
     const selectedValue = boardSelect.value;
     window.setTimeout(() => {
-      runConceptCritique(detail, module, context, selectedValue, guidanceInput.value.trim());
+      runConceptCritique(
+        detail,
+        module,
+        context,
+        conceptDetail,
+        selectedValue,
+        guidanceInput.value.trim()
+      );
       runBtn.disabled = false;
       runBtn.textContent = "Run Critique";
       renderConceptCritique(detail, module, context, selectedValue);
@@ -107,18 +114,20 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
   renderResults();
 }
 
-function runConceptCritique(detail, module, context, selectionValue, guidance) {
+function runConceptCritique(detail, module, context, conceptDetail, selectionValue, guidance) {
   const [boardId, versionId] = selectionValue.split(":");
-  const conceptDetail = context.ensureStepDetail(module, "concept-explore");
   const board = conceptDetail.boards?.find((item) => item.id === boardId);
   if (!board) {
     showToast("Selected board not found.");
     return;
   }
-  const version = board.versions?.find((item) => item.id === versionId) || getActiveVersion(board);
+  let version = board.versions?.find((item) => item.id === versionId) || getActiveVersion(board);
   if (!version) {
-    showToast("Board version missing.");
-    return;
+    version = bootstrapBoardVersion(board, conceptDetail, module, context);
+    if (!version) {
+      showToast("Board version missing.");
+      return;
+    }
   }
 
   const critiqueId = `critique-${Date.now()}`;
@@ -144,6 +153,40 @@ function runConceptCritique(detail, module, context, selectionValue, guidance) {
 
   context.persistDetail(module.id, "concept-critique", detail);
   showToast("Critique ready.");
+}
+
+function bootstrapBoardVersion(board, conceptDetail, module, context) {
+  const preparedBoard = board;
+  preparedBoard.versions = Array.isArray(preparedBoard.versions) ? preparedBoard.versions : [];
+  if (preparedBoard.versions.length) {
+    return getActiveVersion(preparedBoard);
+  }
+
+  const generatedId = `board-version-${preparedBoard.id || "draft"}-${Date.now()}`;
+  const placeholderNarrative = preparedBoard.logline
+    ? `${preparedBoard.logline} (first draft captured for critique).`
+    : "First draft captured for critique.";
+  const version = {
+    id: generatedId,
+    version: 1,
+    createdAt: new Date().toLocaleString(),
+    logline: preparedBoard.logline || "",
+    narrative: placeholderNarrative,
+    keyVisuals: [],
+    tone: [],
+    strategyLink: "",
+    aiGuidance: "",
+    anchorSummary: []
+  };
+
+  preparedBoard.versions.unshift(version);
+  preparedBoard.activeVersionId = version.id;
+  if (preparedBoard.status === "archived") {
+    preparedBoard.status = "draft";
+  }
+
+  context.persistDetail(module.id, "concept-explore", conceptDetail);
+  return version;
 }
 
 function buildCritique(version, guidance, critiqueId) {
