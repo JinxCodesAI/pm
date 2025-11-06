@@ -155,12 +155,12 @@ function buildCritique(version, guidance, critiqueId) {
     "Draft a social-native cut for the versioned board before the client asks."
   ];
 
-  const arguments = [];
+  const argumentList = [];
   let index = 0;
   const register = (type, items) => {
     items.forEach((text) => {
       index += 1;
-      arguments.push({
+      argumentList.push({
         id: `${critiqueId || "critique"}-arg-${index}`,
         type,
         text
@@ -173,7 +173,7 @@ function buildCritique(version, guidance, critiqueId) {
   register("Question", questions);
   register("Recommendation", recommendations);
 
-  return { arguments, strengths, risks, questions, recommendations };
+  return { arguments: argumentList, strengths, risks, questions, recommendations };
 }
 
 function renderCritiqueList(detail, module, context, conceptDetail) {
