@@ -65,7 +65,8 @@ This module is built for creative exploration and client presentation, with iter
 
 *   **Step 2: The AI Creative Director (Concept Stress-Test)**
     *   **How it works:** Before presenting to the client, the freelancer runs each Concept Board through the "Critique This Concept" function.
-    *   **AI Action:** The AI provides a constructive critique for each concept, allowing the freelancer to strengthen their ideas and anticipate client questions before the meeting.
+    *   **AI Action:** The AI provides a constructive critique for each concept as categorized argument cards (Strength, Risk, Question, Recommendation). Each run captures the guidance used, the board version that was reviewed, and a status so teams can mark critiques as addressed.
+    *   **Designer Workflow:** Strategists can tap any argument card to add it to the board's persistent Concept Critique notes. Those notes live inside the Concept Board editor and View Details modal so talking points stay attached to the asset the client will see.
 
 *   **Iteration & Feedback Loop:** This is the core of Module 2. The client will give feedback like, "We love Concept A, but can we make it less sci-fi? And we like the humor of Concept B, but not the setting." The freelancer returns to the tool, saves a new version of the existing Concept Board as a "v2," and uses **Refine with AI** with short guidance ("Tighten pacing; swap moon for family backyard") to rapidly generate the next iteration for the client. The tool keeps a clear history of all versions.
 
@@ -104,6 +105,7 @@ The Concept Explorer has two levels of fidelity with distinct actions:
     *   **Archive:** Keep but mark as rejected. Restorable.
     *   **Remove:** Permanently delete board and its versions.
     *   **Version History:** Browse saved versions.
+    *   **View Details:** Quick modal that surfaces the active version snapshot plus any critique arguments saved from the AI Creative Director.
 
 ---
 

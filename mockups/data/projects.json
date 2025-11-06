@@ -447,17 +447,264 @@
               "notes": "Concept shortlist prepared for Monday critique session.",
               "next": "Run AI critique once the intake summary is updated."
             },
-            {
-              "id": "concept-critique",
-              "name": "AI Creative Director",
-              "description": "Stress-test each concept board before it goes in front of the client.",
-              "aiSupport": "Provides constructive critique and anticipates client pushback.",
-              "humanFocus": "Integrate feedback, duplicate versions, and prep talking points.",
-              "status": "not-started",
-              "notes": "",
-              "next": "Queue after Concept Explorer outputs v2."
+          {
+            "id": "concept-critique",
+            "name": "AI Creative Director",
+            "description": "Stress-test each concept board before it goes in front of the client.",
+            "aiSupport": "Provides constructive critique and anticipates client pushback.",
+            "humanFocus": "Integrate feedback, duplicate versions, and prep talking points.",
+            "status": "not-started",
+            "notes": "",
+            "next": "Queue after Concept Explorer outputs v2."
             }
-          ]
+          ],
+          "details": {
+            "concept-explore": {
+              "lastGuidance": "Highlight emotional room transformations without losing KPI clarity.",
+              "lastGeneratedAt": "2025-04-08 13:45",
+              "ideas": [
+                {
+                  "id": "idea-aurora-harmony",
+                  "title": "Rooms that Rise with You",
+                  "logline": "Follow a family as Aurora presets guide every room into the perfect morning mood in seconds.",
+                  "description": "Celebrate how one command choreographs light, sound, and scent as everyone starts their day.",
+                  "status": "shortlisted",
+                  "score": {
+                    "boldness": 4,
+                    "clarity": 5,
+                    "fit": 5
+                  },
+                  "tags": ["Lifestyle", "Family"],
+                  "createdAt": "2025-04-06 10:05"
+                },
+                {
+                  "id": "idea-aurora-nightshift",
+                  "title": "Nightfall on Demand",
+                  "logline": "An apartment block syncs to Aurora's presets as renters wind down without touching a switch.",
+                  "description": "Shows how presets adapt to late-night study, self-care, and bedtime without app juggling.",
+                  "status": "draft",
+                  "score": {
+                    "boldness": 3,
+                    "clarity": 4,
+                    "fit": 4
+                  },
+                  "tags": ["Rental-friendly", "Wellness"],
+                  "createdAt": "2025-04-05 18:32"
+                },
+                {
+                  "id": "idea-aurora-parade",
+                  "title": "Neighborhood Mood Parade",
+                  "logline": "Block-wide presets trigger a cascading light parade that pulls the community outside.",
+                  "description": "High-energy take showcasing Aurora as the heartbeat of neighborhood rituals.",
+                  "status": "archived",
+                  "score": {
+                    "boldness": 5,
+                    "clarity": 3,
+                    "fit": 3
+                  },
+                  "tags": ["Community", "Spectacle"],
+                  "createdAt": "2025-04-04 16:20"
+                }
+              ],
+              "boards": [
+                {
+                  "id": "board-aurora-sunrise",
+                  "ideaId": "idea-aurora-harmony",
+                  "title": "Rooms that Rise with You",
+                  "logline": "Aurora presets choreograph a sunrise through the home as the family eases into the day.",
+                  "status": "in-review",
+                  "activeVersionId": "board-version-aurora-sunrise-v2",
+                  "versions": [
+                    {
+                      "id": "board-version-aurora-sunrise-v2",
+                      "version": 2,
+                      "createdAt": "2025-04-08 14:05",
+                      "logline": "Aurora presets choreograph a sunrise through the home as the family eases into the day.",
+                      "narrative": "We glide from kitchen to hallway to kid's room as a single voice cue pulls each space into a fresh spring palette. The CTA lands on a retail tie-in that promises bundled starter kits ready for pickup tonight.",
+                      "keyVisuals": [
+                        "Kitchen fades from dawn blue to vibrant peach as kettle steam glows.",
+                        "Kids' room twinkles with a playful gradient synced to their playlist.",
+                        "Bathroom mirror warms to spa lighting while copy calls out '18% bundle lift goal'.",
+                        "Hero family exits to the balcony as the exterior pulses in celebratory coral."
+                      ],
+                      "tone": ["Warm", "Optimistic", "Cinematic"],
+                      "strategyLink": "Connects effortless presets to the KPI of bundled starter kit lift.",
+                      "aiGuidance": "Tighten KPI mention and reinforce paid social story arc.",
+                      "anchorSummary": [
+                        "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'",
+                        "Primary KPI is an 18% sales lift on bundled starter kits within six weeks of launch.",
+                        "Budget flexibility exists if the concept proves it can drive bundle sales via paid social."
+                      ]
+                    },
+                    {
+                      "id": "board-version-aurora-sunrise-v1",
+                      "version": 1,
+                      "createdAt": "2025-04-07 09:40",
+                      "logline": "Morning presets glide room to room proving Aurora handles the family rhythm.",
+                      "narrative": "Voice commands ripple through the apartment, shifting each space into its own mood. The version ends on a wide hero shot promising 'one command, every ritual.'",
+                      "keyVisuals": [
+                        "Macro on Aurora dial as presets queue up.",
+                        "Teen's bedroom glows electric lilac as they stretch.",
+                        "Parents toast coffee as living room eases into sunrise gold."
+                      ],
+                      "tone": ["Inviting", "Contemporary"],
+                      "strategyLink": "Illustrates effortless transformation tied to bundle upsell strategy.",
+                      "aiGuidance": "Show more of the family's distinct rituals.",
+                      "anchorSummary": [
+                        "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'",
+                        "Primary KPI is an 18% sales lift on bundled starter kits within six weeks of launch."
+                      ]
+                    }
+                  ],
+                  "critiqueNotes": [
+                    {
+                      "argumentId": "critique-aurora-sunrise-v2-arg-4",
+                      "critiqueId": "critique-aurora-sunrise-v2",
+                      "type": "Recommendation",
+                      "text": "Prototype a CTA treatment that overlays the paid social metric call-out.",
+                      "createdAt": "2025-04-08 15:52"
+                    },
+                    {
+                      "argumentId": "critique-aurora-sunrise-v2-arg-2",
+                      "critiqueId": "critique-aurora-sunrise-v2",
+                      "type": "Risk",
+                      "text": "Ensure production covers both hero and cut-down lighting transitions without reshoots.",
+                      "createdAt": "2025-04-08 15:54"
+                    }
+                  ]
+                },
+                {
+                  "id": "board-aurora-nightfall",
+                  "ideaId": "idea-aurora-nightshift",
+                  "title": "Nightfall on Demand",
+                  "logline": "A renter orchestrates late-night focus, self-care, and bedtime scenes with Aurora routines.",
+                  "status": "client-ready",
+                  "activeVersionId": "board-version-aurora-nightfall-v1",
+                  "versions": [
+                    {
+                      "id": "board-version-aurora-nightfall-v1",
+                      "version": 1,
+                      "createdAt": "2025-04-06 17:20",
+                      "logline": "A renter orchestrates late-night focus, self-care, and bedtime scenes with Aurora routines.",
+                      "narrative": "We stay inside one apartment as presets pivot from deep-focus blues to spa-like ambers to starlit bedtime. The hero closes a laptop, says 'Aurora, nightfall,' and the CTA promises stress-free wind downs.",
+                      "keyVisuals": [
+                        "Desk shifts from cool productivity lighting to calming lavender.",
+                        "Steam curls around bathroom mirrors as warm amber frames the hero.",
+                        "Bedroom ceiling stars appear while app shows 'Nightfall' routine running."
+                      ],
+                      "tone": ["Calming", "Premium", "Grounded"],
+                      "strategyLink": "Proves Aurora supports renters without rewiring or app fatigue.",
+                      "aiGuidance": "Lean into rental-friendly proof points.",
+                      "anchorSummary": [
+                        "Budget flexibility exists if the concept proves it can drive bundle sales via paid social.",
+                        "Aurora wants to unlock an emotional hook around 'refresh your home mood effortlessly.'"
+                      ]
+                    }
+                  ],
+                  "critiqueNotes": [
+                    {
+                      "argumentId": "critique-aurora-nightfall-v1-arg-1",
+                      "critiqueId": "critique-aurora-nightfall-v1",
+                      "type": "Strength",
+                      "text": "Grounds the story in renter realities the retail partners asked for.",
+                      "createdAt": "2025-04-07 12:10"
+                    }
+                  ]
+                }
+              ]
+            },
+            "concept-critique": {
+              "lastGuidance": "Stress-test KPI clarity and rental proof points before client walk-through.",
+              "lastRun": "2025-04-08 15:45",
+              "critiques": [
+                {
+                  "id": "critique-aurora-sunrise-v2",
+                  "boardId": "board-aurora-sunrise",
+                  "versionId": "board-version-aurora-sunrise-v2",
+                  "versionLabel": 2,
+                  "boardTitle": "Rooms that Rise with You",
+                  "createdAt": "2025-04-08 15:45",
+                  "focus": "Pressure-test KPI clarity and budget guardrails.",
+                  "arguments": [
+                    {
+                      "id": "critique-aurora-sunrise-v2-arg-1",
+                      "type": "Strength",
+                      "text": "Anchors everyday rituals back to the emotional strategy pillars."
+                    },
+                    {
+                      "id": "critique-aurora-sunrise-v2-arg-2",
+                      "type": "Risk",
+                      "text": "Ensure production plan covers hero and cut-down lighting transitions without overages."
+                    },
+                    {
+                      "id": "critique-aurora-sunrise-v2-arg-3",
+                      "type": "Question",
+                      "text": "How will the CTA tie bundle uplift metrics to the on-screen transformation?"
+                    },
+                    {
+                      "id": "critique-aurora-sunrise-v2-arg-4",
+                      "type": "Recommendation",
+                      "text": "Prototype a CTA treatment that overlays the paid social metric call-out."
+                    }
+                  ],
+                  "strengths": [
+                    "Narrative clarity: Story beats ladder from wake-up ritual to KPI.",
+                    "Anchor alignment: Keeps referencing emotional refresh proof points."
+                  ],
+                  "risks": [
+                    "Ensure production plan covers hero and cut-down lighting transitions without overages.",
+                    "Clarify product role in the midpoint beat so value isn't lost in spectacle."
+                  ],
+                  "questions": [
+                    "How will the CTA tie bundle uplift metrics to the on-screen transformation?",
+                    "Which persona insight fuels the kid's room playful beat?"
+                  ],
+                  "recommendations": [
+                    "Prototype a CTA treatment that overlays the paid social metric call-out.",
+                    "Draft a social-native cut that lands the KPI before the logo."
+                  ],
+                  "status": "open"
+                },
+                {
+                  "id": "critique-aurora-nightfall-v1",
+                  "boardId": "board-aurora-nightfall",
+                  "versionId": "board-version-aurora-nightfall-v1",
+                  "versionLabel": 1,
+                  "boardTitle": "Nightfall on Demand",
+                  "createdAt": "2025-04-07 12:05",
+                  "focus": "Validate renter-friendly proof and call out channel deliverables.",
+                  "arguments": [
+                    {
+                      "id": "critique-aurora-nightfall-v1-arg-1",
+                      "type": "Strength",
+                      "text": "Grounds the core narrative in renter realities the retail partner flagged."
+                    },
+                    {
+                      "id": "critique-aurora-nightfall-v1-arg-2",
+                      "type": "Question",
+                      "text": "Where do we surface the retail associate training tie-in?"
+                    }
+                  ],
+                  "strengths": [
+                    "Narrative clarity: Stays inside one apartment to show ease without rewiring.",
+                    "Anchor alignment: Reinforces the 'effortless refresh' promise."
+                  ],
+                  "risks": [
+                    "Ensure production scale stays lean enough for add-on night shoots.",
+                    "Clarify product role in the midpoint beat so value isn't lost in spectacle."
+                  ],
+                  "questions": [
+                    "Where do we surface the retail associate training tie-in?"
+                  ],
+                  "recommendations": [
+                    "Draft a social-native cut for the versioned board before the client asks.",
+                    "Prototype an alternate ending that reinforces the KPI."
+                  ],
+                  "status": "closed"
+                }
+              ]
+            }
+          }
         },
         {
           "id": "script-lab",
@@ -804,7 +1051,249 @@
               "notes": "",
               "next": ""
             }
-          ]
+          ],
+          "details": {
+            "concept-explore": {
+              "lastGuidance": "Champion approachable alpine storytelling and highlight sustainability proof points.",
+              "lastGeneratedAt": "2025-04-07 11:30",
+              "ideas": [
+                {
+                  "id": "idea-northpeak-guidepost",
+                  "title": "Trailhead Guidepost",
+                  "logline": "Northpeak mentors welcome first-time hikers at a pop-up trailhead to outfit them with confidence.",
+                  "description": "Series of helpful pit-stops that translate intimidating gear into approachable rituals.",
+                  "status": "shortlisted",
+                  "score": {
+                    "boldness": 4,
+                    "clarity": 4,
+                    "fit": 5
+                  },
+                  "tags": ["Community", "Education"],
+                  "createdAt": "2025-04-05 09:55"
+                },
+                {
+                  "id": "idea-northpeak-compass",
+                  "title": "Compass Crew",
+                  "logline": "A crew of first-timers document how Northpeak kits make their first summit feel possible.",
+                  "description": "Social-forward documentary style that pairs sustainability proof with real-time coaching.",
+                  "status": "draft",
+                  "score": {
+                    "boldness": 3,
+                    "clarity": 4,
+                    "fit": 4
+                  },
+                  "tags": ["Social", "Documentary"],
+                  "createdAt": "2025-04-04 17:40"
+                },
+                {
+                  "id": "idea-northpeak-summitbuddy",
+                  "title": "Summit Buddy System",
+                  "logline": "Pairing newbies with experienced hikers who pass down tips over shared campfire rituals.",
+                  "description": "Celebrates mentorship and community without losing sight of retailer co-op deliverables.",
+                  "status": "archived",
+                  "score": {
+                    "boldness": 5,
+                    "clarity": 3,
+                    "fit": 3
+                  },
+                  "tags": ["Mentorship", "Community"],
+                  "createdAt": "2025-04-03 15:20"
+                }
+              ],
+              "boards": [
+                {
+                  "id": "board-northpeak-guidepost",
+                  "ideaId": "idea-northpeak-guidepost",
+                  "title": "Trailhead Guidepost",
+                  "logline": "Northpeak coaches run a pop-up trailhead to equip nervous newcomers before sunrise.",
+                  "status": "in-review",
+                  "activeVersionId": "board-version-northpeak-guidepost-v2",
+                  "versions": [
+                    {
+                      "id": "board-version-northpeak-guidepost-v2",
+                      "version": 2,
+                      "createdAt": "2025-04-07 15:20",
+                      "logline": "Northpeak coaches run a pop-up trailhead to equip nervous newcomers before sunrise.",
+                      "narrative": "From first light to summit send-off, mentors translate every piece of gear into simple, confidence-boosting rituals while sustainability proof shows up on signage and CTA overlays.",
+                      "keyVisuals": [
+                        "Guides welcome hikers under a branded arch with 'First Summit? We've got you.' signage.",
+                        "Gear fitting table with biodegradable packaging call-outs and side-by-side bundle pricing.",
+                        "Mentor shows how to clip crampons while drone shot reveals the scenic outlook.",
+                        "Closing tableau of the group celebrating at sunrise with overlay 'Ready for your first summit?'"
+                      ],
+                      "tone": ["Welcoming", "Aspirational", "Grounded"],
+                      "strategyLink": "Shows how Northpeak demystifies gear while driving bundle upsell for retail partners.",
+                      "aiGuidance": "Work in sustainability credentials without slowing momentum.",
+                      "anchorSummary": [
+                        "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof.",
+                        "Retail partners want sell-in packages ready by mid-May with measurable bundle incentives.",
+                        "Product team can flex biodegradable materials narrative if we supply consumer-friendly language."
+                      ]
+                    },
+                    {
+                      "id": "board-version-northpeak-guidepost-v1",
+                      "version": 1,
+                      "createdAt": "2025-04-06 12:05",
+                      "logline": "Mentors stage a trailhead bootcamp so beginners leave feeling expedition-ready.",
+                      "narrative": "Pop-up stations walk hikers through bundle basics before a celebratory first climb. Ends on a CTA driving to co-op partners.",
+                      "keyVisuals": [
+                        "Set-up montage as volunteers assemble guidepost signage.",
+                        "Close-up of sustainability badge being stamped onto a pack.",
+                        "Hiker gets first summit badge pinned to jacket."
+                      ],
+                      "tone": ["Encouraging", "Practical"],
+                      "strategyLink": "Keeps focus on making gear approachable for first-timers while nodding to retail priorities.",
+                      "aiGuidance": "Dial up sustainability proof points.",
+                      "anchorSummary": [
+                        "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof.",
+                        "Retail partners want sell-in packages ready by mid-May with measurable bundle incentives."
+                      ]
+                    }
+                  ],
+                  "critiqueNotes": [
+                    {
+                      "argumentId": "critique-northpeak-guidepost-v2-arg-3",
+                      "critiqueId": "critique-northpeak-guidepost-v2",
+                      "type": "Question",
+                      "text": "Plan how the CTA tees up the May 20 retail briefings without cluttering the hero shot.",
+                      "createdAt": "2025-04-07 16:05"
+                    },
+                    {
+                      "argumentId": "critique-northpeak-guidepost-v2-arg-2",
+                      "critiqueId": "critique-northpeak-guidepost-v2",
+                      "type": "Risk",
+                      "text": "Confirm crew logistics so the pop-up can be captured in one dawn shoot.",
+                      "createdAt": "2025-04-07 16:06"
+                    }
+                  ]
+                },
+                {
+                  "id": "board-northpeak-campfire",
+                  "ideaId": "idea-northpeak-summitbuddy",
+                  "title": "Campfire Confidence",
+                  "logline": "Mentors and newcomers swap stories at camp while Northpeak kits keep everyone prepared.",
+                  "status": "draft",
+                  "activeVersionId": "board-version-northpeak-campfire-v1",
+                  "versions": [
+                    {
+                      "id": "board-version-northpeak-campfire-v1",
+                      "version": 1,
+                      "createdAt": "2025-04-05 19:40",
+                      "logline": "Mentors and newcomers swap stories at camp while Northpeak kits keep everyone prepared.",
+                      "narrative": "Evening at basecamp shows how gear, sustainability commitments, and mentorship blend. Ends on an invite to join the community hike.",
+                      "keyVisuals": [
+                        "Campfire circle with QR code-enabled field guides passed around.",
+                        "Close-up on biodegradable cookware in use while mentor shares trail tips.",
+                        "Sunrise hike-out with voiceover inviting viewers to join the next session."
+                      ],
+                      "tone": ["Warm", "Community-driven"],
+                      "strategyLink": "Connects sustainability storytelling to community building before broader rollout.",
+                      "aiGuidance": "Keep cast small and production lean.",
+                      "anchorSummary": [
+                        "Product team can flex biodegradable materials narrative if we supply consumer-friendly language.",
+                        "Northpeak needs to champion first-time hikers with approachable expertise and visible social proof."
+                      ]
+                    }
+                  ],
+                  "critiqueNotes": [
+                    {
+                      "argumentId": "critique-northpeak-campfire-v1-arg-1",
+                      "critiqueId": "critique-northpeak-campfire-v1",
+                      "type": "Recommendation",
+                      "text": "Storyboard a lean social cut that spotlights the sustainability badge moment.",
+                      "createdAt": "2025-04-06 09:15"
+                    }
+                  ]
+                }
+              ]
+            },
+            "concept-critique": {
+              "lastGuidance": "Surface sustainability proof without losing the 'first summit' emotional arc.",
+              "lastRun": "2025-04-07 16:00",
+              "critiques": [
+                {
+                  "id": "critique-northpeak-guidepost-v2",
+                  "boardId": "board-northpeak-guidepost",
+                  "versionId": "board-version-northpeak-guidepost-v2",
+                  "versionLabel": 2,
+                  "boardTitle": "Trailhead Guidepost",
+                  "createdAt": "2025-04-07 16:00",
+                  "focus": "Validate sustainability messaging and production footprint at the pop-up trailhead.",
+                  "arguments": [
+                    {
+                      "id": "critique-northpeak-guidepost-v2-arg-1",
+                      "type": "Strength",
+                      "text": "Mentor-led walkthroughs perfectly mirror the 'approachable expertise' brief pillar."
+                    },
+                    {
+                      "id": "critique-northpeak-guidepost-v2-arg-2",
+                      "type": "Risk",
+                      "text": "Confirm crew logistics so the pop-up can be captured in one dawn shoot."
+                    },
+                    {
+                      "id": "critique-northpeak-guidepost-v2-arg-3",
+                      "type": "Question",
+                      "text": "Plan how the CTA tees up the May 20 retail briefings without cluttering the hero shot."
+                    },
+                    {
+                      "id": "critique-northpeak-guidepost-v2-arg-4",
+                      "type": "Recommendation",
+                      "text": "Prototype a kiosk overlay that highlights biodegradable packaging proof before the CTA."
+                    }
+                  ],
+                  "strengths": [
+                    "Narrative clarity: Opens with a clear welcome beat and resolves with action-inviting CTA.",
+                    "Anchor alignment: Sustainability signage ties directly to intake proof points."
+                  ],
+                  "risks": [
+                    "Confirm crew logistics so the pop-up can be captured in one dawn shoot.",
+                    "Clarify product role in the midpoint beat so value isn't lost in spectacle."
+                  ],
+                  "questions": [
+                    "Plan how the CTA tees up the May 20 retail briefings without cluttering the hero shot.",
+                    "What incentive do hikers receive for visiting retail partners after the activation?"
+                  ],
+                  "recommendations": [
+                    "Prototype a kiosk overlay that highlights biodegradable packaging proof before the CTA.",
+                    "Draft a toolkit handoff visual so retail partners see how this scales."
+                  ],
+                  "status": "open"
+                },
+                {
+                  "id": "critique-northpeak-campfire-v1",
+                  "boardId": "board-northpeak-campfire",
+                  "versionId": "board-version-northpeak-campfire-v1",
+                  "versionLabel": 1,
+                  "boardTitle": "Campfire Confidence",
+                  "createdAt": "2025-04-06 09:10",
+                  "focus": "Ensure the community angle still drives bundle conversion talking points.",
+                  "arguments": [
+                    {
+                      "id": "critique-northpeak-campfire-v1-arg-1",
+                      "type": "Recommendation",
+                      "text": "Storyboard a lean social cut that spotlights the sustainability badge moment."
+                    }
+                  ],
+                  "strengths": [
+                    "Narrative clarity: Keeps the focus on mentorship that demystifies the journey.",
+                    "Anchor alignment: Reinforces biodegradable proof while keeping tone welcoming."
+                  ],
+                  "risks": [
+                    "Ensure production scale stays lean enough for overnight camp coverage.",
+                    "Clarify product role in the midpoint beat so value isn't lost in spectacle."
+                  ],
+                  "questions": [
+                    "Where does the script call out bundle pricing to satisfy retail partners?"
+                  ],
+                  "recommendations": [
+                    "Storyboard a lean social cut that spotlights the sustainability badge moment.",
+                    "Prototype an alternate ending that reinforces the KPI."
+                  ],
+                  "status": "closed"
+                }
+              ]
+            }
+          }
         },
         {
           "id": "script-lab",
