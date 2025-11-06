@@ -36,15 +36,20 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
   const boardSelectLabel = createElement("label");
   boardSelectLabel.appendChild(createElement("span", { text: "Board" }));
   const boardSelect = document.createElement("select");
+  const optionValues = [];
   boards.forEach((board) => {
     const activeVersion = getActiveVersion(board);
     const option = document.createElement("option");
     option.value = `${board.id}:${activeVersion?.id || ""}`;
     option.textContent = `${board.title || "Concept"} • v${activeVersion?.version || 1}`;
     boardSelect.appendChild(option);
+    optionValues.push(option.value);
   });
-  const selectionToUse =
+  let selectionToUse =
     preferredSelection || detail.lastSelection || (boardSelect.options[0]?.value ?? "");
+  if (selectionToUse && !optionValues.includes(selectionToUse) && optionValues.length) {
+    selectionToUse = optionValues[0];
+  }
   if (selectionToUse) {
     boardSelect.value = selectionToUse;
   }
@@ -73,7 +78,7 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
     runBtn.textContent = "Reviewing…";
     const selectedValue = boardSelect.value;
     window.setTimeout(() => {
-      runConceptCritique(
+      const resolvedSelection = runConceptCritique(
         detail,
         module,
         context,
@@ -83,7 +88,12 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
       );
       runBtn.disabled = false;
       runBtn.textContent = "Run Critique";
-      renderConceptCritique(detail, module, context, selectedValue);
+      renderConceptCritique(
+        detail,
+        module,
+        context,
+        resolvedSelection || selectedValue
+      );
     }, 120);
   });
   controlBar.appendChild(runBtn);
@@ -98,7 +108,9 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
   body.appendChild(resultsContainer);
 
   const renderResults = () => {
-    detail.lastSelection = boardSelect.value;
+    if (boardSelect.value) {
+      detail.lastSelection = boardSelect.value;
+    }
     renderCritiqueResults({
       detail,
       module,
@@ -119,16 +131,18 @@ function runConceptCritique(detail, module, context, conceptDetail, selectionVal
   const board = conceptDetail.boards?.find((item) => item.id === boardId);
   if (!board) {
     showToast("Selected board not found.");
-    return;
+    return null;
   }
   let version = board.versions?.find((item) => item.id === versionId) || getActiveVersion(board);
   if (!version) {
     version = bootstrapBoardVersion(board, conceptDetail, module, context);
     if (!version) {
       showToast("Board version missing.");
-      return;
+      return null;
     }
   }
+
+  const resolvedSelection = `${boardId}:${version.id}`;
 
   const critiqueId = `critique-${Date.now()}`;
   const critique = buildCritique(version, guidance, critiqueId);
@@ -149,10 +163,11 @@ function runConceptCritique(detail, module, context, conceptDetail, selectionVal
   });
   detail.lastGuidance = guidance;
   detail.lastRun = new Date().toLocaleString();
-  detail.lastSelection = selectionValue;
+  detail.lastSelection = resolvedSelection;
 
   context.persistDetail(module.id, "concept-critique", detail);
   showToast("Critique ready.");
+  return resolvedSelection;
 }
 
 function bootstrapBoardVersion(board, conceptDetail, module, context) {
@@ -247,6 +262,12 @@ function renderCritiqueResults({
 }) {
   container.innerHTML = "";
   if (!selectionValue) {
+    container.appendChild(
+      createElement("p", {
+        classes: "muted",
+        text: "Run a critique to populate argument cards for this board."
+      })
+    );
     return;
   }
 
@@ -255,6 +276,12 @@ function renderCritiqueResults({
     (item) => item.boardId === boardId && item.versionId === versionId
   );
   if (!critique) {
+    container.appendChild(
+      createElement("p", {
+        classes: "muted",
+        text: "Run a critique to populate argument cards for this board."
+      })
+    );
     return;
   }
 

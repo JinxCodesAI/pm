@@ -115,13 +115,14 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
     setTimeout(() => (assistBtn.textContent = "Refine with AI"), 1200);
   });
   assistRow.appendChild(assistBtn);
-  form.appendChild(assistRow);
 
   form.appendChild(
     createCritiqueNotesSection(board.critiqueNotes, {
       emptyMessage: "No critique arguments added yet. Capture them in AI Creative Director."
     })
   );
+
+  form.appendChild(assistRow);
 
   const actions = createElement("div", { classes: "modal-actions" });
   const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
