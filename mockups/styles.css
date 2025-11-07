@@ -2249,6 +2249,101 @@ p {
   font-size: 0.9rem;
 }
 
+.concept-builder {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.concept-builder-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.concept-builder-selector-label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.concept-builder-select {
+  min-width: 18rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.concept-builder-selector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.concept-builder-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.concept-builder-field {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.concept-builder-field h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.concept-builder-field p {
+  margin: 0;
+}
+
+.concept-builder-input {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.concept-builder-field-controls {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.concept-builder-guidance {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.concept-builder-guidance textarea {
+  resize: vertical;
+  min-height: 2.4rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.concept-builder-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .concept-strategy-link {
   font-size: 0.8rem;
   color: var(--text-muted);
