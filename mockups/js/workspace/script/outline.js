@@ -505,7 +505,7 @@ function openSceneEditor({ detail, module, context, scene = null, index = null }
         versionId: currentSource.versionId || activeVersion?.id || "",
         keyVisual: currentSource.keyVisual || ""
       },
-      aiGuidance
+      aiGuidance,
       source: scene?.source || { boardId: "", versionId: "", keyVisual: scene?.source?.keyVisual || "" }
     };
 
