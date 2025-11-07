@@ -9,8 +9,17 @@ import {
   showToast,
   openConfirmModal
 } from "../helpers.js";
-import { changeBoardStatus, duplicateBoard, getActiveVersion, openConceptBoardEditor, openVersionHistoryDialog, promoteIdeaToBoard, requestBoardArchive } from "./boards.js";
-import { openCritiqueModalForBoard } from "./critique.js";
+import {
+  changeBoardStatus,
+  createCritiqueNotesSection,
+  duplicateBoard,
+  getActiveVersion,
+  openBoardDetailsModal,
+  openConceptBoardEditor,
+  openVersionHistoryDialog,
+  promoteIdeaToBoard,
+  requestBoardArchive
+} from "./boards.js";
 import { composeIdeaSeeds } from "./generators.js";
 import { generateId, getBriefAnchors, getPersonaVoices } from "./support.js";
 
@@ -203,7 +212,7 @@ function renderBoardList({ body, detail, module, context }) {
   const header = createSectionHeading(
     "Concept Boards",
     detail.boards?.length
-      ? "Refine and version your best directions. Mark client-ready or move back to Ideas with rationale."
+      ? "Refine and version your best directions. Capture critique arguments in AI Creative Director before client review."
       : "Promote a promising idea to start developing a Concept Board."
   );
   body.appendChild(header);
@@ -265,10 +274,19 @@ function renderBoardList({ body, detail, module, context }) {
       card.appendChild(historyBtn);
     }
 
+    if (board.critiqueNotes?.length) {
+      const noteCount = board.critiqueNotes.length;
+      card.appendChild(
+        createElement("p", {
+          classes: "concept-board-critique-callout",
+          text: `${noteCount} critique argument${noteCount === 1 ? "" : "s"} captured.`
+        })
+      );
+    }
+
     const actions = createElement("div", { classes: "concept-board-actions" });
     actions.appendChild(createActionButton("View Details", () => openBoardDetailsModal(board)));
     actions.appendChild(createActionButton("Edit Concept", () => openConceptBoardEditor(detail, module, context, { index })));
-    actions.appendChild(createActionButton("Critique", () => openCritiqueModalForBoard({ detail, module, context, board })));
     if (board.status === "archived") {
       actions.appendChild(
         createActionButton("Restore", () => {
@@ -480,33 +498,6 @@ function openIdeaDetailsModal(idea) {
       scoreRow.appendChild(badge);
     });
     content.appendChild(scoreRow);
-  }
-  modal.body.appendChild(content);
-}
-
-function openBoardDetailsModal(board) {
-  const activeVersion = getActiveVersion(board);
-  const modal = openModal(board.title || "Concept Board", { dialogClass: "modal-dialog-wide" });
-  const content = document.createElement("div");
-  const logline = activeVersion?.logline || board.logline;
-  if (logline) {
-    content.appendChild(createElement("p", { classes: "concept-logline", text: logline }));
-  }
-  if (activeVersion?.narrative) {
-    content.appendChild(createElement("p", { text: activeVersion.narrative }));
-  }
-  if (activeVersion?.keyVisuals?.length) {
-    const visuals = createElement("ul", { classes: "concept-visual-list" });
-    activeVersion.keyVisuals.forEach((v) => visuals.appendChild(createElement("li", { text: v })));
-    content.appendChild(visuals);
-  }
-  if (activeVersion?.tone?.length) {
-    const toneRow = createElement("div", { classes: "concept-tone-row" });
-    activeVersion.tone.forEach((word) => toneRow.appendChild(createElement("span", { classes: "tag-chip", text: word })));
-    content.appendChild(toneRow);
-  }
-  if (activeVersion?.strategyLink) {
-    content.appendChild(createElement("p", { classes: "concept-strategy-link", text: `Link to strategy: ${activeVersion.strategyLink}` }));
   }
   modal.body.appendChild(content);
 }

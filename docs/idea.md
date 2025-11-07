@@ -64,8 +64,13 @@ This module is built for creative exploration and client presentation, with iter
     *   **AI Action:** For each selected logline, the AI helps the user flesh it out into a full "Concept Board."
 
 *   **Step 2: The AI Creative Director (Concept Stress-Test)**
-    *   **How it works:** Before presenting to the client, the freelancer runs each Concept Board through the "Critique This Concept" function.
-    *   **AI Action:** The AI provides a constructive critique for each concept, allowing the freelancer to strengthen their ideas and anticipate client questions before the meeting.
+    *   **How it works:** Before presenting to the client, the freelancer picks a Concept Board from the dropdown and runs a critique on demand. The panel stays empty until a board is reviewed, so it is always clear which concept the arguments belong to.
+        *   The dropdown always mirrors the live Concept Boards list, so newly promoted or reordered ideas appear instantly, and the selection snaps to the exact version that was critiqued.
+        *   If a concept hasn't been versioned yet, the tool quietly captures the current snapshot as a draft v1 before generating feedback so the critique always has a concrete artifact to reference.
+        *   Reviewers can open the full concept snapshot via the built-in **View Details** button just beneath the board selector to double-check the version that will receive changes.
+        *   A manual critique panel sits above the AI output; the **Add Critique** action opens a focused modal (mirroring the Source Library flow) so strategists can log bespoke notes even before running the generator. Saved notes join the board's Concept Critique history alongside AI-addressed arguments.
+    *   **AI Action:** The AI provides a constructive critique for each concept as categorized argument cards (Strength, Risk, Question, Recommendation). Each run captures the guidance used, the board version that was reviewed, and a status so teams can mark critiques as addressed.
+    *   **Designer Workflow:** Every argument card now ships with Address, Ignore, and Explain actions. Address routes the talking point into the board's persistent Concept Critique notes, Ignore archives the argument inside the critique, and Explain is staged for a future deep-dive response flow. Address and Ignore can be toggled on or off so teams can explore different revisions without losing track of previous decisions. Saved notes—including manual entries—live inside the Concept Board editor and View Details modal so talking points stay attached to the asset the client will see.
 
 *   **Iteration & Feedback Loop:** This is the core of Module 2. The client will give feedback like, "We love Concept A, but can we make it less sci-fi? And we like the humor of Concept B, but not the setting." The freelancer returns to the tool, saves a new version of the existing Concept Board as a "v2," and uses **Refine with AI** with short guidance ("Tighten pacing; swap moon for family backyard") to rapidly generate the next iteration for the client. The tool keeps a clear history of all versions.
 
@@ -97,13 +102,14 @@ The Concept Explorer has two levels of fidelity with distinct actions:
     *   **Remove:** Permanently delete without signaling the AI.
 
 *   **Concept Boards:** refined, versioned artifacts for client presentation.
-    *   **Edit Concept:** Full editor (title/logline, narrative, key visuals, tone, strategy). Each save creates a new version.
+    *   **Edit Concept:** Full editor (title/logline, narrative, key visuals, tone, strategy). Each save creates a new version. Concept Critique notes surface directly above the AI refinement lane, which now lives at the bottom of the form so it's easy to trigger even when the modal scrolls.
     *   **Refine with AI:** Ask AI to expand or adjust using a short guidance input.
     *   **Mark Client Ready:** Set status for presentation.
     *   **Move to Ideas:** Demote back to Idea Pool with a brief comment (reason). The board is removed; an idea draft is created.
     *   **Archive:** Keep but mark as rejected. Restorable.
     *   **Remove:** Permanently delete board and its versions.
     *   **Version History:** Browse saved versions.
+    *   **View Details:** Quick modal that surfaces the active version snapshot plus any critique arguments saved from the AI Creative Director.
 
 ---
 

@@ -18,7 +18,8 @@ export function promoteIdeaToBoard(detail, module, context, idea) {
     logline: idea.logline,
     status: "draft",
     versions: [],
-    activeVersionId: ""
+    activeVersionId: "",
+    critiqueNotes: []
   };
   detail.boards.unshift(draft);
   context.persistDetail(module.id, "concept-explore", detail);
@@ -114,6 +115,13 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
     setTimeout(() => (assistBtn.textContent = "Refine with AI"), 1200);
   });
   assistRow.appendChild(assistBtn);
+
+  form.appendChild(
+    createCritiqueNotesSection(board.critiqueNotes, {
+      emptyMessage: "No critique arguments added yet. Capture them in AI Creative Director."
+    })
+  );
+
   form.appendChild(assistRow);
 
   const actions = createElement("div", { classes: "modal-actions" });
@@ -163,6 +171,42 @@ export function openConceptBoardEditor(detail, module, context, options = {}) {
 
   modal.body.appendChild(form);
   titleInput.focus();
+}
+
+export function openBoardDetailsModal(board) {
+  const activeVersion = getActiveVersion(board);
+  const modal = openModal(board.title || "Concept Board", { dialogClass: "modal-dialog-wide" });
+  const content = document.createElement("div");
+  const logline = activeVersion?.logline || board.logline;
+  if (logline) {
+    content.appendChild(createElement("p", { classes: "concept-logline", text: logline }));
+  }
+  if (activeVersion?.narrative) {
+    content.appendChild(createElement("p", { text: activeVersion.narrative }));
+  }
+  if (activeVersion?.keyVisuals?.length) {
+    const visuals = createElement("ul", { classes: "concept-visual-list" });
+    activeVersion.keyVisuals.forEach((visual) => visuals.appendChild(createElement("li", { text: visual })));
+    content.appendChild(visuals);
+  }
+  if (activeVersion?.tone?.length) {
+    const toneRow = createElement("div", { classes: "concept-tone-row" });
+    activeVersion.tone.forEach((word) =>
+      toneRow.appendChild(createElement("span", { classes: "tag-chip", text: word }))
+    );
+    content.appendChild(toneRow);
+  }
+  if (activeVersion?.strategyLink) {
+    content.appendChild(
+      createElement("p", { classes: "concept-strategy-link", text: `Link to strategy: ${activeVersion.strategyLink}` })
+    );
+  }
+  content.appendChild(
+    createCritiqueNotesSection(board.critiqueNotes, {
+      emptyMessage: "No critique arguments added yet. Capture them in AI Creative Director."
+    })
+  );
+  modal.body.appendChild(content);
 }
 
 export function duplicateBoard(detail, module, context, index) {
@@ -243,4 +287,41 @@ export function getActiveVersion(board) {
     return null;
   }
   return board.versions.find((version) => version.id === board.activeVersionId) || board.versions[0];
+}
+
+export function createCritiqueNotesSection(notes, { emptyMessage } = {}) {
+  const section = createElement("section", { classes: "concept-board-critique-section" });
+  section.appendChild(createElement("h4", { text: "Concept Critique" }));
+
+  if (!notes?.length) {
+    section.appendChild(
+      createElement("p", {
+        classes: "muted",
+        text: emptyMessage || "No critique arguments added yet. Capture them in AI Creative Director."
+      })
+    );
+    return section;
+  }
+
+  const list = createElement("ul", { classes: "concept-board-critique-notes" });
+  notes.forEach((note) => {
+    const typeClass = (note.type || "note").toLowerCase().replace(/\s+/g, "-");
+    const item = createElement("li", {
+      classes: ["concept-board-critique-note", `argument-${typeClass}`]
+    });
+    item.appendChild(
+      createElement("span", {
+        classes: "concept-board-critique-note-type",
+        text: note.type || "Note"
+      })
+    );
+    item.appendChild(createElement("p", { text: note.text || "" }));
+    if (note.createdAt) {
+      item.appendChild(createElement("span", { classes: "muted", text: `Added ${note.createdAt}` }));
+    }
+    list.appendChild(item);
+  });
+
+  section.appendChild(list);
+  return section;
 }

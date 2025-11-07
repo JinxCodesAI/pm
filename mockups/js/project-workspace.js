@@ -352,6 +352,15 @@ function ensureStepDetail(module, stepId) {
           anchorSummary: Array.isArray(version.anchorSummary) ? version.anchorSummary.filter(Boolean) : []
         };
       });
+      const critiqueNotes = Array.isArray(board.critiqueNotes)
+        ? board.critiqueNotes.map((note, noteIndex) => ({
+            argumentId: note.argumentId || `critique-argument-${index}-${noteIndex}`,
+            critiqueId: note.critiqueId || "",
+            type: note.type || "Note",
+            text: note.text || "",
+            createdAt: note.createdAt || ""
+          }))
+        : [];
       const activeVersionId = cleanedVersions.find((version) => version.id === board.activeVersionId)
         ? board.activeVersionId
         : cleanedVersions[0]?.id || "";
@@ -362,25 +371,38 @@ function ensureStepDetail(module, stepId) {
         logline: board.logline || "",
         status: ["draft", "in-review", "client-ready", "archived"].includes(board.status) ? board.status : "draft",
         versions: cleanedVersions,
-        activeVersionId
+        activeVersionId,
+        critiqueNotes
       };
     });
     merged.lastGuidance = merged.lastGuidance || "";
     merged.lastGeneratedAt = merged.lastGeneratedAt || "";
   } else if (stepId === "concept-critique") {
     merged.critiques = Array.isArray(merged.critiques) ? merged.critiques : [];
-    merged.critiques = merged.critiques.map((critique) => ({
-      id: critique.id || `critique-${Date.now()}`,
-      boardId: critique.boardId || "",
-      versionId: critique.versionId || "",
-      boardTitle: critique.boardTitle || "Concept Board",
-      createdAt: critique.createdAt || "",
-      strengths: Array.isArray(critique.strengths) ? critique.strengths.filter(Boolean) : [],
-      risks: Array.isArray(critique.risks) ? critique.risks.filter(Boolean) : [],
-      questions: Array.isArray(critique.questions) ? critique.questions.filter(Boolean) : [],
-      recommendations: Array.isArray(critique.recommendations) ? critique.recommendations.filter(Boolean) : [],
-      status: critique.status === "closed" ? "closed" : "open"
-    }));
+    merged.critiques = merged.critiques.map((critique) => {
+      const argumentsList = Array.isArray(critique.arguments)
+        ? critique.arguments.map((argument, argumentIndex) => ({
+            id: argument.id || `${critique.id || "critique"}-arg-${argumentIndex + 1}`,
+            type: argument.type || "Note",
+            text: argument.text || ""
+          }))
+        : [];
+      return {
+        id: critique.id || `critique-${Date.now()}`,
+        boardId: critique.boardId || "",
+        versionId: critique.versionId || "",
+        versionLabel: critique.versionLabel || "",
+        boardTitle: critique.boardTitle || "Concept Board",
+        createdAt: critique.createdAt || "",
+        focus: critique.focus || "",
+        arguments: argumentsList,
+        strengths: Array.isArray(critique.strengths) ? critique.strengths.filter(Boolean) : [],
+        risks: Array.isArray(critique.risks) ? critique.risks.filter(Boolean) : [],
+        questions: Array.isArray(critique.questions) ? critique.questions.filter(Boolean) : [],
+        recommendations: Array.isArray(critique.recommendations) ? critique.recommendations.filter(Boolean) : [],
+        status: critique.status === "closed" ? "closed" : "open"
+      };
+    });
     merged.lastGuidance = merged.lastGuidance || "";
     merged.lastRun = merged.lastRun || "";
   }
