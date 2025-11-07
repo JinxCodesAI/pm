@@ -20,7 +20,13 @@ import {
   promoteIdeaToBoard,
   requestBoardArchive
 } from "./boards.js";
-import { composeIdeaSeeds } from "./generators.js";
+import {
+  composeIdeaSeeds,
+  suggestIdeaTitle,
+  suggestIdeaLogline,
+  suggestIdeaDescription,
+  suggestIdeaTags
+} from "./generators.js";
 import { generateId, getBriefAnchors, getPersonaVoices } from "./support.js";
 
 export function renderConceptExplorer(detail, module, context) {
@@ -376,43 +382,141 @@ function openIdeaEditor({ detail, module, context, index }) {
         tags: []
       };
 
+  current.score = current.score && typeof current.score === "object"
+    ? current.score
+    : { boldness: 3, clarity: 3, fit: 3 };
+
   const modal = openModal(isEdit ? "Edit Concept" : "New Concept");
   const form = document.createElement("form");
-  form.className = "modal-form";
+  form.className = "modal-form concept-idea-form";
 
-  const titleField = createElement("label");
-  titleField.appendChild(createElement("span", { text: "Title" }));
+  const guidanceState = {
+    title: "",
+    logline: "",
+    description: "",
+    tags: ""
+  };
+
   const titleInput = document.createElement("input");
   titleInput.type = "text";
   titleInput.required = true;
   titleInput.value = current.title || "";
-  titleField.appendChild(titleInput);
-  form.appendChild(titleField);
+  titleInput.placeholder = "e.g. Momentum Reboot";
+  titleInput.addEventListener("input", () => {
+    current.title = titleInput.value;
+  });
+  form.appendChild(
+    createIdeaField({
+      label: "Title",
+      description: "A working name you can reference in critique and client decks.",
+      input: titleInput,
+      guidanceState,
+      guidanceKey: "title",
+      aiLabel: "Refine Title",
+      onGenerate: (guidance) => {
+        const suggestion = suggestIdeaTitle({ context, logline: current.logline, guidance });
+        if (!suggestion) {
+          showToast("Need a logline or brief anchor before refining the title.");
+          return false;
+        }
+        current.title = suggestion;
+        titleInput.value = suggestion;
+        return true;
+      }
+    })
+  );
 
-  const loglineField = createElement("label");
-  loglineField.appendChild(createElement("span", { text: "Logline" }));
   const loglineInput = document.createElement("textarea");
   loglineInput.rows = 3;
   loglineInput.value = current.logline || "";
-  loglineField.appendChild(loglineInput);
-  form.appendChild(loglineField);
+  loglineInput.placeholder = "One sentence that sells the core idea.";
+  loglineInput.addEventListener("input", () => {
+    current.logline = loglineInput.value;
+  });
+  form.appendChild(
+    createIdeaField({
+      label: "Logline",
+      description: "Capture the promise in a punchy, client-ready sentence.",
+      input: loglineInput,
+      guidanceState,
+      guidanceKey: "logline",
+      aiLabel: "Refine Logline",
+      onGenerate: (guidance) => {
+        const suggestion = suggestIdeaLogline({ context, title: current.title, guidance });
+        if (!suggestion) {
+          showToast("Add a brief insight in Discover & Brief to refine the logline.");
+          return false;
+        }
+        current.logline = suggestion;
+        loglineInput.value = suggestion;
+        return true;
+      }
+    })
+  );
 
-  const descField = createElement("label");
-  descField.appendChild(createElement("span", { text: "Narrative Snapshot" }));
   const descInput = document.createElement("textarea");
   descInput.rows = 3;
   descInput.value = current.description || "";
-  descField.appendChild(descInput);
-  form.appendChild(descField);
+  descInput.placeholder = "How does the story unfold?";
+  descInput.addEventListener("input", () => {
+    current.description = descInput.value;
+  });
+  form.appendChild(
+    createIdeaField({
+      label: "Narrative Snapshot",
+      description: "Sketch the flow so you can stress-test beats later.",
+      input: descInput,
+      guidanceState,
+      guidanceKey: "description",
+      aiLabel: "Refine Narrative",
+      onGenerate: (guidance) => {
+        const suggestion = suggestIdeaDescription({
+          context,
+          title: current.title,
+          logline: current.logline,
+          guidance
+        });
+        if (!suggestion) {
+          showToast("Add a logline or strategy anchor before refining the narrative.");
+          return false;
+        }
+        current.description = suggestion;
+        descInput.value = suggestion;
+        return true;
+      }
+    })
+  );
 
-  const tagField = createElement("label");
-  tagField.appendChild(createElement("span", { text: "Tags" }));
   const tagInput = document.createElement("input");
   tagInput.type = "text";
   tagInput.placeholder = "Comma separated";
   tagInput.value = (current.tags || []).join(", ");
-  tagField.appendChild(tagInput);
-  form.appendChild(tagField);
+  tagInput.addEventListener("input", () => {
+    current.tags = tagInput.value
+      .split(",")
+      .map((word) => word.trim())
+      .filter(Boolean);
+  });
+  form.appendChild(
+    createIdeaField({
+      label: "Tags",
+      description: "Use quick tags to group similar directions.",
+      input: tagInput,
+      guidanceState,
+      guidanceKey: "tags",
+      aiLabel: "Suggest Tags",
+      onGenerate: (guidance) => {
+        const tags = suggestIdeaTags({ context, logline: current.logline, guidance });
+        if (!tags.length) {
+          showToast("Need a logline or strategic anchor before suggesting tags.");
+          return false;
+        }
+        current.tags = tags;
+        tagInput.value = tags.join(", ");
+        return true;
+      }
+    })
+  );
 
   const scoreRow = createElement("div", { classes: "concept-score-input" });
   ["boldness", "clarity", "fit"].forEach((key) => {
@@ -448,10 +552,7 @@ function openIdeaEditor({ detail, module, context, index }) {
       title: titleInput.value.trim(),
       logline: loglineInput.value.trim(),
       description: descInput.value.trim(),
-      tags: tagInput.value
-        .split(",")
-        .map((word) => word.trim())
-        .filter(Boolean)
+      tags: (current.tags || []).map((tag) => tag.trim()).filter(Boolean)
     };
 
     if (!payload.title) {
@@ -473,6 +574,59 @@ function openIdeaEditor({ detail, module, context, index }) {
 
   modal.body.appendChild(form);
   titleInput.focus();
+}
+
+function createIdeaField({ label, description, input, guidanceState, guidanceKey, aiLabel, onGenerate }) {
+  const wrapper = createElement("div", { classes: "concept-idea-field" });
+  const fieldLabel = createElement("label");
+  fieldLabel.appendChild(createElement("span", { text: label }));
+  input.classList.add("concept-idea-input");
+  fieldLabel.appendChild(input);
+  wrapper.appendChild(fieldLabel);
+
+  if (description) {
+    wrapper.appendChild(createElement("p", { classes: "muted", text: description }));
+  }
+
+  const controls = createElement("div", { classes: "concept-idea-controls" });
+  const guidanceLabel = createElement("label", { classes: "concept-idea-guidance" });
+  guidanceLabel.appendChild(createElement("span", { text: "Guidance for AI (optional)" }));
+  const guidanceInput = document.createElement("textarea");
+  guidanceInput.rows = 2;
+  guidanceInput.placeholder = "Coaching notes before refining.";
+  guidanceInput.value = guidanceState[guidanceKey] || "";
+  guidanceInput.addEventListener("input", () => {
+    guidanceState[guidanceKey] = guidanceInput.value;
+  });
+  guidanceLabel.appendChild(guidanceInput);
+  controls.appendChild(guidanceLabel);
+
+  const aiButton = document.createElement("button");
+  aiButton.type = "button";
+  aiButton.className = "ghost-button";
+  aiButton.textContent = aiLabel;
+  aiButton.addEventListener("click", () => {
+    if (aiButton.disabled) {
+      return;
+    }
+    aiButton.disabled = true;
+    const original = aiButton.textContent;
+    aiButton.textContent = "Generating…";
+    window.setTimeout(() => {
+      const success = onGenerate(guidanceState[guidanceKey] || "");
+      aiButton.disabled = false;
+      aiButton.textContent = success ? "Refined" : original;
+      if (success) {
+        setTimeout(() => {
+          aiButton.textContent = original;
+        }, 1200);
+      }
+    }, 90);
+  });
+  controls.appendChild(aiButton);
+
+  wrapper.appendChild(controls);
+  return wrapper;
 }
 
 function openIdeaDetailsModal(idea) {
