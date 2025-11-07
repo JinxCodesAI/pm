@@ -14,6 +14,7 @@ import {
   createCritiqueNotesSection,
   duplicateBoard,
   getActiveVersion,
+  openBoardDetailsModal,
   openConceptBoardEditor,
   openVersionHistoryDialog,
   promoteIdeaToBoard,
@@ -498,38 +499,6 @@ function openIdeaDetailsModal(idea) {
     });
     content.appendChild(scoreRow);
   }
-  modal.body.appendChild(content);
-}
-
-function openBoardDetailsModal(board) {
-  const activeVersion = getActiveVersion(board);
-  const modal = openModal(board.title || "Concept Board", { dialogClass: "modal-dialog-wide" });
-  const content = document.createElement("div");
-  const logline = activeVersion?.logline || board.logline;
-  if (logline) {
-    content.appendChild(createElement("p", { classes: "concept-logline", text: logline }));
-  }
-  if (activeVersion?.narrative) {
-    content.appendChild(createElement("p", { text: activeVersion.narrative }));
-  }
-  if (activeVersion?.keyVisuals?.length) {
-    const visuals = createElement("ul", { classes: "concept-visual-list" });
-    activeVersion.keyVisuals.forEach((v) => visuals.appendChild(createElement("li", { text: v })));
-    content.appendChild(visuals);
-  }
-  if (activeVersion?.tone?.length) {
-    const toneRow = createElement("div", { classes: "concept-tone-row" });
-    activeVersion.tone.forEach((word) => toneRow.appendChild(createElement("span", { classes: "tag-chip", text: word })));
-    content.appendChild(toneRow);
-  }
-  if (activeVersion?.strategyLink) {
-    content.appendChild(createElement("p", { classes: "concept-strategy-link", text: `Link to strategy: ${activeVersion.strategyLink}` }));
-  }
-  content.appendChild(
-    createCritiqueNotesSection(board.critiqueNotes, {
-      emptyMessage: "No critique arguments added yet. Capture them in AI Creative Director."
-    })
-  );
   modal.body.appendChild(content);
 }
 

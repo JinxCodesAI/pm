@@ -6,7 +6,7 @@ import {
   renderDefaultStepBody,
   showToast
 } from "../helpers.js";
-import { getActiveVersion } from "./boards.js";
+import { getActiveVersion, openBoardDetailsModal } from "./boards.js";
 
 export function renderConceptCritique(detail, module, context, preferredSelection) {
   const body = getStepBody();
@@ -98,6 +98,26 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
   });
   controlBar.appendChild(runBtn);
 
+  const viewDetailsBtn = document.createElement("button");
+  viewDetailsBtn.type = "button";
+  viewDetailsBtn.className = "ghost-button";
+  viewDetailsBtn.textContent = "View Details";
+  viewDetailsBtn.disabled = !boardSelect.value;
+  viewDetailsBtn.addEventListener("click", () => {
+    if (!boardSelect.value) {
+      showToast("Select a board to view details.");
+      return;
+    }
+    const [boardId] = boardSelect.value.split(":");
+    const board = conceptDetail.boards?.find((item) => item.id === boardId);
+    if (!board) {
+      showToast("Selected board not found.");
+      return;
+    }
+    openBoardDetailsModal(board);
+  });
+  controlBar.appendChild(viewDetailsBtn);
+
   if (detail.lastRun) {
     controlBar.appendChild(createElement("p", { classes: "muted", text: `Last critique ${detail.lastRun}` }));
   }
@@ -111,6 +131,7 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
     if (boardSelect.value) {
       detail.lastSelection = boardSelect.value;
     }
+    viewDetailsBtn.disabled = !boardSelect.value;
     renderCritiqueResults({
       detail,
       module,
@@ -272,6 +293,26 @@ function renderCritiqueResults({
   }
 
   const [boardId, versionId] = selectionValue.split(":");
+  const board = conceptDetail?.boards?.find((item) => item.id === boardId);
+  if (!board) {
+    container.appendChild(
+      createElement("p", {
+        classes: "muted",
+        text: "Board no longer exists. Select another concept to continue."
+      })
+    );
+    return;
+  }
+
+  container.appendChild(
+    buildManualCritiqueComposer({
+      board,
+      module,
+      context,
+      onRefresh: () => renderConceptCritique(detail, module, context, selectionValue)
+    })
+  );
+
   const critique = detail.critiques?.find(
     (item) => item.boardId === boardId && item.versionId === versionId
   );
@@ -290,14 +331,114 @@ function renderCritiqueResults({
     module,
     context,
     conceptDetail,
-    critique
+    critique,
+    board
   });
   container.appendChild(card);
 }
 
-function buildCritiqueCard({ detail, module, context, conceptDetail, critique }) {
+function buildManualCritiqueComposer({ board, module, context, onRefresh }) {
+  const section = createElement("section", { classes: "concept-critique-manual" });
+  section.appendChild(createElement("h4", { text: "Add Manual Critique" }));
+  section.appendChild(
+    createElement("p", {
+      classes: "muted",
+      text: "Capture your own talking points alongside the AI results."
+    })
+  );
+
+  const form = document.createElement("form");
+  form.className = "manual-critique-form";
+
+  const fields = createElement("div", { classes: "manual-critique-fields" });
+
+  const typeLabel = createElement("label");
+  typeLabel.appendChild(createElement("span", { text: "Type" }));
+  const typeSelect = document.createElement("select");
+  ["Risk", "Recommendation", "Strength", "Question", "Observation"].forEach((option) => {
+    const opt = document.createElement("option");
+    opt.value = option;
+    opt.textContent = option;
+    typeSelect.appendChild(opt);
+  });
+  typeLabel.appendChild(typeSelect);
+  fields.appendChild(typeLabel);
+
+  const noteLabel = createElement("label");
+  noteLabel.appendChild(createElement("span", { text: "Note" }));
+  const noteInput = document.createElement("textarea");
+  noteInput.rows = 3;
+  noteInput.placeholder = "Summarize the critique you want to capture.";
+  noteLabel.appendChild(noteInput);
+  fields.appendChild(noteLabel);
+
+  form.appendChild(fields);
+
+  const actions = createElement("div", { classes: "manual-critique-actions" });
+  const addBtn = document.createElement("button");
+  addBtn.type = "submit";
+  addBtn.className = "chip-button primary-chip";
+  addBtn.textContent = "Add Critique";
+  actions.appendChild(addBtn);
+  form.appendChild(actions);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = noteInput.value.trim();
+    if (!text) {
+      showToast("Add context before saving your critique.");
+      return;
+    }
+    const added = addManualCritiqueNote({
+      module,
+      context,
+      boardId: board.id,
+      type: typeSelect.value,
+      text
+    });
+    if (!added) {
+      return;
+    }
+    noteInput.value = "";
+    typeSelect.selectedIndex = 0;
+    if (onRefresh) {
+      onRefresh();
+    }
+  });
+
+  section.appendChild(form);
+
+  const preview = createElement("div", { classes: "manual-critique-preview" });
+  preview.appendChild(createElement("strong", { text: "Latest notes" }));
+  const recentNotes = (board.critiqueNotes || []).slice(0, 3);
+  if (!recentNotes.length) {
+    preview.appendChild(
+      createElement("p", {
+        classes: "muted",
+        text: "Nothing saved yet. Address arguments or add manual notes to build your critique."
+      })
+    );
+  } else {
+    const list = document.createElement("ul");
+    list.className = "manual-critique-preview-list";
+    recentNotes.forEach((note) => {
+      const item = document.createElement("li");
+      item.appendChild(
+        createElement("span", { classes: "manual-critique-preview-type", text: note.type || "Note" })
+      );
+      item.appendChild(createElement("p", { text: note.text || "" }));
+      list.appendChild(item);
+    });
+    preview.appendChild(list);
+  }
+  section.appendChild(preview);
+
+  return section;
+}
+
+function buildCritiqueCard({ detail, module, context, conceptDetail, critique, board }) {
   const argumentsList = normalizeCritiqueArguments(critique);
-  const board = conceptDetail?.boards?.find((item) => item.id === critique.boardId);
+  const resolvedBoard = board || conceptDetail?.boards?.find((item) => item.id === critique.boardId);
   const card = createElement("article", { classes: "concept-critique-card" });
   const header = createElement("div", { classes: "concept-critique-header" });
   const versionLabel = critique.versionLabel || critique.versionId?.split("-").pop();
@@ -321,12 +462,18 @@ function buildCritiqueCard({ detail, module, context, conceptDetail, critique })
 
   if (argumentsList.length) {
     const argumentContainer = createElement("div", { classes: "concept-critique-argument-list" });
-    const existingNotes = board?.critiqueNotes || [];
+    const existingNotes = resolvedBoard?.critiqueNotes || [];
     argumentsList.forEach((argument) => {
       const typeClass = argument.type.toLowerCase().replace(/\s+/g, "-");
       const argumentCard = createElement("div", {
         classes: ["concept-critique-argument-card", `argument-${typeClass}`]
       });
+
+      const alreadyAdded = existingNotes.some((note) => note.argumentId === argument.id);
+      if (alreadyAdded && argument.status !== "addressed") {
+        updateArgumentStatus(detail, module, context, critique.id, argument.id, "addressed");
+        argument.status = "addressed";
+      }
 
       if (argument.status === "ignored") {
         argumentCard.classList.add("is-ignored");
@@ -343,38 +490,42 @@ function buildCritiqueCard({ detail, module, context, conceptDetail, critique })
       );
       argumentCard.appendChild(createElement("p", { text: argument.text }));
 
-      const alreadyAdded = existingNotes.some((note) => note.argumentId === argument.id);
-      if (alreadyAdded && argument.status !== "addressed") {
-        argument.status = "addressed";
-      }
-
       const actions = createElement("div", { classes: "concept-critique-argument-actions" });
 
       const addressBtn = document.createElement("button");
       addressBtn.type = "button";
       addressBtn.className = "chip-button primary-chip";
-      if (argument.status === "addressed" || alreadyAdded) {
+      if (argument.status === "addressed") {
         addressBtn.textContent = "Addressed";
-        addressBtn.disabled = true;
-        addressBtn.classList.add("is-disabled");
-      } else if (argument.status === "ignored") {
-        addressBtn.textContent = "Address";
-        addressBtn.disabled = true;
-        addressBtn.classList.add("is-disabled");
+        addressBtn.classList.add("is-active");
       } else {
         addressBtn.textContent = "Address";
-        addressBtn.addEventListener("click", () => {
-          addArgumentToConceptBoard({
+      }
+      addressBtn.addEventListener("click", () => {
+        if (argument.status === "addressed") {
+          removeArgumentFromConceptBoard({
+            module,
+            context,
+            boardId: critique.boardId,
+            argumentId: argument.id
+          });
+          updateArgumentStatus(detail, module, context, critique.id, argument.id, "open");
+        } else {
+          const added = addArgumentToConceptBoard({
             module,
             context,
             boardId: critique.boardId,
             critiqueId: critique.id,
             argument
           });
+          if (!added) {
+            renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
+            return;
+          }
           updateArgumentStatus(detail, module, context, critique.id, argument.id, "addressed");
-          renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
-        });
-      }
+        }
+        renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
+      });
       actions.appendChild(addressBtn);
 
       const ignoreBtn = document.createElement("button");
@@ -382,15 +533,24 @@ function buildCritiqueCard({ detail, module, context, conceptDetail, critique })
       ignoreBtn.className = "chip-button ghost-chip";
       if (argument.status === "ignored") {
         ignoreBtn.textContent = "Ignored";
-        ignoreBtn.disabled = true;
-        ignoreBtn.classList.add("is-disabled");
+        ignoreBtn.classList.add("is-active");
       } else {
         ignoreBtn.textContent = "Ignore";
-        ignoreBtn.addEventListener("click", () => {
-          updateArgumentStatus(detail, module, context, critique.id, argument.id, "ignored");
-          renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
-        });
       }
+      ignoreBtn.addEventListener("click", () => {
+        if (argument.status === "ignored") {
+          updateArgumentStatus(detail, module, context, critique.id, argument.id, "open");
+        } else {
+          removeArgumentFromConceptBoard({
+            module,
+            context,
+            boardId: critique.boardId,
+            argumentId: argument.id
+          });
+          updateArgumentStatus(detail, module, context, critique.id, argument.id, "ignored");
+        }
+        renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
+      });
       actions.appendChild(ignoreBtn);
 
       const explainBtn = document.createElement("button");
@@ -435,18 +595,56 @@ function markCritiqueAddressed(detail, module, context, index) {
   renderConceptCritique(detail, module, context, `${critique.boardId}:${critique.versionId}`);
 }
 
+function addManualCritiqueNote({ module, context, boardId, type, text }) {
+  const conceptDetail = context.ensureStepDetail(module, "concept-explore");
+  const board = conceptDetail?.boards?.find((item) => item.id === boardId);
+  if (!board) {
+    showToast("Board not found for manual critique.");
+    return false;
+  }
+  board.critiqueNotes = Array.isArray(board.critiqueNotes) ? board.critiqueNotes : [];
+  board.critiqueNotes.unshift({
+    argumentId: `manual-${Date.now()}`,
+    critiqueId: "manual",
+    type: type || "Note",
+    text,
+    createdAt: new Date().toLocaleString()
+  });
+  context.persistDetail(module.id, "concept-explore", conceptDetail);
+  showToast("Manual critique saved to concept board.");
+  return true;
+}
+
+function removeArgumentFromConceptBoard({ module, context, boardId, argumentId }) {
+  if (!argumentId) {
+    return false;
+  }
+  const conceptDetail = context.ensureStepDetail(module, "concept-explore");
+  const board = conceptDetail?.boards?.find((item) => item.id === boardId);
+  if (!board?.critiqueNotes?.length) {
+    return false;
+  }
+  const nextNotes = board.critiqueNotes.filter((note) => note.argumentId !== argumentId);
+  if (nextNotes.length === board.critiqueNotes.length) {
+    return false;
+  }
+  board.critiqueNotes = nextNotes;
+  context.persistDetail(module.id, "concept-explore", conceptDetail);
+  showToast("Argument removed from concept critique.");
+  return true;
+}
+
 function addArgumentToConceptBoard({ module, context, boardId, critiqueId, argument }) {
   const conceptDetail = context.ensureStepDetail(module, "concept-explore");
   const board = conceptDetail?.boards?.find((item) => item.id === boardId);
   if (!board) {
     showToast("Board not found for critique argument.");
-    return;
+    return false;
   }
-  board.critiqueNotes = board.critiqueNotes || [];
+  board.critiqueNotes = Array.isArray(board.critiqueNotes) ? board.critiqueNotes : [];
   const exists = board.critiqueNotes.some((note) => note.argumentId === argument.id);
   if (exists) {
-    showToast("Argument already added to concept.");
-    return;
+    return true;
   }
   board.critiqueNotes.unshift({
     argumentId: argument.id,
@@ -457,6 +655,7 @@ function addArgumentToConceptBoard({ module, context, boardId, critiqueId, argum
   });
   context.persistDetail(module.id, "concept-explore", conceptDetail);
   showToast("Argument added to concept critique.");
+  return true;
 }
 
 function normalizeCritiqueArguments(critique) {
