@@ -58,6 +58,18 @@ const STEP_DETAIL_FACTORIES = {
     lastGuidance: "",
     lastGeneratedAt: ""
   }),
+  "concept-board-builder": () => ({
+    activeBoardId: "",
+    fieldGuidance: {
+      title: "",
+      logline: "",
+      narrative: "",
+      keyVisuals: "",
+      tone: "",
+      strategyLink: ""
+    },
+    workingDrafts: {}
+  }),
   "concept-critique": () => ({
     critiques: [],
     lastGuidance: "",
@@ -435,6 +447,16 @@ function ensureStepDetail(module, stepId) {
     });
     merged.lastGuidance = merged.lastGuidance || "";
     merged.lastRun = merged.lastRun || "";
+  } else if (stepId === "concept-board-builder") {
+    merged.activeBoardId = merged.activeBoardId || "";
+    merged.fieldGuidance = merged.fieldGuidance || {};
+    merged.fieldGuidance.title = merged.fieldGuidance.title || "";
+    merged.fieldGuidance.logline = merged.fieldGuidance.logline || "";
+    merged.fieldGuidance.narrative = merged.fieldGuidance.narrative || "";
+    merged.fieldGuidance.keyVisuals = merged.fieldGuidance.keyVisuals || "";
+    merged.fieldGuidance.tone = merged.fieldGuidance.tone || "";
+    merged.fieldGuidance.strategyLink = merged.fieldGuidance.strategyLink || "";
+    merged.workingDrafts = merged.workingDrafts && typeof merged.workingDrafts === "object" ? merged.workingDrafts : {};
   } else if (stepId === "scene-outline") {
     merged.selectedBoardId = merged.selectedBoardId || "";
     merged.beats = Array.isArray(merged.beats) ? merged.beats : [];

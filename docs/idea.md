@@ -63,7 +63,12 @@ This module is built for creative exploration and client presentation, with iter
     *   **How it works:** Based on the approved brief, the user uses the AI to brainstorm several high-level concepts (the one-liners or "loglines"). The user then identifies the top 2–3 strongest ideas to promote.
     *   **AI Action:** For each selected logline, the AI helps the user flesh it out into a full "Concept Board."
 
-*   **Step 2: The AI Creative Director (Concept Stress-Test)**
+*   **Step 2: Concept Board Builder**
+    *   **How it works:** Once an idea is promoted, the Concept Board Builder opens the full artifact in-line—Title, Logline, Narrative, Key Visual Moments, Tone & Style, and Link to Strategy—so the strategist can see every element before moving on. Each field can be edited manually or regenerated individually with targeted AI guidance, keeping iterations fast without losing the strategist's voice.
+    *   **AI Action:** Every artifact element ships with a dedicated "Refine with AI" control. The AI respects any coaching notes entered beside that field (e.g., "Make the logline more playful"), and only updates the chosen element while preserving the rest of the board.
+    *   **Designer Workflow:** Drafts auto-sync with the Concept Explorer. Saving locks a new version, captures the guidance used, and updates the active Concept Board so downstream critique always references the latest copy.
+
+*   **Step 3: The AI Creative Director (Concept Stress-Test)**
     *   **How it works:** Before presenting to the client, the freelancer picks a Concept Board from the dropdown and runs a critique on demand. The panel stays empty until a board is reviewed, so it is always clear which concept the arguments belong to.
         *   The dropdown always mirrors the live Concept Boards list, so newly promoted or reordered ideas appear instantly, and the selection snaps to the exact version that was critiqued.
         *   If a concept hasn't been versioned yet, the tool quietly captures the current snapshot as a draft v1 before generating feedback so the critique always has a concrete artifact to reference.
@@ -102,7 +107,7 @@ The Concept Explorer has two levels of fidelity with distinct actions:
     *   **Remove:** Permanently delete without signaling the AI.
 
 *   **Concept Boards:** refined, versioned artifacts for client presentation.
-    *   **Edit Concept:** Full editor (title/logline, narrative, key visuals, tone, strategy). Each save creates a new version. Concept Critique notes surface directly above the AI refinement lane, which now lives at the bottom of the form so it's easy to trigger even when the modal scrolls.
+    *   **Edit Concept:** Opens the Concept Board Builder—everything (title/logline, narrative, key visuals, tone, strategy) is editable in-line with AI refinement controls per field. Each save creates a new version. Concept Critique notes surface directly above the AI refinement lane, which now lives at the bottom of the form so it's easy to trigger even when the modal scrolls.
     *   **Refine with AI:** Ask AI to expand or adjust using a short guidance input.
     *   **Mark Client Ready:** Set status for presentation.
     *   **Move to Ideas:** Demote back to Idea Pool with a brief comment (reason). The board is removed; an idea draft is created.
