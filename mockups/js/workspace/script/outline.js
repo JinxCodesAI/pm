@@ -15,6 +15,7 @@ import {
   getConceptBoards,
   getPersonaVoices
 } from "./support.js";
+import { generateSceneBeatDraft } from "./ai.js";
 
 export function renderSceneOutline(detail, module, context) {
   const body = getStepBody();
@@ -225,6 +226,11 @@ function renderSceneBlueprint({ body, detail, module, context, selectedBoard, ac
     if (scene.notes) {
       card.appendChild(createElement("p", { classes: "muted", text: `Notes: ${scene.notes}` }));
     }
+    if (scene.aiGuidance) {
+      card.appendChild(
+        createElement("p", { classes: ["muted", "ai-guidance"], text: `AI Guidance: ${scene.aiGuidance}` })
+      );
+    }
     if (scene.anchors?.length) {
       const anchorsList = createElement("ul", { classes: "scene-anchor-list" });
       scene.anchors.slice(0, 3).forEach((anchor) => {
@@ -304,6 +310,25 @@ function openSceneEditor({ detail, module, context, scene = null, index = null }
   const isEdit = Boolean(scene && index !== null && index >= 0);
   const modal = openModal(isEdit ? "Edit Scene" : "Add Scene", { dialogClass: "modal-dialog-wide" });
 
+  const beats = Array.isArray(detail.beats) ? detail.beats : [];
+  const boards = getConceptBoards(context);
+  const selectedBoard = boards.find((board) => board.id === detail.selectedBoardId) || boards[0] || null;
+  const activeVersion = selectedBoard ? getActiveBoardVersion(selectedBoard) : null;
+  const anchors = getBriefAnchors(context);
+  const personas = getPersonaVoices(context);
+  const beatsWithoutCurrent = isEdit
+    ? beats.filter((_, beatIndex) => beatIndex !== index)
+    : beats;
+  const usedVisuals = new Set(
+    beatsWithoutCurrent
+      .map((beat) => beat.source?.keyVisual || beat.visualFocus || "")
+      .filter(Boolean)
+  );
+  const candidateVisuals = Array.isArray(activeVersion?.keyVisuals) ? activeVersion.keyVisuals : [];
+  const nextVisual =
+    candidateVisuals.find((visual) => !usedVisuals.has(visual)) || scene?.source?.keyVisual || "";
+  const scenePosition = isEdit && index !== null ? index : beats.length;
+
   const form = document.createElement("form");
   form.className = "modal-form";
 
@@ -361,6 +386,95 @@ function openSceneEditor({ detail, module, context, scene = null, index = null }
   anchorsLabel.appendChild(anchorsInput);
   form.appendChild(anchorsLabel);
 
+  const guidanceDefault = scene?.aiGuidance || detail.lastSceneGuidance || "";
+  let currentSource = {
+    boardId: scene?.source?.boardId || selectedBoard?.id || "",
+    versionId: scene?.source?.versionId || activeVersion?.id || "",
+    keyVisual: scene?.source?.keyVisual || ""
+  };
+
+  const assist = createElement("div", { classes: "scene-ai-assist" });
+  assist.appendChild(
+    createElement("p", {
+      classes: "muted",
+      text: "Let the AI draft or revise this beat using your guidance and upstream artifacts."
+    })
+  );
+
+  const guidanceLabel = createElement("label");
+  guidanceLabel.appendChild(
+    createElement("span", {
+      text: isEdit ? "Revision guidance for AI (optional)" : "Guidance for AI (optional)"
+    })
+  );
+  const guidanceInput = document.createElement("textarea");
+  guidanceInput.rows = 2;
+  guidanceInput.placeholder = "e.g. Increase tension before the reveal and highlight product benefits.";
+  guidanceInput.value = guidanceDefault;
+  guidanceLabel.appendChild(guidanceInput);
+  assist.appendChild(guidanceLabel);
+
+  const assistActions = createElement("div", { classes: "scene-ai-assist-actions" });
+  const assistBtn = document.createElement("button");
+  assistBtn.type = "button";
+  assistBtn.className = "ghost-button";
+  assistBtn.textContent = isEdit ? "Revise with AI" : "Draft with AI";
+  assistBtn.addEventListener("click", () => {
+    const suggestion = generateSceneBeatDraft({
+      instructions: guidanceInput.value,
+      anchors,
+      personas,
+      conceptLogline: activeVersion?.logline || "",
+      keyVisual: nextVisual,
+      boardTitle: selectedBoard?.title || "",
+      boardId: selectedBoard?.id || "",
+      versionId: activeVersion?.id || "",
+      sceneIndex: scenePosition,
+      existingScene: scene,
+      beats: beatsWithoutCurrent
+    });
+
+    if (suggestion.title) {
+      titleInput.value = suggestion.title;
+    }
+    if (suggestion.purpose) {
+      purposeInput.value = suggestion.purpose;
+    }
+    if (suggestion.visualFocus) {
+      visualInput.value = suggestion.visualFocus;
+    }
+    if (suggestion.notes !== undefined) {
+      notesInput.value = suggestion.notes;
+    }
+    if (suggestion.duration) {
+      durationInput.value = suggestion.duration;
+    }
+    if (Array.isArray(suggestion.anchors)) {
+      anchorsInput.value = suggestion.anchors.join("\n");
+    }
+    if (suggestion.source) {
+      currentSource = {
+        boardId: suggestion.source.boardId || currentSource.boardId || selectedBoard?.id || "",
+        versionId:
+          suggestion.source.versionId || currentSource.versionId || activeVersion?.id || "",
+        keyVisual: suggestion.source.keyVisual || currentSource.keyVisual || nextVisual || ""
+      };
+    }
+    if (suggestion.aiGuidance) {
+      guidanceInput.value = suggestion.aiGuidance;
+    }
+
+    detail.lastSceneGuidance = guidanceInput.value.trim();
+    context.persistDetail(module.id, "scene-outline", detail);
+    assistBtn.textContent = isEdit ? "AI revision applied" : "AI draft applied";
+    setTimeout(() => {
+      assistBtn.textContent = isEdit ? "Revise with AI" : "Draft with AI";
+    }, 1200);
+  });
+  assistActions.appendChild(assistBtn);
+  assist.appendChild(assistActions);
+  form.appendChild(assist);
+
   const actions = createElement("div", { classes: "modal-actions" });
   const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
   cancelBtn.type = "button";
@@ -373,6 +487,8 @@ function openSceneEditor({ detail, module, context, scene = null, index = null }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+    const aiGuidance = guidanceInput.value.trim();
+    detail.lastSceneGuidance = aiGuidance;
     const payload = {
       id: scene?.id || generateId("scene"),
       title: titleInput.value.trim() || (scene?.title || "Scene"),
@@ -384,6 +500,12 @@ function openSceneEditor({ detail, module, context, scene = null, index = null }
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean),
+      source: {
+        boardId: currentSource.boardId || selectedBoard?.id || "",
+        versionId: currentSource.versionId || activeVersion?.id || "",
+        keyVisual: currentSource.keyVisual || ""
+      },
+      aiGuidance
       source: scene?.source || { boardId: "", versionId: "", keyVisual: scene?.source?.keyVisual || "" }
     };
 
