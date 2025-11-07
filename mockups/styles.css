@@ -2477,3 +2477,247 @@ p {
   background: rgba(99, 102, 241, 0.08);
 }
 
+/* Script Workshop */
+.script-bridge {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: var(--surface-alt);
+  border: 1px dashed var(--border);
+}
+
+.script-bridge-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.script-bridge-picker select {
+  min-width: 220px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+
+.script-bridge-summary h4 {
+  margin-bottom: 0.4rem;
+}
+
+.script-bridge-summary p {
+  margin: 0.2rem 0;
+}
+
+.script-anchor-list {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.script-anchor-list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-size: 0.85rem;
+}
+
+.script-anchor-list small {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.script-visual-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.scene-outline-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.scene-card {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.scene-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.scene-card p {
+  margin: 0;
+}
+
+.scene-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.scene-anchor-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.script-reference-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .script-reference-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.script-reference-card {
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.script-reference-card h5 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.script-reference-card ul,
+.script-reference-card ol {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.script-generator {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(56, 189, 248, 0.08));
+}
+
+.script-generator-copy p {
+  margin: 0.35rem 0;
+}
+
+.script-generator-anchors {
+  margin: 0.6rem 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.script-generator-controls {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.script-generator-controls textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 72px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
+}
+
+.script-generator-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.script-draft-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.script-draft-card {
+  padding: 1.25rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.script-draft-card.is-archived {
+  opacity: 0.65;
+}
+
+.script-draft-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.script-draft-scenes {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.script-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.script-draft-editor-scenes {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.script-draft-scene {
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.script-draft-scene textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
