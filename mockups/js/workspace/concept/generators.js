@@ -129,6 +129,83 @@ export function suggestStrategyLink({ context, title, logline, guidance }) {
   return `${lead} • Focus: ${cues.join("; ")}`;
 }
 
+export function suggestIdeaTitle({ context, logline, guidance }) {
+  const anchors = getBriefAnchors(context);
+  const base = (logline || anchors[0] || "").replace(/^[•-]\s*/, "");
+  if (!base) {
+    return "";
+  }
+  const cues = parseGuidance(guidance);
+  const title = formatIdeaTitle(base, 0);
+  if (!cues.length) {
+    return title;
+  }
+  const cue = cues[0]
+    .split(/[^a-z0-9]+/i)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(capitalise)
+    .join(" ");
+  return cue ? `${title} ${cue}`.trim() : title;
+}
+
+export function suggestIdeaLogline({ context, title, guidance }) {
+  const anchors = getBriefAnchors(context);
+  if (!anchors.length) {
+    return "";
+  }
+  const personas = getPersonaVoices(context);
+  const persona = personas[0] || "Audience";
+  const cues = parseGuidance(guidance);
+  const anchor = anchors[0].replace(/^[•-]\s*/, "").replace(/[.]+$/, "");
+  const lens = cues[0] ? cues[0].toLowerCase() : "cinematic";
+  const subject = title || persona;
+  return `${subject || "Our hero"} drives a ${lens} story that proves ${anchor.toLowerCase()}.`;
+}
+
+export function suggestIdeaDescription({ context, title, logline, guidance }) {
+  const anchors = getBriefAnchors(context);
+  if (!anchors.length && !logline) {
+    return "";
+  }
+  const personas = getPersonaVoices(context);
+  const persona = personas[0] || "Audience";
+  const cues = parseGuidance(guidance);
+  const emphasis = cues.length ? `Focus on ${cues.join("; ")}. ` : "";
+  const anchor = anchors[0]?.replace(/^[•-]\s*/, "") || logline || "the core promise";
+  const hero = title || "The concept";
+  return `${hero} follows ${persona.toLowerCase()} as they dramatise how ${anchor.toLowerCase()}. ${emphasis}Each beat keeps the product unmistakably central.`;
+}
+
+export function suggestIdeaTags({ context, logline, guidance }) {
+  const anchors = getBriefAnchors(context);
+  const personas = getPersonaVoices(context);
+  const cues = parseGuidance(guidance);
+  const tags = [];
+  if (anchors[0]) {
+    tags.push(...anchors[0].split(/[^a-z0-9]+/i).filter(Boolean).slice(0, 2).map(capitalise));
+  }
+  if (logline) {
+    tags.push(...logline.split(/[^a-z0-9]+/i).filter(Boolean).slice(0, 2).map(capitalise));
+  }
+  if (personas[0]) {
+    tags.push(personas[0].split(/[^a-z0-9]+/i)[0]);
+  }
+  cues.slice(0, 2).forEach((cue) => {
+    const tag = cue
+      .split(/[^a-z0-9]+/i)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(capitalise)
+      .join(" ");
+    if (tag) {
+      tags.push(tag);
+    }
+  });
+  const unique = Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)));
+  return unique.slice(0, 6);
+}
+
 function parseGuidance(guidance) {
   return guidance
     ? guidance
