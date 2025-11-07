@@ -506,6 +506,7 @@ function openSceneEditor({ detail, module, context, scene = null, index = null }
         keyVisual: currentSource.keyVisual || ""
       },
       aiGuidance
+      source: scene?.source || { boardId: "", versionId: "", keyVisual: scene?.source?.keyVisual || "" }
     };
 
     detail.beats = detail.beats || [];

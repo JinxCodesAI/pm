@@ -3,6 +3,7 @@ import {
   createActionButton,
   createSectionHeading,
   getStepBody,
+  openModal,
   renderDefaultStepBody,
   showToast
 } from "../helpers.js";
@@ -33,6 +34,7 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
   }
 
   const controlBar = createElement("div", { classes: "concept-critique-controls" });
+  const boardField = createElement("div", { classes: "concept-critique-board-field" });
   const boardSelectLabel = createElement("label");
   boardSelectLabel.appendChild(createElement("span", { text: "Board" }));
   const boardSelect = document.createElement("select");
@@ -54,7 +56,7 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
     boardSelect.value = selectionToUse;
   }
   boardSelectLabel.appendChild(boardSelect);
-  controlBar.appendChild(boardSelectLabel);
+  boardField.appendChild(boardSelectLabel);
 
   const guidanceLabel = createElement("label");
   guidanceLabel.appendChild(createElement("span", { text: "Focus" }));
@@ -63,7 +65,6 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
   guidanceInput.placeholder = "e.g. Challenge the stakes and flag production risks.";
   guidanceInput.value = detail.lastGuidance || "";
   guidanceLabel.appendChild(guidanceInput);
-  controlBar.appendChild(guidanceLabel);
 
   const runBtn = document.createElement("button");
   runBtn.className = "primary-button";
@@ -96,7 +97,6 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
       );
     }, 120);
   });
-  controlBar.appendChild(runBtn);
 
   const viewDetailsBtn = document.createElement("button");
   viewDetailsBtn.type = "button";
@@ -116,7 +116,12 @@ export function renderConceptCritique(detail, module, context, preferredSelectio
     }
     openBoardDetailsModal(board);
   });
-  controlBar.appendChild(viewDetailsBtn);
+  boardField.appendChild(viewDetailsBtn);
+  controlBar.appendChild(boardField);
+
+  controlBar.appendChild(guidanceLabel);
+
+  controlBar.appendChild(runBtn);
 
   if (detail.lastRun) {
     controlBar.appendChild(createElement("p", { classes: "muted", text: `Last critique ${detail.lastRun}` }));
@@ -347,66 +352,22 @@ function buildManualCritiqueComposer({ board, module, context, onRefresh }) {
     })
   );
 
-  const form = document.createElement("form");
-  form.className = "manual-critique-form";
-
-  const fields = createElement("div", { classes: "manual-critique-fields" });
-
-  const typeLabel = createElement("label");
-  typeLabel.appendChild(createElement("span", { text: "Type" }));
-  const typeSelect = document.createElement("select");
-  ["Risk", "Recommendation", "Strength", "Question", "Observation"].forEach((option) => {
-    const opt = document.createElement("option");
-    opt.value = option;
-    opt.textContent = option;
-    typeSelect.appendChild(opt);
-  });
-  typeLabel.appendChild(typeSelect);
-  fields.appendChild(typeLabel);
-
-  const noteLabel = createElement("label");
-  noteLabel.appendChild(createElement("span", { text: "Note" }));
-  const noteInput = document.createElement("textarea");
-  noteInput.rows = 3;
-  noteInput.placeholder = "Summarize the critique you want to capture.";
-  noteLabel.appendChild(noteInput);
-  fields.appendChild(noteLabel);
-
-  form.appendChild(fields);
-
   const actions = createElement("div", { classes: "manual-critique-actions" });
-  const addBtn = document.createElement("button");
-  addBtn.type = "submit";
-  addBtn.className = "chip-button primary-chip";
-  addBtn.textContent = "Add Critique";
-  actions.appendChild(addBtn);
-  form.appendChild(actions);
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const text = noteInput.value.trim();
-    if (!text) {
-      showToast("Add context before saving your critique.");
-      return;
-    }
-    const added = addManualCritiqueNote({
+  const addBtn = createActionButton("Add Critique", () =>
+    openManualCritiqueModal({
+      board,
       module,
       context,
-      boardId: board.id,
-      type: typeSelect.value,
-      text
-    });
-    if (!added) {
-      return;
-    }
-    noteInput.value = "";
-    typeSelect.selectedIndex = 0;
-    if (onRefresh) {
-      onRefresh();
-    }
-  });
-
-  section.appendChild(form);
+      onSave: () => {
+        if (onRefresh) {
+          onRefresh();
+        }
+      }
+    })
+  );
+  addBtn.classList.add("primary-chip");
+  actions.appendChild(addBtn);
+  section.appendChild(actions);
 
   const preview = createElement("div", { classes: "manual-critique-preview" });
   preview.appendChild(createElement("strong", { text: "Latest notes" }));
@@ -434,6 +395,79 @@ function buildManualCritiqueComposer({ board, module, context, onRefresh }) {
   section.appendChild(preview);
 
   return section;
+}
+
+function openManualCritiqueModal({ board, module, context, onSave }) {
+  const modal = openModal("Add Critique", { dialogClass: "modal-dialog-wide" });
+  const form = document.createElement("form");
+  form.className = "modal-form manual-critique-form";
+
+  form.appendChild(
+    createElement("p", {
+      classes: "muted",
+      text: "Log context or direction that the AI might have missed. These notes appear with other critique arguments."
+    })
+  );
+
+  const fields = createElement("div", { classes: "manual-critique-fields" });
+
+  const typeLabel = createElement("label");
+  typeLabel.appendChild(createElement("span", { text: "Type" }));
+  const typeSelect = document.createElement("select");
+  ["Risk", "Recommendation", "Strength", "Question", "Observation"].forEach((option) => {
+    const opt = document.createElement("option");
+    opt.value = option;
+    opt.textContent = option;
+    typeSelect.appendChild(opt);
+  });
+  typeLabel.appendChild(typeSelect);
+  fields.appendChild(typeLabel);
+
+  const noteLabel = createElement("label");
+  noteLabel.appendChild(createElement("span", { text: "Note" }));
+  const noteInput = document.createElement("textarea");
+  noteInput.rows = 6;
+  noteInput.placeholder = "Summarize the critique you want to capture.";
+  noteLabel.appendChild(noteInput);
+  fields.appendChild(noteLabel);
+
+  form.appendChild(fields);
+
+  const actions = createElement("div", { classes: "modal-actions" });
+  const cancelBtn = createElement("button", { classes: "secondary-button", text: "Cancel" });
+  cancelBtn.type = "button";
+  cancelBtn.addEventListener("click", () => modal.close());
+  const submitBtn = createElement("button", { classes: "primary-button", text: "Save Critique" });
+  submitBtn.type = "submit";
+  actions.appendChild(cancelBtn);
+  actions.appendChild(submitBtn);
+  form.appendChild(actions);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = noteInput.value.trim();
+    if (!text) {
+      showToast("Add context before saving your critique.");
+      return;
+    }
+    const added = addManualCritiqueNote({
+      module,
+      context,
+      boardId: board.id,
+      type: typeSelect.value,
+      text
+    });
+    if (!added) {
+      return;
+    }
+    modal.close();
+    if (typeof onSave === "function") {
+      onSave();
+    }
+  });
+
+  modal.body.appendChild(form);
+  noteInput.focus();
 }
 
 function buildCritiqueCard({ detail, module, context, conceptDetail, critique, board }) {

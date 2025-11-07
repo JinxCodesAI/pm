@@ -95,6 +95,16 @@
             "next": ""
           },
           {
+            "id": "concept-board-builder",
+            "name": "Concept Board Builder",
+            "description": "Develop the full Concept Board—logline, narrative, key visuals, tone, and strategy link—in one workspace.",
+            "aiSupport": "Refines each artifact element individually with targeted guidance.",
+            "humanFocus": "Capture manual tweaks, lock versions, and prep the story for critique.",
+            "status": "not-started",
+            "notes": "",
+            "next": ""
+          },
+          {
             "id": "concept-critique",
             "name": "AI Creative Director",
             "description": "Stress-test each concept board before it goes in front of the client.",
@@ -448,6 +458,16 @@
               "next": "Run AI critique once the intake summary is updated."
             },
             {
+              "id": "concept-board-builder",
+              "name": "Concept Board Builder",
+              "description": "Develop the full Concept Board—logline, narrative, key visuals, tone, and strategy link—in one workspace.",
+              "aiSupport": "Refines each artifact element individually with targeted guidance.",
+              "humanFocus": "Capture manual tweaks, lock versions, and prep the story for critique.",
+              "status": "in-progress",
+              "notes": "Aurora Sunrise v2 drafted; Nightfall needs fresher key visuals.",
+              "next": "Save v3 once new lighting beats are approved."
+            },
+            {
               "id": "concept-critique",
               "name": "AI Creative Director",
               "description": "Stress-test each concept board before it goes in front of the client.",
@@ -607,6 +627,18 @@
                   ]
                 }
               ]
+            },
+            "concept-board-builder": {
+              "activeBoardId": "board-aurora-sunrise",
+              "fieldGuidance": {
+                "title": "",
+                "logline": "",
+                "narrative": "",
+                "keyVisuals": "",
+                "tone": "",
+                "strategyLink": ""
+              },
+              "workingDrafts": {}
             },
             "concept-critique": {
               "critiques": []
@@ -949,6 +981,16 @@
               "next": "Begin once proof points locked with product."
             },
             {
+              "id": "concept-board-builder",
+              "name": "Concept Board Builder",
+              "description": "Develop the full Concept Board—logline, narrative, key visuals, tone, and strategy link—in one workspace.",
+              "aiSupport": "Refines each artifact element individually with targeted guidance.",
+              "humanFocus": "Capture manual tweaks, lock versions, and prep the story for critique.",
+              "status": "not-started",
+              "notes": "",
+              "next": ""
+            },
+            {
               "id": "concept-critique",
               "name": "AI Creative Director",
               "description": "Stress-test each concept board before it goes in front of the client.",
@@ -1107,6 +1149,18 @@
                   ]
                 }
               ]
+            },
+            "concept-board-builder": {
+              "activeBoardId": "board-northpeak-guidepost",
+              "fieldGuidance": {
+                "title": "",
+                "logline": "",
+                "narrative": "",
+                "keyVisuals": "",
+                "tone": "",
+                "strategyLink": ""
+              },
+              "workingDrafts": {}
             },
             "concept-critique": {
               "critiques": []

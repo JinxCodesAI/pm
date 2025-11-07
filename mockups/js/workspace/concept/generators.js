@@ -7,12 +7,7 @@ export function composeIdeaSeeds(context, guidance) {
     return { anchors: [], personas, seeds: [] };
   }
 
-  const cues = guidance
-    ? guidance
-        .split(/[.!?]/)
-        .map((line) => line.trim())
-        .filter(Boolean)
-    : [];
+  const cues = parseGuidance(guidance);
 
   const modifiers = [
     "cinematic montage",
@@ -61,12 +56,7 @@ export function generateBoardDraft({ context, title, logline, guidance }) {
   const personas = getPersonaVoices(context);
   const persona = personas[0] || "Audience";
   const hero = title || logline.split(" ").slice(0, 3).join(" ");
-  const cues = guidance
-    ? guidance
-        .split(/[.!?]/)
-        .map((line) => line.trim())
-        .filter(Boolean)
-    : [];
+  const cues = parseGuidance(guidance);
   return {
     narrative: `${hero} follows ${persona.toLowerCase()} as they realise ${logline.toLowerCase()}. ${
       cues.length ? `Focus on: ${cues.join("; ")}. ` : ""
@@ -80,4 +70,74 @@ export function generateBoardDraft({ context, title, logline, guidance }) {
     tone: ["Cinematic", "Human", "Confident", ...(cues.length ? ["Guided"] : [])],
     strategyLink: anchors[0] || "Linked to primary brief insight"
   };
+}
+
+export function suggestBoardTitle({ context, logline, guidance }) {
+  const anchors = getBriefAnchors(context);
+  const base = (logline || anchors[0] || "").replace(/^[•-]\s*/, "");
+  if (!base) {
+    return "";
+  }
+  const cues = parseGuidance(guidance);
+  const title = formatIdeaTitle(base, 0);
+  if (!cues.length) {
+    return title;
+  }
+  const cue = cues[0]
+    .split(/[^a-z0-9]+/i)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(capitalise)
+    .join(" ");
+  return cue ? `${title} ${cue}`.trim() : title;
+}
+
+export function suggestBoardLogline({ context, title, guidance }) {
+  const anchors = getBriefAnchors(context);
+  if (!anchors.length) {
+    return "";
+  }
+  const personas = getPersonaVoices(context);
+  const persona = personas[0] || "Audience";
+  const cues = parseGuidance(guidance);
+  const tone = cues[0] ? cues[0].toLowerCase() : "cinematic";
+  const anchor = anchors[0].replace(/^[•-]\s*/, "").replace(/[.]+$/, "");
+  const subject = title || persona;
+  return `${subject || "Our hero"} leads a ${tone} story that proves ${anchor.toLowerCase()}.`;
+}
+
+export function suggestKeyVisualMoments({ context, title, logline, guidance }) {
+  const draft = generateBoardDraft({ context, title, logline, guidance });
+  return draft?.keyVisuals || [];
+}
+
+export function suggestToneKeywords({ context, title, logline, guidance }) {
+  const draft = generateBoardDraft({ context, title, logline, guidance });
+  return draft?.tone || [];
+}
+
+export function suggestStrategyLink({ context, title, logline, guidance }) {
+  const anchors = getBriefAnchors(context);
+  if (!anchors.length) {
+    return "";
+  }
+  const cues = parseGuidance(guidance);
+  const lead = anchors[0].replace(/^[•-]\s*/, "");
+  if (!cues.length) {
+    return `Connects directly to: ${lead}`;
+  }
+  return `${lead} • Focus: ${cues.join("; ")}`;
+}
+
+function parseGuidance(guidance) {
+  return guidance
+    ? guidance
+        .split(/[.!?]/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+    : [];
+}
+
+function capitalise(word) {
+  return word ? word[0].toUpperCase() + word.slice(1).toLowerCase() : "";
 }
