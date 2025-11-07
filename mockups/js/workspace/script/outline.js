@@ -31,12 +31,24 @@ export function renderSceneOutline(detail, module, context) {
     return;
   }
 
-  const boards = getConceptBoards(context);
+  const boards = getConceptBoards(context).filter((board) => board.status === "client-ready");
   const anchors = getBriefAnchors(context);
   const personas = getPersonaVoices(context);
 
+  let shouldPersist = false;
+  if (detail.selectedBoardId && !boards.some((board) => board.id === detail.selectedBoardId)) {
+    detail.selectedBoardId = boards[0]?.id || null;
+    shouldPersist = true;
+  }
   if (!detail.selectedBoardId && boards.length) {
     detail.selectedBoardId = boards[0].id;
+    shouldPersist = true;
+  }
+  if (!boards.length && detail.selectedBoardId) {
+    detail.selectedBoardId = null;
+    shouldPersist = true;
+  }
+  if (shouldPersist) {
     context.persistDetail(module.id, "scene-outline", detail);
   }
 
@@ -68,7 +80,7 @@ function renderConceptBridge({
   if (!boards.length) {
     const empty = createElement("div", {
       classes: "empty-card",
-      text: "No concept boards available. Finalize a concept in Concept Studio to unlock the outline."
+      text: "Mark at least one concept board as Client Ready to unlock the outline."
     });
     wrapper.appendChild(empty);
     body.appendChild(heading);
@@ -112,11 +124,10 @@ function renderConceptBridge({
     boardSummary.appendChild(
       createElement("h4", { text: selectedBoard.title || "Concept Board" })
     );
-    if (selectedBoard.status) {
-      boardSummary.appendChild(
-        createElement("p", { classes: "muted", text: `Status: ${selectedBoard.status}` })
-      );
-    }
+    const statusLabel = formatBoardStatus(selectedBoard.status);
+    boardSummary.appendChild(
+      createElement("p", { classes: "muted", text: `Status: ${statusLabel}` })
+    );
     if (activeVersion?.logline) {
       boardSummary.appendChild(createElement("p", { text: activeVersion.logline }));
     }
@@ -164,6 +175,20 @@ function renderConceptBridge({
 
   body.appendChild(heading);
   body.appendChild(wrapper);
+}
+
+function formatBoardStatus(status) {
+  switch (status) {
+    case "client-ready":
+      return "Client Ready";
+    case "in-review":
+      return "In Review";
+    case "archived":
+      return "Archived";
+    case "draft":
+    default:
+      return "Draft";
+  }
 }
 
 function renderSceneBlueprint({ body, detail, module, context, selectedBoard, activeVersion }) {

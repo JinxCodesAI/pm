@@ -2337,6 +2337,60 @@ p {
   font-size: 0.85rem;
 }
 
+.concept-idea-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.concept-idea-field {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.concept-idea-field > label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.concept-idea-input {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.concept-idea-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.concept-idea-guidance {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 12rem;
+  font-size: 0.85rem;
+}
+
+.concept-idea-guidance textarea {
+  resize: vertical;
+  min-height: 2.4rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.concept-idea-controls .ghost-button {
+  align-self: center;
+}
+
 .concept-builder-actions {
   display: flex;
   justify-content: flex-end;
