@@ -15,6 +15,7 @@ import {
   showToast
 } from "./workspace/helpers.js";
 import { createConceptRenderers } from "./workspace/concept/index.js";
+import { createScriptRenderers } from "./workspace/script/index.js";
 
 const STEP_RENDERERS = {
   "structure-input": renderIntakeSummaryView,
@@ -61,6 +62,19 @@ const STEP_DETAIL_FACTORIES = {
     critiques: [],
     lastGuidance: "",
     lastRun: ""
+  }),
+  "scene-outline": () => ({
+    selectedBoardId: "",
+    beats: [],
+    lastGuidance: "",
+    lastSync: "",
+    notes: ""
+  }),
+  "script-draft": () => ({
+    drafts: [],
+    activeDraftId: null,
+    lastGuidance: "",
+    lastRun: ""
   })
 };
 
@@ -85,6 +99,22 @@ const conceptContext = {
 };
 
 Object.assign(STEP_RENDERERS, createConceptRenderers(conceptContext));
+
+const scriptContext = {
+  getProject: () => state.project,
+  persistDetail: (moduleId, stepId, detail) => persistDetail(moduleId, stepId, detail),
+  ensureStepDetail: (module, stepId) => ensureStepDetail(module, stepId),
+  getActiveSummaryVersion,
+  showToast,
+  createSectionHeading,
+  createActionButton,
+  openModal,
+  openConfirmModal,
+  renderDefaultStepBody,
+  clone
+};
+
+Object.assign(STEP_RENDERERS, createScriptRenderers(scriptContext));
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -403,6 +433,56 @@ function ensureStepDetail(module, stepId) {
         status: critique.status === "closed" ? "closed" : "open"
       };
     });
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.lastRun = merged.lastRun || "";
+  } else if (stepId === "scene-outline") {
+    merged.selectedBoardId = merged.selectedBoardId || "";
+    merged.beats = Array.isArray(merged.beats) ? merged.beats : [];
+    merged.beats = merged.beats.map((beat, index) => ({
+      id: beat.id || `scene-${Date.now()}-${index}`,
+      title: beat.title || beat.name || `Scene ${index + 1}`,
+      purpose: beat.purpose || beat.goal || "",
+      visualFocus: beat.visualFocus || beat.visual || "",
+      notes: beat.notes || "",
+      duration: beat.duration || "",
+      anchors: Array.isArray(beat.anchors) ? beat.anchors.filter(Boolean) : [],
+      source: beat.source
+        ? {
+            boardId: beat.source.boardId || "",
+            versionId: beat.source.versionId || "",
+            keyVisual: beat.source.keyVisual || ""
+          }
+        : { boardId: "", versionId: "", keyVisual: "" }
+    }));
+    merged.lastGuidance = merged.lastGuidance || "";
+    merged.lastSync = merged.lastSync || "";
+    merged.notes = merged.notes || "";
+  } else if (stepId === "script-draft") {
+    merged.drafts = Array.isArray(merged.drafts) ? merged.drafts : [];
+    merged.drafts = merged.drafts.map((draft, draftIndex) => ({
+      id: draft.id || `draft-${Date.now()}-${draftIndex}`,
+      label: draft.label || `Draft v${draftIndex + 1}`,
+      status: ["draft", "in-review", "client-ready", "archived"].includes(draft.status)
+        ? draft.status
+        : "draft",
+      createdAt: draft.createdAt || "",
+      updatedAt: draft.updatedAt || "",
+      outlineSnapshot: Array.isArray(draft.outlineSnapshot) ? draft.outlineSnapshot.filter(Boolean) : [],
+      aiGuidance: draft.aiGuidance || "",
+      notes: draft.notes || "",
+      scenes: Array.isArray(draft.scenes)
+        ? draft.scenes.map((scene, sceneIndex) => ({
+            id: scene.id || `draft-scene-${Date.now()}-${draftIndex}-${sceneIndex}`,
+            heading: scene.heading || scene.title || `Scene ${sceneIndex + 1}`,
+            summary: scene.summary || "",
+            script: scene.script || "",
+            cues: Array.isArray(scene.cues) ? scene.cues.filter(Boolean) : [],
+            sourceSceneId: scene.sourceSceneId || ""
+          }))
+        : [],
+      exports: Array.isArray(draft.exports) ? draft.exports.filter(Boolean) : []
+    }));
+    merged.activeDraftId = merged.activeDraftId || merged.drafts[0]?.id || null;
     merged.lastGuidance = merged.lastGuidance || "";
     merged.lastRun = merged.lastRun || "";
   }
